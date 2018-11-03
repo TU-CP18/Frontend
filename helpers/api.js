@@ -1,16 +1,15 @@
 import axios from 'axios';
-import Api from '../constants';
-// import fakeApi from './fakeApi';
+import Api from '../constants/Api';
+import fakeApi from './fakeApi';
 
 const BASE_URL = Api.host;
 
 const request = (method, url, bodyParams, queryParams) => {
-    const state = global.store.getState();
 
     // TODO: implement together with dev settings screen and store
-    // if (state.devSettings.get('fakeApi')) {
-    //     const response = fakeApi(method, url, bodyParams, queryParams);
-    //     if (response) return response;
+    // if (global.devSettings.get('fakeApi')) {
+        const response = fakeApi(method, url, bodyParams, queryParams);
+        if (response) return response;
     // }
 
     method = method.toUpperCase();
@@ -30,8 +29,8 @@ const request = (method, url, bodyParams, queryParams) => {
         options['params'] = queryParams;
     }
 
-    if (global.token && global.token.length > 10) {
-        options['headers']['Authorization'] = 'Bearer ' + global.token;
+    if (global.userStore.authenticated) {
+        options['headers']['Authorization'] = 'Bearer ' + global.global.userStore.authToken;
     }
 
     return axios(options);

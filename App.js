@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View, Image } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
 import { observable } from 'mobx';
@@ -7,6 +7,7 @@ import { observer, Provider } from 'mobx-react/native';
 
 import UserStore from './store/User';
 const userStore = new UserStore();
+global.userStore = userStore;
 
 @observer
 export default class App extends React.Component {
@@ -16,11 +17,17 @@ export default class App extends React.Component {
   render() {
     if (!this.isLoadingComplete && !this.props.skipLoadingScreen) {
       return (
-        <AppLoading
-          startAsync={this._loadResourcesAsync}
-          onError={this._handleLoadingError}
-          onFinish={this._handleFinishLoading}
-        />
+        <View style={styles.splashContainer}>
+          <AppLoading
+            startAsync={this._loadResourcesAsync}
+            onError={this._handleLoadingError}
+            onFinish={this._handleFinishLoading}
+          />
+          <Image
+            style={styles.splashImage}
+            source={require('./assets/images/background_van.jpg')}
+          />
+        </View>
       );
     } else {
       return (
@@ -71,4 +78,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingTop: 24,
   },
+  splashContainer: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  splashImage: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    // height: '100%',
+    // resizeMode: 'cover',
+  }
 });
