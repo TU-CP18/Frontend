@@ -49,13 +49,17 @@ export default class User {
         runInAction(() => this.loginError = "User not found");
       }
     } catch (error) {
+      console.log("error in User.login", error, error.message);
+
       let error = "Unknown error";
-      if (error.message === 'Network Error') {
-        error = "Some Nice Network Error Message";
+      
+      if (!error.response) {
+        error = "Network Error";
       }
-      else if (error.response.status >= 400 && error.response.status < 500) {
-        error = "Some Could not be found Error Message";
+      else if (error.response && error.response.status >= 400 && error.response.status < 500) {
+        error = "User not found";
       }
+
       runInAction(() => this.loginError = error);
     }
   }

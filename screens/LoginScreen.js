@@ -22,6 +22,10 @@ export default class LoginScreen extends React.Component {
   @observable password = '';
   @observable keyboardOpen = false;
 
+  static navigationOptions = {
+    header: null,
+  };
+
   componentDidMount () {
     this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this._keyboardDidShow);
     this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
@@ -97,18 +101,14 @@ export default class LoginScreen extends React.Component {
             loading={this.props.user.loginLoading}
           />
         </View>
-        {/* <Icon
+        <Icon
           raised
           name='gear'
           type='font-awesome'
           color='#f50'
-          containerStyle={{
-            position: 'absolute',
-            left: 10,
-            top: 30,
-          }}
+          containerStyle={styles.devSettingsIcon}
           onPress={() => this.props.navigation.navigate('DevSettings')}
-        /> */}
+        />
       </KeyboardAvoidingView>
 
     );
@@ -160,5 +160,10 @@ const styles = StyleSheet.create({
   loginButton: {
     height: 56,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  },
+  devSettingsIcon: {
+    position: 'absolute',
+    left: 10,
+    bottom: 10,
   },
 });

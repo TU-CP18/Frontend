@@ -6,11 +6,10 @@ const BASE_URL = Api.host;
 
 const request = (method, url, bodyParams, queryParams) => {
 
-    // TODO: implement together with dev settings screen and store
-    // if (global.devSettings.get('fakeApi')) {
+    if (global.devSettings.settings.get('fakeApi')) {
         const response = fakeApi(method, url, bodyParams, queryParams);
         if (response) return response;
-    // }
+    }
 
     method = method.toUpperCase();
 

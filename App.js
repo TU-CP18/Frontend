@@ -6,8 +6,10 @@ import { observable } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
 
 import UserStore from './store/User';
-const userStore = new UserStore();
-global.userStore = userStore;
+import DevSettingsStore from './store/DevSettings';
+
+const userStore = global.userStore = new UserStore();
+const devSettingsStore = global.devSettings = new DevSettingsStore();
 
 @observer
 export default class App extends React.Component {
@@ -31,7 +33,10 @@ export default class App extends React.Component {
       );
     } else {
       return (
-        <Provider user={userStore}>
+        <Provider
+          user={userStore}
+          devSettings={devSettingsStore}
+        >
           <View style={styles.container}>
             {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
             <AppNavigator
@@ -57,6 +62,7 @@ export default class App extends React.Component {
         'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
       }),
       userStore.init(),
+      devSettingsStore.init(),
     ]);
   };
 
