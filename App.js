@@ -2,14 +2,19 @@ import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
+import { observable } from 'mobx';
+import { observer, Provider } from 'mobx-react/native';
 
+import UserStore from './store/User';
+const userStore = new UserStore();
+
+@observer
 export default class App extends React.Component {
-  state = {
-    isLoadingComplete: false,
-  };
+  @observable isLoadingComplete = false;
+  @observable initialRoute = 'Auth';
 
   render() {
-    if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
+    if (!this.isLoadingComplete && !this.props.skipLoadingScreen) {
       return (
         <AppLoading
           startAsync={this._loadResourcesAsync}
@@ -19,10 +24,14 @@ export default class App extends React.Component {
       );
     } else {
       return (
-        <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-          <AppNavigator />
-        </View>
+        <Provider user={userStore}>
+          <View style={styles.container}>
+            {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+            <AppNavigator
+              initialRoute={this.initialRoute}
+            />
+          </View>
+        </Provider>
       );
     }
   }
@@ -35,11 +44,12 @@ export default class App extends React.Component {
       ]),
       Font.loadAsync({
         // This is the font that we are using for our tab bar
-        ...Icon.Ionicons.font,
+        ...Icon.Ionicons.font, 
         // We include SpaceMono because we use it in HomeScreen.js. Feel free
         // to remove this if you are not using it in your app
         'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
       }),
+      userStore.init(),
     ]);
   };
 
@@ -50,7 +60,8 @@ export default class App extends React.Component {
   };
 
   _handleFinishLoading = () => {
-    this.setState({ isLoadingComplete: true });
+    this.isLoadingComplete = true;
+    this.initialRoute = userStore.authenticated ? 'Main' : 'Auth';
   };
 }
 
@@ -58,5 +69,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: 24,
   },
 });

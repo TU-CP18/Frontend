@@ -7,17 +7,28 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Button,
 } from 'react-native';
-import { WebBrowser } from 'expo';
+import { observer, inject } from 'mobx-react';
 
 import { MonoText } from '../components/StyledText';
 
+@inject('user')
+@observer
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    header: null,
-  };
+  // static navigationOptions = {
+  //   header: null,
+  // };
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (!this.props.user.authenticated) {
+      this.props.navigation.navigate('Auth');
+    }
+  }
 
   render() {
+    this.props.user.authenticated; 
+
     return (
       <View style={styles.container}>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -31,6 +42,12 @@ export default class HomeScreen extends React.Component {
               style={styles.welcomeImage}
             />
           </View>
+
+          <Button
+            onPress={() => this.props.user.logout()}
+            title="Logout"
+            color="red"
+          />
 
           <View style={styles.getStartedContainer}>
             {this._maybeRenderDevelopmentModeWarning()}
@@ -47,7 +64,7 @@ export default class HomeScreen extends React.Component {
           </View>
 
           <View style={styles.helpContainer}>
-            <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
+            <TouchableOpacity style={styles.helpLink}>
               <Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
             </TouchableOpacity>
           </View>
@@ -67,7 +84,7 @@ export default class HomeScreen extends React.Component {
   _maybeRenderDevelopmentModeWarning() {
     if (__DEV__) {
       const learnMoreButton = (
-        <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
+        <Text style={styles.helpLinkText}>
           Learn more
         </Text>
       );
@@ -87,15 +104,6 @@ export default class HomeScreen extends React.Component {
     }
   }
 
-  _handleLearnMorePress = () => {
-    WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/development-mode');
-  };
-
-  _handleHelpPress = () => {
-    WebBrowser.openBrowserAsync(
-      'https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes'
-    );
-  };
 }
 
 const styles = StyleSheet.create({
