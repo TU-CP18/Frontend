@@ -94,7 +94,7 @@ How do I push changes to the `master` branch?
 1.  Switch to `master` with `git checkout master`
 2.  Update `master` with `git pull --rebase` (ALWAYS use `rebase` when pulling!)
 3.  Create new branch from `master` with `git checkout -b cs/new-feature` (where 'cs/' is your own name/abbreviation)
-4.  Work on branch and push changes
+4.  Work on branch and push changes with `git push --set-upstream origin cs/new-feature` (where 'cs/' is your own name/abbreviation)
 5.  Rebase master onto branch to not have merge conflicts later with `git pull origin master --rebase` (AGAIN use`--rebase`)
 6.  Push branch again, this time force push to include rebased master (`git push --force`)
 7.  Create a pull request from github.com
