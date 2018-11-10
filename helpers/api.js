@@ -20,7 +20,7 @@ const request = (method, url, bodyParams, queryParams) => {
         headers: {},
     }
 
-    if (bodyParams && (method === 'PUT' || method === 'POST' || method === 'PATCH')) {
+    if (bodyParams && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
         options['data'] = bodyParams;
     }
     
@@ -29,7 +29,8 @@ const request = (method, url, bodyParams, queryParams) => {
     }
 
     if (global.userStore.authenticated) {
-        options['headers']['Authorization'] = 'Bearer ' + global.global.userStore.authToken;
+        // all api endpoints expect the authToken to be transferred in the authorization header
+        options['headers']['Authorization'] = `Bearer ${global.userStore.authToken}`;
     }
 
     return axios(options);
@@ -53,4 +54,4 @@ export const patch = (url, bodyParams, queryParams) => {
 
 export default {
     get, post, put, patch
-}
+};
