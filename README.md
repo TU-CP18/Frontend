@@ -80,6 +80,10 @@ Unit tests are run by [Jest](https://jestjs.io/) and written with [Jasmine](http
 
     npm test
 
+## Prototype
+
+There is a UX prototype created with Adobe XD available at: https://xd.adobe.com/view/14c325be-f3ab-4e9d-4db2-59cd61a8cd00-62f2/?fullscreen
+
 ## Git Workflow
 
 The `master` branch is protected and only approved pull requests can push to it. Most important part of
