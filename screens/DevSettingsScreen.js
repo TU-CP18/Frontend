@@ -1,20 +1,24 @@
 import React from 'react';
-import { StyleSheet, FlatList, View, Text } from 'react-native';
+import {
+  StyleSheet,
+  FlatList,
+  View,
+  Text,
+} from 'react-native';
 import { ExpoConfigView } from '@expo/samples';
 import { ListItem } from 'react-native-elements';
 import { observer, inject } from 'mobx-react/native';
- 
+
 @inject('devSettings')
 @observer
-export default class DevSettingsScreen extends React.Component {
-
+class DevSettingsScreen extends React.Component {
   static navigationOptions = {
     title: 'Dev Settings',
-  }
+  };
 
   static keyExtractor = (item, index) => item.label;
 
-  renderItem({ item }) { 
+  renderItem({ item }) {
     if (item.type === 'checkbox') {
       return (
         <ListItem
@@ -22,18 +26,18 @@ export default class DevSettingsScreen extends React.Component {
           subtitle={item.subtitle && item.subtitle}
           leftIcon={{
             name: item.leftIcon,
-            type: item.leftIconType
+            type: item.leftIconType,
           }}
           rightIcon={item.rightIcon && {
             name: item.rightIcon,
-            type: item.rightIconType
+            type: item.rightIconType,
           }}
           bottomDivider
           onPress={item.onPress}
         />
       );
     }
-    else if (item.type === 'textinput') {
+    if (item.type === 'textinput') {
 
     }
   }
@@ -63,7 +67,7 @@ export default class DevSettingsScreen extends React.Component {
           this.props.devSettings.set('fakeApi', !this.props.devSettings.settings.get('fakeApi'));
         },
       },
-    ]
+    ];
 
     return (
       <View style={styles.container}>
@@ -87,3 +91,5 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
   },
 });
+
+export default DevSettingsScreen;

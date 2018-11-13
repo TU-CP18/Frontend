@@ -5,53 +5,41 @@ import fakeApi from './fakeApi';
 const BASE_URL = Api.host;
 
 const request = (method, url, bodyParams, queryParams) => {
+  if (global.devSettings.settings.get('fakeApi')) {
+    const response = fakeApi(method, url, bodyParams, queryParams);
+    if (response) return response;
+  }
 
-    if (global.devSettings.settings.get('fakeApi')) {
-        const response = fakeApi(method, url, bodyParams, queryParams);
-        if (response) return response;
-    }
+  const verb = method.toUpperCase();
 
-    method = method.toUpperCase();
+  const options = {
+    verb,
+    url: BASE_URL + url,
+    responseType: 'json',
+    headers: {},
+  };
 
-    let options = {
-        method: method,
-        url: BASE_URL + url,
-        responseType: 'json',
-        headers: {},
-    }
+  if (bodyParams && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(verb)) {
+    options.data = bodyParams;
+  }
 
-    if (bodyParams && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-        options['data'] = bodyParams;
-    }
-    
-    if (queryParams) {
-        options['params'] = queryParams;
-    }
+  if (queryParams) {
+    options.params = queryParams;
+  }
 
-    if (global.userStore.authenticated) {
-        // all api endpoints expect the authToken to be transferred in the authorization header
-        options['headers']['Authorization'] = `Bearer ${global.userStore.authToken}`;
-    }
+  if (global.userStore.authenticated) {
+    // all api endpoints expect the authToken to be transferred in the authorization header
+    options.headers.Authorization = `Bearer ${global.userStore.authToken}`;
+  }
 
-    return axios(options);
-}
+  return axios(options);
+};
 
-export const get = (url, queryParams) => {
-    return request('get', url, queryParams);
-}
-
-export const post = (url, bodyParams, queryParams) => {
-    return request('post', url, bodyParams, queryParams);
-}
-
-export const put = (url, bodyParams, queryParams) => {
-    return request('put', url, bodyParams, queryParams);
-}
-
-export const patch = (url, bodyParams, queryParams) => {
-    return request('patch', url, bodyParams, queryParams);
-}
+const get = (url, queryParams) => request('get', url, queryParams);
+const post = (url, bodyParams, queryParams) => request('post', url, bodyParams, queryParams);
+const put = (url, bodyParams, queryParams) => request('put', url, bodyParams, queryParams);
+const patch = (url, bodyParams, queryParams) => request('patch', url, bodyParams, queryParams);
 
 export default {
-    get, post, put, patch
+  get, post, put, patch,
 };

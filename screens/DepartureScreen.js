@@ -3,18 +3,16 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import ContactScreen from './ContactScreen';
 
-export default class DepartureScreen extends React.Component {
-
+class DepartureScreen extends React.Component {
   static navigationOptions = {
     title: 'Departure',
   };
 
   render() {
     return (
-      <View style={styles.container}>
-        
-      </View>
+      <View style={styles.container} />
     );
   }
 }
@@ -25,3 +23,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
+export default DepartureScreen;

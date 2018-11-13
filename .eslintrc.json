@@ -1,8 +1,8 @@
 {
-    "env": {
-        "node": true,
-        "es6": true
-    },
-    "parser": "babel-eslint",
-    "extends": "airbnb"
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "parser": "babel-eslint",
+  "extends": "airbnb"
 }

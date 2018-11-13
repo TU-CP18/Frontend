@@ -10,8 +10,7 @@ import { MonoText } from '../components/StyledText';
 
 @inject('user')
 @observer
-export default class HomeScreen extends React.Component {
-
+class HomeScreen extends React.Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (!this.props.user.authenticated) {
       this.props.navigation.navigate('Auth');
@@ -19,7 +18,7 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
-    this.props.user.authenticated; 
+    this.props.user.authenticated;
 
     return (
       <View style={styles.container}>
@@ -59,3 +58,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
+export default HomeScreen;
