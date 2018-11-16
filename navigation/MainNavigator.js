@@ -17,7 +17,7 @@ const MainStack = createStackNavigator(
   {
     initialRouteName: 'Home',
     // headerMode: 'none',
-  }
+  },
 );
 
 export default MainStack;

@@ -1,5 +1,7 @@
 import { AsyncStorage } from 'react-native';
-import { observable, action, runInAction, toJS } from 'mobx';
+import {
+  observable, action, runInAction, toJS,
+} from 'mobx';
 
 const DEV_SETTINGS = 'dev_settings';
 
@@ -14,7 +16,7 @@ export default class DevSettings {
       const settings = JSON.parse(await AsyncStorage.getItem(DEV_SETTINGS));
       runInAction(() => this.settings.replace(settings));
     } catch (error) {
-      console.log("error in DevSettings.init", error)
+      console.log('error in DevSettings.init', error);
     }
   }
 
@@ -23,9 +25,7 @@ export default class DevSettings {
     try {
       this.settings.set(key, value);
       await AsyncStorage.setItem(DEV_SETTINGS, JSON.stringify(toJS(this.settings)));
-    }
-    catch(error) {
-      console.log("error in DevSettings.set", error)
+    } catch (error) {
     }
   }
 }

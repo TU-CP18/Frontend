@@ -16,8 +16,8 @@ export default ({ initialRoute = 'Auth' }) => {
     {
       initialRouteName: initialRoute,
       headerMode: 'none',
-    }
+    },
   );
 
-  return <AppNavigator />
+  return <AppNavigator />;
 };

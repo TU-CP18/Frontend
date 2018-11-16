@@ -4,17 +4,14 @@ import {
   View,
 } from 'react-native';
 
-export default class ContactScreen extends React.Component {
-
+class ContactScreen extends React.Component {
   static navigationOptions = {
     title: 'Contact',
   };
 
   render() {
     return (
-      <View style={styles.container}>
-        
-      </View>
+      <View style={styles.container} />
     );
   }
 }
@@ -25,3 +22,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
+export default ContactScreen;

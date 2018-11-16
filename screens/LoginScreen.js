@@ -14,26 +14,22 @@ import {
 import { observer, inject } from 'mobx-react/native';
 import { observable } from 'mobx';
 
-@inject("user")
+@inject('user')
 @observer
-export default class LoginScreen extends React.Component {
-
-  @observable username = '';
-  @observable password = '';
-  @observable keyboardOpen = false;
-
+class LoginScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
 
-  componentDidMount () {
+  @observable username = '';
+
+  @observable password = '';
+
+  @observable keyboardOpen = false;
+
+  componentDidMount() {
     this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this._keyboardDidShow);
     this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
-  }
-
-  componentWillUnmount () {
-    this.keyboardDidShowListener.remove();
-    this.keyboardDidHideListener.remove();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -42,25 +38,30 @@ export default class LoginScreen extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
+  }
+
   _keyboardDidShow = () => {
     this.keyboardOpen = true;
-  }
-  
+  };
+
   _keyboardDidHide = () => {
     this.keyboardOpen = false;
-  }
+  };
 
   _onUsernameChange = (value) => {
     this.username = value;
-  }
+  };
 
   _onPasswordChange = (value) => {
     this.password = value;
-  }
+  };
 
   _onLoginPress = () => {
     this.props.user.login(this.username, this.password);
-  }
+  };
 
   render() {
     this.props.user.authenticated;
@@ -84,7 +85,7 @@ export default class LoginScreen extends React.Component {
           />
           <Input
             placeholder="Password"
-            secureTextEntry={true}
+            secureTextEntry
             containerStyle={styles.inputContainer}
             inputContainerStyle={styles.input}
             leftIcon={{ type: 'font-awesome', name: 'user' }}
@@ -103,9 +104,9 @@ export default class LoginScreen extends React.Component {
         </View>
         <Icon
           raised
-          name='gear'
-          type='font-awesome'
-          color='#f50'
+          name="gear"
+          type="font-awesome"
+          color="#f50"
           containerStyle={styles.devSettingsIcon}
           onPress={() => this.props.navigation.navigate('DevSettings')}
         />
@@ -168,3 +169,5 @@ const styles = StyleSheet.create({
     bottom: 10,
   },
 });
+
+export default LoginScreen;

@@ -7,13 +7,16 @@ const USER_DETAILS = 'user/user_details';
 
 export default class User {
   @observable authenticated = false;
+
   @observable authToken;
+
   @observable name;
 
   @observable loginLoading = false;
+
   @observable loginError;
-  
-  @observable foobar = "ttest";
+
+  @observable foobar = 'ttest';
 
   @action
   async init() {
@@ -46,27 +49,30 @@ export default class User {
           this.name = session.name;
         });
       } else {
-        runInAction(() => this.loginError = "User not found");
+        runInAction(() => {
+          this.loginError = 'User not found';
+        });
       }
     } catch (error) {
-      console.log("error in User.login", error, error.message);
+      console.log('error in User.login', error, error.message);
 
-      let error = "Unknown error";
-      
-      if (!error.response) {
-        error = "Network Error";
-      }
-      else if (error.response && error.response.status >= 400 && error.response.status < 500) {
-        error = "User not found";
+      let err = 'Unknown error';
+
+      if (!err.response) {
+        err = 'Network Error';
+      } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
+        err = 'User not found';
       }
 
-      runInAction(() => this.loginError = error);
+      runInAction(() => {
+        this.loginError = err;
+      });
     }
   }
 
   @action async logout() {
     try {
-      const userDetails = await AsyncStorage.removeItem(USER_DETAILS);
+      await AsyncStorage.removeItem(USER_DETAILS);
       this.authenticated = false;
       this.authToken = undefined;
       this.name = undefined;
