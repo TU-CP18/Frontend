@@ -3,11 +3,10 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import ContactScreen from './ContactScreen';
 
-class DepartureScreen extends React.Component {
+class ControlScreen extends React.Component {
   static navigationOptions = {
-    title: 'Departure',
+    title: 'Groundcontrol',
   };
 
   render() {
@@ -24,4 +23,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DepartureScreen;
+export default ControlScreen;
