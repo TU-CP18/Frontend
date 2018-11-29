@@ -21,7 +21,20 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.cp.daimler",
       "supportsTablet": true
+    },
+    "android": {
+      "package": "com.cp.daimler",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAtGNzhPnq60UVBOs6NBRqdN-Lbh-Hco0M"
+        }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     }
   }
 }

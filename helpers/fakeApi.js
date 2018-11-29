@@ -9,8 +9,7 @@ export default (method, url, bodyParams, queryParams) => {
     return Promise.resolve({
       status: 200,
       data: {
-        token: '123',
-        name: 'John Snow',
+        id_token: '123',
       },
     });
   }

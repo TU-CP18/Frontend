@@ -23,30 +23,29 @@ export default class User {
     try {
       // await asyncSleep(1000);
       const userDetails = JSON.parse(await AsyncStorage.getItem(USER_DETAILS));
-
-      if (userDetails.token) {
+      console.log(userDetails);
+      console.log(userDetails.id_token);
+      if (userDetails.id_token) {
         this.authenticated = true;
-        this.authToken = userDetails.token;
-        this.name = userDetails.name;
+        this.authToken = userDetails.id_token;
       }
     } catch (error) {
+      console.log(error);
     }
   }
 
   @action
   async login(username, password) {
     try {
-      const response = await api.post('/session', { username, password });
-
+      const response = await api.post('/authenticate', { username, password });
       if (response.status === 200) {
-        const session = response.data;
+        const { data } = response;
 
-        await AsyncStorage.setItem(USER_DETAILS, JSON.stringify(session));
+        await AsyncStorage.setItem(USER_DETAILS, JSON.stringify(data));
         // see https://mobx.js.org/best/actions.html#async-await why runInAction have to be used
         runInAction(() => {
           this.authenticated = true;
-          this.authToken = session.token;
-          this.name = session.name;
+          this.authToken = data.id_token;
         });
       } else {
         runInAction(() => {
@@ -70,13 +69,14 @@ export default class User {
     }
   }
 
-  @action async logout() {
+  @action
+  async logout() {
     try {
       await AsyncStorage.removeItem(USER_DETAILS);
       this.authenticated = false;
       this.authToken = undefined;
-      this.name = undefined;
     } catch (error) {
+      console.log(error);
     }
   }
 }
