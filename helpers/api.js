@@ -5,7 +5,7 @@ import fakeApi from './fakeApi';
 const BASE_URL = Api.host;
 
 const request = (method, url, bodyParams, queryParams) => {
-  if (global.devSettings.settings.get('fakeApi')) {
+  if (global.devSettings.settings.get('fakeApi') && url === '/authenticate') {
     const response = fakeApi(method, '/session', bodyParams, queryParams);
     if (response) return response;
   }

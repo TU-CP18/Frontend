@@ -9,7 +9,7 @@ export default (method, url, bodyParams, queryParams) => {
     return Promise.resolve({
       status: 200,
       data: {
-        id_token: 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkcml2ZXIiLCJhdXRoIjoiUk9MRV9BRE1JTixST0xFX1VTRVIiLCJleHAiOjE1NDM2MDExODJ9.-ZyCO7ckIR14-snxQ9HrhmLEHP32C-mQPmfGKNXEtj-kKfk8e2cdPnwnCjZ7ww8pFn5dRelmcpsjGEtkJMPNQw',
+        id_token: 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkcml2ZXIiLCJhdXRoIjoiUk9MRV9BRE1JTixST0xFX1VTRVIiLCJleHAiOjE1NDYyMDgwMTV9.UTz2kK_iz7FItXSRuUkH-lGLvHVgX4885QL5qfz6jyzOm6jAiKZ1vwGsMKCS1TTLj9LwC7mboiHnRp2scc-qJg',
       },
     });
   }

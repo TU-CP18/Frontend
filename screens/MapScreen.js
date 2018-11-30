@@ -21,6 +21,8 @@ import Polyline from '@mapbox/polyline';
 import api from '../helpers/api';
 import appConfig from '../app.json';
 
+const { width, height } = Dimensions.get('window');
+
 class MapScreen extends React.Component {
   static navigationOptions = {
     title: 'Map',
@@ -35,11 +37,10 @@ class MapScreen extends React.Component {
         latitude: 0,
         longitude: 0,
         latitudeDelta: 0.0122,
-        longitudeDelta: Dimensions.get('window').width
-          / Dimensions.get('window').height
-          * 0.0122,
+        longitudeDelta: width / height * 0.0122,
       },
       destinationReached: false,
+      isMapReady: false,
     };
 
     this.apikey = appConfig.expo.android.config.googleMaps.apiKey;
@@ -50,11 +51,10 @@ class MapScreen extends React.Component {
     this.animateToCoordinates = this.animateToCoordinates.bind(this);
   }
 
-  async componentWillMount() {
+  async componentDidMount() {
     // ask the user for location permission
     if (Platform.OS === 'android' && !Constants.isDevice) {
       Alert.alert('Warning', 'This will not work on sketch in an android emulator. Try it on your device!');
-      // TODO: ask how to stop rendering here
       return;
     }
     if (await !this.isPermissionGranted(Permissions.LOCATION)) {
@@ -117,13 +117,19 @@ class MapScreen extends React.Component {
    * @returns {Promise<*>}
    */
   async getDirections(startLoc, destinationLoc) {
+    const startCoords = Object.values(startLoc);
+    const destinationCoords = Object.values(destinationLoc);
+    if (startCoords.length !== 2 || destinationCoords.length !== 2) {
+      console.error('Given coordinates have wrong format');
+      return {};
+    }
     try {
       const response = await axios({
         method: 'GET',
         url: 'https://maps.googleapis.com/maps/api/directions/json',
         params: {
-          origin: Object.values(startLoc).join(','),
-          destination: Object.values(destinationLoc).join(','),
+          origin: startCoords.join(','),
+          destination: destinationCoords.join(','),
           key: this.apikey,
         },
         responseType: 'json',
@@ -147,8 +153,7 @@ class MapScreen extends React.Component {
       this.setState({ coordinates: coordinates });
       return coordinates;
     } catch (error) {
-      console.log(error);
-      Alert.alert('Network error', error);
+      console.error(error);
       return error;
     }
   }
@@ -170,8 +175,7 @@ class MapScreen extends React.Component {
         longitude: data.longStart,
       };
     } catch (error) {
-      console.log(error);
-      Alert.alert('Network error', error);
+      console.error(error);
       return error;
     }
   }
@@ -198,7 +202,6 @@ class MapScreen extends React.Component {
 
   /**
    * animate to specified coordinates on the map
-   * only use this method for android devices
    * @param coords
    */
   animateToCoordinates(coords) {
@@ -207,8 +210,8 @@ class MapScreen extends React.Component {
     if (focusedLocation && latitude && longitude) {
       this.map.animateToRegion({
         ...focusedLocation,
-        latitude: coords.latitude,
-        longitude: coords.longitude,
+        latitude: latitude,
+        longitude: longitude,
       });
     }
   }
@@ -247,9 +250,12 @@ class MapScreen extends React.Component {
     Alert.alert('Confirmation', 'Arrival confirmed');
   };
 
+  onMapReady = () => {
+    this.setState({ isMapReady: true });
+  };
+
   render() {
-    // TODO: only provide a marker with destination if prop is set
-    const { coordinates, focusedLocation } = this.state;
+    const { coordinates, focusedLocation, isMapReady } = this.state;
 
     return (
       <View style={styles.container}>
@@ -260,13 +266,14 @@ class MapScreen extends React.Component {
           followsUserLocation={Platform.OS === 'ios'}
           loadingEnabled
           ref={map => { this.map = map; }}
+          onMapReady={() => this.onMapReady()}
         >
           <MapView.Polyline
             coordinates={coordinates}
             strokeWidth={3}
             strokeColor="blue"
           />
-          {coordinates.length > 0 && (
+          {isMapReady && coordinates.length > 0 && (
             <MapView.Marker
               coordinate={coordinates[coordinates.length - 1]}
             />
@@ -284,7 +291,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   map: {
-    flex: 1,
+    width: width,
+    height: height,
   },
   confirmContainer: {
     position: 'absolute',
