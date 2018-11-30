@@ -9,7 +9,7 @@ export default (method, url, bodyParams, queryParams) => {
     return Promise.resolve({
       status: 200,
       data: {
-        id_token: '123',
+        id_token: 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkcml2ZXIiLCJhdXRoIjoiUk9MRV9BRE1JTixST0xFX1VTRVIiLCJleHAiOjE1NDM2MDExODJ9.-ZyCO7ckIR14-snxQ9HrhmLEHP32C-mQPmfGKNXEtj-kKfk8e2cdPnwnCjZ7ww8pFn5dRelmcpsjGEtkJMPNQw',
       },
     });
   }

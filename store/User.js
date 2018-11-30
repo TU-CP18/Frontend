@@ -23,8 +23,6 @@ export default class User {
     try {
       // await asyncSleep(1000);
       const userDetails = JSON.parse(await AsyncStorage.getItem(USER_DETAILS));
-      console.log(userDetails);
-      console.log(userDetails.id_token);
       if (userDetails.id_token) {
         this.authenticated = true;
         this.authToken = userDetails.id_token;

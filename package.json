@@ -19,6 +19,7 @@
     "@mapbox/polyline": "^1.0.0",
     "axios": "^0.18.0",
     "expo": "^30.0.1",
+    "geolib": "^2.0.24",
     "mobx": "^5.5.2",
     "mobx-react": "^5.3.6",
     "react": "16.3.1",

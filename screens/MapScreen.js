@@ -4,13 +4,19 @@ import {
   View,
   Dimensions,
   Alert,
+  TouchableOpacity,
+  Text,
+  Platform,
 } from 'react-native';
 import {
   MapView,
   Location,
   Permissions,
+  Constants,
 } from 'expo';
+import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import geolib from 'geolib';
 import Polyline from '@mapbox/polyline';
 import api from '../helpers/api';
 import appConfig from '../app.json';
@@ -28,26 +34,41 @@ class MapScreen extends React.Component {
       focusedLocation: {
         latitude: 0,
         longitude: 0,
-        latitudeDelta: 0.03,
+        latitudeDelta: 0.0122,
         longitudeDelta: Dimensions.get('window').width
           / Dimensions.get('window').height
-          * 0.03,
+          * 0.0122,
       },
+      destinationReached: false,
     };
 
     this.apikey = appConfig.expo.android.config.googleMaps.apiKey;
     // bind this in constructor so state can be set in these methods
     this.getLocation = this.getLocation.bind(this);
     this.getDirections = this.getDirections.bind(this);
+    this.checkUserLocation = this.checkUserLocation.bind(this);
+    this.animateToCoordinates = this.animateToCoordinates.bind(this);
   }
 
   async componentWillMount() {
+    // ask the user for location permission
+    if (Platform.OS === 'android' && !Constants.isDevice) {
+      Alert.alert('Warning', 'This will not work on sketch in an android emulator. Try it on your device!');
+      // TODO: ask how to stop rendering here
+      return;
+    }
+    if (await !this.isPermissionGranted(Permissions.LOCATION)) {
+      Alert.alert('Permission', 'You need to enable location services');
+      return;
+    }
     // get the current location of the user
-    const currentLocation = await this.getLocation();
     // retrieve the destination location where the users shift will start
-    const destinationLocation = await this.getInterceptionCoords();
+    const [currentLocation, destinationLocation] = await Promise.all([
+      this.getLocation(),
+      this.getInterceptionCoords(),
+    ]);
     // retrieve a direction between these two points
-    await this.getDirections(currentLocation, destinationLocation);
+    this.getDirections(currentLocation, destinationLocation);
     // monitor the current position of the user
     this.watchid = await Location.watchPositionAsync({
       enableHighAccuracy: true,
@@ -56,40 +77,36 @@ class MapScreen extends React.Component {
   }
 
   componentWillUnmount() {
-    this.watchid.remove();
+    if (this.watchid) {
+      this.watchid.remove();
+    }
   }
 
+  /**
+   * retrieve current coordinates and move to them on the map
+   * assumes that location permission has already been granted
+   * @returns {Promise<{latitude: (number|*|string), longitude: (number|*|string)}>}
+   */
   async getLocation() {
-    // ask the user for location permission
-    // TODO: catch that location is not granted and refactor in methods
-    const { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status === 'granted') {
-      // get current position if permission has been granted
-      const { coords } = await Location.getCurrentPositionAsync({
-        enableHighAccuracy: true,
-      });
-      const { focusedLocation } = this.state;
-      // initalize map at current position
-      this.map.animateToRegion({
-        ...focusedLocation,
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-      });
-      this.setState(prevState => {
-        return {
-          focusedLocation: {
-            ...prevState.focusedLocation,
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-          },
-        };
-      });
+    // get current position if permission has been granted
+    const { coords } = await Location.getCurrentPositionAsync({
+      enableHighAccuracy: true,
+    });
+    // initalize map at current position
+    this.animateToCoordinates(coords);
+    this.setState(prevState => {
       return {
-        latitude: coords.latitude,
-        longitude: coords.longitude,
+        focusedLocation: {
+          ...prevState.focusedLocation,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        },
       };
-    }
-    throw new Error('Location permission not granted');
+    });
+    return {
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    };
   }
 
   /**
@@ -101,7 +118,7 @@ class MapScreen extends React.Component {
    */
   async getDirections(startLoc, destinationLoc) {
     try {
-      const options = {
+      const response = await axios({
         method: 'GET',
         url: 'https://maps.googleapis.com/maps/api/directions/json',
         params: {
@@ -111,8 +128,7 @@ class MapScreen extends React.Component {
         },
         responseType: 'json',
         headers: {},
-      };
-      const response = await axios(options);
+      });
       if (response.status !== 200) {
         // this will execute the catch block
         throw new Error('Fetching the coordinates of the interception point failed');
@@ -141,7 +157,7 @@ class MapScreen extends React.Component {
    * get the coordinates of the interception point
    * @returns {Promise<*>}
    */
-  getInterceptionCoords = async () => {
+  async getInterceptionCoords() {
     try {
       const response = await api.get('/shifts/next');
       if (response.status !== 200) {
@@ -158,13 +174,77 @@ class MapScreen extends React.Component {
       Alert.alert('Network error', error);
       return error;
     }
+  }
+
+  checkUserLocation(location) {
+    const { coordinates } = this.state;
+    const { coords } = location;
+    if (Platform.OS === 'android') {
+      // follow the user location
+      // mapview component handles this for ios devices
+      this.animateToCoordinates(coords);
+    }
+    const destinationCoords = coordinates[coordinates.length - 1];
+    const distance = geolib.getDistance(coords, destinationCoords);
+    if (distance <= 20) {
+      // distance to destination is shorter than 20 metres
+      // show button so user can confirm arrival
+      this.setState({ destinationReached: true });
+    } else {
+      // remove arrival button in case the user moves away from the destination
+      this.setState({ destinationReached: false });
+    }
+  }
+
+  /**
+   * animate to specified coordinates on the map
+   * only use this method for android devices
+   * @param coords
+   */
+  animateToCoordinates(coords) {
+    const { focusedLocation } = this.state;
+    const { latitude, longitude } = coords;
+    if (focusedLocation && latitude && longitude) {
+      this.map.animateToRegion({
+        ...focusedLocation,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+    }
+  }
+
+  renderConfirmalButton() {
+    const { destinationReached } = this.state;
+    if (!destinationReached) {
+      return null;
+    }
+    return (
+      <View style={styles.confirmContainer}>
+        <TouchableOpacity
+          style={styles.confirmButton}
+          onPress={this.onArrivalConfirmed}
+        >
+          <View style={styles.drawerItem}>
+            <Ionicons
+              name="ios-checkmark-circle-outline"
+              size={30}
+              color="#ffffff"
+              style={styles.drawerItemIcon}
+            />
+            <Text style={styles.buttonText}>Confirm Arrival</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  isPermissionGranted = async permission => {
+    const { status } = await Permissions.askAsync(permission);
+    return (status === 'granted');
   };
 
-  checkUserLocation = coords => {
-    // TODO: find out how far the coordinates are from the destination
-    // TODO: if closer than 10 metres show confirm arrival
-    // TODO: optionally draw new route if user is far away from original route
-    console.log(coords);
+  onArrivalConfirmed = () => {
+    Alert.alert('Confirmation', 'Arrival confirmed');
   };
 
   render() {
@@ -177,7 +257,7 @@ class MapScreen extends React.Component {
           style={styles.map}
           initialRegion={focusedLocation}
           showsUserLocation
-          followsUserLocation
+          followsUserLocation={Platform.OS === 'ios'}
           loadingEnabled
           ref={map => { this.map = map; }}
         >
@@ -192,6 +272,7 @@ class MapScreen extends React.Component {
             />
           )}
         </MapView>
+        {this.renderConfirmalButton()}
       </View>
     );
   }
@@ -204,6 +285,32 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  confirmContainer: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    height: 150,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  confirmButton: {
+    paddingHorizontal: 30,
+  },
+  drawerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    backgroundColor: 'lightblue',
+    borderRadius: 15,
+  },
+  drawerItemIcon: {
+    marginRight: 10,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 22,
   },
 });
 
