@@ -8,8 +8,7 @@ import {
   TouchableHighlight,
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
-
-import { MonoText } from '../components/StyledText';
+import MapMarker from '../components/MapMarker';
 
 @inject('user')
 @observer
@@ -27,7 +26,15 @@ class HomeScreen extends React.Component {
           Hi {this.props.user.name},
         </Text>
         <TouchableHighlight style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.navigation.navigate('Map')}>
-          <View style={styles.mapButton} />
+          <View style={styles.mapContainer}>
+            <MapMarker
+              style={styles.mapButton}
+              coordinate={{
+                latitude: 52.523,
+                longitude: 13.413492,
+              }}
+            />
+          </View>
         </TouchableHighlight>
         <Text style={[styles.messageText]}>Head to --Location--</Text>
         <Text style={styles.messageText}>in --x-- minutes</Text>
@@ -84,14 +91,14 @@ const styles = StyleSheet.create({
     color: '#fefefe',
     textAlign: 'center',
   },
-  mapButton: {
+  mapContainer: {
     marginTop: 25,
     marginBottom: 25,
     width: 200,
     height: 200,
+  },
+  mapButton: {
     borderRadius: 100,
-    backgroundColor: '#fefefe',
-    opacity: 0.75,
   },
   bottomButtons: {
     position: 'absolute',
