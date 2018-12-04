@@ -1,5 +1,5 @@
 export default (method, url, bodyParams, queryParams) => {
-  if (url === '/session' && method === 'post') {
+  if (url === '/authenticate' && method === 'post') {
     if (bodyParams.username !== 'John' || bodyParams.password !== '1') {
       return Promise.resolve({
         status: 403,

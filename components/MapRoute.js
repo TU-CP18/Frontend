@@ -13,6 +13,7 @@ import {
   Location,
   Permissions,
   Constants,
+  IntentLauncherAndroid,
 } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -41,17 +42,15 @@ class MapRoute extends React.Component {
     };
 
     this.apikey = appConfig.expo.android.config.googleMaps.apiKey;
-    // bind this in constructor so state can be set in these methods
-    this.getLocation = this.getLocation.bind(this);
-    this.getDirections = this.getDirections.bind(this);
-    this.checkUserLocation = this.checkUserLocation.bind(this);
-    this.animateToCoordinates = this.animateToCoordinates.bind(this);
   }
 
   async componentDidMount() {
     // ask the user for location permission
-    if (Platform.OS === 'android' && !Constants.isDevice) {
-      Alert.alert('Warning', 'This will not work on sketch in an android emulator. Try it on your device!');
+    const { locationServicesEnabled } = await Location.getProviderStatusAsync();
+    if (!locationServicesEnabled) {
+      IntentLauncherAndroid.startActivityAsync(
+        IntentLauncherAndroid.ACTION_LOCATION_SOURCE_SETTINGS,
+      );
       return;
     }
     if (await !lib.isPermissionGranted(Permissions.LOCATION)) {
@@ -65,7 +64,7 @@ class MapRoute extends React.Component {
       this.getInterceptionCoords(),
     ]);
     // retrieve a direction between these two points
-    this.getDirections(currentLocation, destinationLocation);
+    await this.getDirections(currentLocation, destinationLocation);
     // monitor the current position of the user
     this.watchid = await Location.watchPositionAsync({
       enableHighAccuracy: true,
@@ -84,7 +83,7 @@ class MapRoute extends React.Component {
    * assumes that location permission has already been granted
    * @returns {Promise<{latitude: (number|*|string), longitude: (number|*|string)}>}
    */
-  async getLocation() {
+  getLocation = async () => {
     // get current position if permission has been granted
     const { coords } = await Location.getCurrentPositionAsync({
       enableHighAccuracy: true,
@@ -104,7 +103,7 @@ class MapRoute extends React.Component {
       latitude: coords.latitude,
       longitude: coords.longitude,
     };
-  }
+  };
 
   /**
    * retrieves the coordinates of a route
@@ -113,7 +112,7 @@ class MapRoute extends React.Component {
    * @param destinationLoc
    * @returns {Promise<*>}
    */
-  async getDirections(startLoc, destinationLoc) {
+  getDirections = async (startLoc, destinationLoc) => {
     const startCoords = Object.values(startLoc);
     const destinationCoords = Object.values(destinationLoc);
     if (startCoords.length !== 2 || destinationCoords.length !== 2) {
@@ -153,7 +152,7 @@ class MapRoute extends React.Component {
       console.error(error);
       return error;
     }
-  }
+  };
 
   /**
    * get the coordinates of the interception point
@@ -177,8 +176,9 @@ class MapRoute extends React.Component {
     }
   };
 
-  checkUserLocation(location) {
+  checkUserLocation = async location => {
     const { coordinates } = this.state;
+    console.log(location);
     const { coords } = location;
     if (Platform.OS === 'android') {
       // follow the user location
@@ -186,17 +186,18 @@ class MapRoute extends React.Component {
       this.animateToCoordinates(coords);
     }
     const destinationCoords = coordinates[coordinates.length - 1];
+    console.log(destinationCoords);
     const distance = geolib.getDistance(coords, destinationCoords);
     // show button if user is close to destination so he can confirm arrival
     // remove arrival button in case the user moves away from the destination
     this.setState({ destinationReached: (distance <= 20) });
-  }
+  };
 
   /**
    * animate to specified coordinates on the map
    * @param coords
    */
-  animateToCoordinates(coords) {
+  animateToCoordinates = async coords => {
     const { focusedLocation } = this.state;
     const { latitude, longitude } = coords;
     if (focusedLocation && latitude && longitude) {
@@ -206,7 +207,7 @@ class MapRoute extends React.Component {
         longitude: longitude,
       });
     }
-  }
+  };
 
   renderConfirmalButton() {
     const { destinationReached } = this.state;

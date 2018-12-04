@@ -28,7 +28,6 @@ class HomeScreen extends React.Component {
         <TouchableHighlight style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.navigation.navigate('Map')}>
           <View style={styles.mapContainer}>
             <MapMarker
-              style={styles.mapButton}
               coordinate={{
                 latitude: 52.523,
                 longitude: 13.413492,
@@ -96,9 +95,8 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     width: 200,
     height: 200,
-  },
-  mapButton: {
     borderRadius: 100,
+    overflow: 'hidden',
   },
   bottomButtons: {
     position: 'absolute',
