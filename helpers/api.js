@@ -13,8 +13,9 @@ const request = (method, url, bodyParams, queryParams) => {
   const verb = method.toUpperCase();
 
   const options = {
-    verb,
-    url: BASE_URL + url,
+    method: verb,
+    baseURL: BASE_URL,
+    url: url,
     responseType: 'json',
     headers: {},
   };
