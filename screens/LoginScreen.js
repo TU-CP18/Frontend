@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   StyleSheet,
-  Image,
   View,
   KeyboardAvoidingView,
   Keyboard,
@@ -13,6 +12,7 @@ import {
 } from 'react-native-elements';
 import { observer, inject } from 'mobx-react/native';
 import { observable } from 'mobx';
+import { BackgroundImage } from '../components/BackgroundImage';
 
 @inject('user')
 @observer
@@ -64,11 +64,7 @@ class LoginScreen extends React.Component {
   render() {
     return (
       <KeyboardAvoidingView style={[styles.container, this.keyboardOpen ? styles.containerKeyboardOpen : {}]} behavior="padding" enabled>
-        <Image
-          style={styles.backgroundImage}
-          source={require('../assets/images/background_van.jpg')}
-          blurRadius={5}
-        />
+        <BackgroundImage />
         <View style={styles.formContainer}>
           <Input
             placeholder="Username"
@@ -120,13 +116,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backgroundImage: {
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    height: '100%',
-    opacity: 0.5,
-  },
   containerKeyboardOpen: {
     justifyContent: 'flex-start',
     paddingTop: 40,
@@ -143,6 +132,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderBottomColor: '#fefefe',
     borderBottomWidth: 2.0,
+    opacity: 0.75,
   },
   input: {
     borderRadius: 12,
@@ -170,6 +160,7 @@ const styles = StyleSheet.create({
   loginButton: {
     height: 75,
     backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    opacity: 0.75,
   },
   devSettingsIcon: {
     position: 'absolute',

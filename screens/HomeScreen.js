@@ -11,6 +11,7 @@ import {
 import { observer, inject } from 'mobx-react';
 
 import { MonoText } from '../components/StyledText';
+import { BackgroundImage } from '../components/BackgroundImage';
 
 @inject('user')
 @observer
@@ -45,11 +46,7 @@ class HomeScreen extends React.Component {
 
     return (
       <KeyboardAvoidingView style={[styles.container, this.keyboardOpen ? styles.containerKeyboardOpen : {}]} behavior="padding" enabled>
-        <Image
-          style={styles.backgroundImage}
-          source={require('../assets/images/background_van.jpg')}
-          blurRadius={5}
-        />
+        <BackgroundImage />
         {inner}        
         <View style={styles.bottomButtons}>
           <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={() => null}>
@@ -70,13 +67,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#343434',
-  },
-  backgroundImage: {
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    height: '100%',
-    opacity: 0.5,
   },
   messageText: {
     fontSize: 32,
