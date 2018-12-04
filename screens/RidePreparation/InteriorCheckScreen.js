@@ -3,91 +3,130 @@ import {
   StyleSheet,
   View,
   Text,
-  Button,
   Alert,
   TouchableOpacity,
 } from 'react-native';
 import { MapView } from 'expo';
-import { CheckBox, Icon, Rating } from 'react-native-elements';
+import { FontAwesome } from '@expo/vector-icons';
+import CarCheckItem from '../../components/CarCheckItem';
+import Rating from '../../components/Rating';
+import Button from '../../components/Button';
 
 class InteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     return {
       title: 'Interior Check',
       headerRight: (
-        <Icon
+        <FontAwesome
           onPress={() => navigation.navigate('Contact')}
-          name="headphones"
-          type="feather"
-          containerStyle={{
-            paddingRight: 10,
+          name="phone"
+          size={28}
+          style={{
+            paddingRight: 12,
           }}
         />
       ),
     };
   };
 
+  constructor() {
+    super();
+
+    this.state = {
+      interiorChecked: false,
+      cleanlinessRating: -1,
+    };
+  }
+
+  onPressStartRide = () => {
+    if (!this.checklistDone()) return;
+
+    const { navigation } = this.props;
+
+    Alert.alert(
+      // 'Alert Title',
+      'Confirmation Request',
+      'Confirm that you checked the operional readiness of the car '
+      + 'accordingly and that you are prepared to drive manually if required.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Confirm', onPress: () => navigation.navigate('Ride') },
+      ],
+      { cancelable: true },
+    );
+  }
+
+  checklistDone = () => {
+    const { interiorChecked, cleanlinessRating } = this.state;
+    return interiorChecked && cleanlinessRating > 0;
+  }
+
   render() {
     const { navigation } = this.props;
+    const { interiorChecked, cleanlinessRating } = this.state;
 
     return (
       <View style={styles.container}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Map', {
-            disableArrivalButton: true,
-          })}
-        >
-          <MapView
-            style={styles.mapPreview}
-            initialRegion={{
-              latitude: 52.5191406,
-              longitude: 13.4014149,
-              latitudeDelta: 0.1,
-              longitudeDelta: 0.1,
-            }}
+        <View style={styles.content}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Map', {
+              disableArrivalButton: true,
+            })}
+          >
+            <MapView
+              style={styles.mapPreview}
+              initialRegion={{
+                latitude: 52.5191406,
+                longitude: 13.4014149,
+                latitudeDelta: 0.1,
+                longitudeDelta: 0.1,
+              }}
+            />
+          </TouchableOpacity>
+
+          <Text style={styles.guideText}>
+            Check the interior of the car and track new issues if required.
+          </Text>
+
+          <CarCheckItem
+            title="Interior is operational"
+            checked={interiorChecked}
+            onPressCheck={() => this.setState({ interiorChecked: !interiorChecked })}
+            // onPressAddIssue={this.showIssueModal}
+            issues={[
+              'Passenger Seat: slightly torn open',
+              'OMFG, there is blood everywhere!!',
+            ]}
           />
-        </TouchableOpacity>
-        <Text style={styles.guideText}>
-          Check the interior of the car and track new issues if required.
-        </Text>
-        <CheckBox
-          title="Seat Belts are intact"
-          checked={false}
-        />
-        <Text>
-        {'\u2022'}
-        Passenger Seat: slightly torn open
-        </Text>
-        <Button
-          onPress={() => {}}
-          title="Add Issues"
-          color="blue"
-        />
-        <Text style={styles.guideText}>
-          Check the interior of the car and track new issues if required.
-        </Text>
-        <Rating
-          fractions={1}
-          ratingCount={10}
-          imageSize={25}
-          onFinishRating={(rating) => { console.log("FINISH RATTING", rating); }}
-          onStartRating={(rating) => { console.log("START RATTING", rating); }}
-        />
+
+          <Text style={[styles.guideText, styles.guideTextCleanliness]}>
+            Please rate the cleanliness of the car
+          </Text>
+          <Rating
+            rating={cleanlinessRating}
+            onRate={(rating) => this.setState({ cleanlinessRating: rating })}
+            style={styles.rating}
+          />
+        </View>
 
         <Button
-          onPress={() => Alert.alert(
-            // 'Alert Title',
-            'Confirmation Request',
-            'Confirm that you checked the operional readiness of the car '
-            + 'accordingly and that you are prepared to drive manually if required.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Confirm', onPress: () => navigation.navigate('Ride') },
-            ],
-            { cancelable: true },
-          )}
+          onPress={this.onPressStartRide}
           title="Start Ride"
-          color="green"
+          iconLeft="MaterialCommunityIcons/car-connected"
+          disabled={!this.checklistDone()}
+          wrapperStyle={{
+            margin: 10,
+          }}
+          containerStyle={[
+            styles.buttonContainer,
+            this.checklistDone() ? styles.buttonEnabled : styles.buttonDisabled,
+          ]}
+          textStyle={[
+            this.checklistDone() ? styles.buttonTextEnabled : styles.buttonTextDisabled,
+          ]}
+          iconStyle={[
+            this.checklistDone() ? styles.buttonIconEnabled : styles.buttonIconDisabled,
+          ]}
         />
       </View>
     );
@@ -99,16 +138,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  content: {
+    flex: 1,
+  },
   mapPreview: {
     width: '100%',
     height: 80,
   },
   guideText: {
     padding: 20,
+    paddingLeft: 10,
     fontSize: 16,
   },
-  checkBoxLabel: {
-
+  guideTextCleanliness: {
+    paddingBottom: 4,
+  },
+  rating: {
+    paddingLeft: 10,
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  buttonEnabled: {
+    backgroundColor: '#1CFF95',
+    borderColor: '#cecece',
+  },
+  buttonDisabled: {
+    backgroundColor: '#cecece',
+  },
+  buttonTextEnabled: {
+    color: '#ffffff',
+  },
+  buttonIconEnabled: {
+    color: '#ffffff',
   },
 });
 
