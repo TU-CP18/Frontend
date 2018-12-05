@@ -20,7 +20,7 @@ After cloning the `cp18-daimler-app` repository, you should run the following co
 Run the following command to start a development server for you.
 
     npm start
-    
+
 ## Development
 
 The previous command sets up a development server on your local machine on port 19002.
@@ -37,7 +37,7 @@ In order to emulate the app with the Android emulator, the following steps are r
 
 Note: Steps 2-9 need to be setup just once.
 
-1. Launch [Android Studio](https://developer.android.com/studio/). 
+1. Launch [Android Studio](https://developer.android.com/studio/).
 2. Open `Tools` > `SDK Manager`. In the left menu select `System Settings` and choose `Android SDK`.
 3. Install the `Android 8.1 (Oreo)` (API Level 27) SDK.
 4. Click the checkbox to select the just installed SDK and then apply the settings.
@@ -53,7 +53,7 @@ Once the build process of the AVD is finished, we are able to emulate our app on
 To run the app on the android emulator click on `Run on Android device/emulator`.
 
 Alternatively you can run from the command line:
-   
+
     npm run android
 
 #### Helpful shortcuts
@@ -66,7 +66,7 @@ Alternatively you can run from the command line:
 Assuming you already installed [Xcode](https://developer.apple.com/xcode/) and the [Command Line Tools for Xcode](https://developer.apple.com/download/more/), click on `Run on iOS simulator`.
 
 Alternatively you can run from the command line:
-   
+
     npm run ios
 
 #### Helpful shortcuts
@@ -96,7 +96,7 @@ How do I push changes to the `master` branch?
 3.  Create new branch from `master` with `git checkout -b cs/new-feature` (where 'cs/' is your own name/abbreviation)
 4.  Work on branch and push changes with `git push --set-upstream origin cs/new-feature` (where 'cs/' is your own name/abbreviation)
 5.  Rebase master onto branch to not have merge conflicts later with `git pull origin master --rebase` (AGAIN use`--rebase`)
-6.  Push branch again, this time force push to include rebased master (`git push --force`)
+6.  Push branch again, this time force push to include rebased master (`git push origin head --force`)
 7.  Create a pull request from github.com
 8.  Get pull request reviewed and merge it into master
 
@@ -109,8 +109,7 @@ Try to keep pull requests small (not 100+ files changed), so they are easier to 
 To run ESLint and show all violations and problems, execute:
 
     npm run lint
-    
+
 For trying to autofix the occuring violations and problems, execute:
 
     npm run lint-fix
-

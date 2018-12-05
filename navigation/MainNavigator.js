@@ -4,7 +4,6 @@ import HomeScreen from '../screens/HomeScreen';
 import ScheduleScreen from '../screens/ScheduleScreen';
 import ContactScreen from '../screens/ContactScreen';
 import MapScreen from '../screens/MapScreen';
-import DepartureScreen from '../screens/DepartureScreen';
 
 const MainStack = createStackNavigator(
   {
@@ -12,7 +11,6 @@ const MainStack = createStackNavigator(
     Schedule: ScheduleScreen,
     Contact: ContactScreen,
     Map: MapScreen,
-    Departure: DepartureScreen,
   },
   {
     initialRouteName: 'Home',
