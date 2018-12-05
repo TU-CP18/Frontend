@@ -6,12 +6,12 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { MapView } from 'expo';
 import { FontAwesome } from '@expo/vector-icons';
 import CarCheckItem from '../../components/CarCheckItem';
 import Rating from '../../components/Rating';
 import Button from '../../components/Button';
 import IssueModal from '../../components/IssueModal';
+import MapMarker from '../../components/MapMarker';
 
 class InteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -86,14 +86,14 @@ class InteriorCheckScreen extends React.Component {
               disableArrivalButton: true,
             })}
           >
-            <MapView
-              style={styles.mapPreview}
-              initialRegion={{
-                latitude: 52.5191406,
-                longitude: 13.4014149,
-                latitudeDelta: 0.1,
-                longitudeDelta: 0.1,
+            <MapMarker
+              coordinate={{
+                latitude: 52.523,
+                longitude: 13.413492,
               }}
+              style={styles.mapPreview}
+              zoomEnabled={false}
+              scrollEnabled={false}
             />
           </TouchableOpacity>
 
@@ -106,10 +106,7 @@ class InteriorCheckScreen extends React.Component {
             checked={interiorChecked}
             onPressCheck={() => this.setState({ interiorChecked: !interiorChecked })}
             onPressAddIssue={this.showIssueModal}
-            issues={[
-              'Passenger Seat: slightly torn open',
-              'OMFG, there is blood everywhere!!',
-            ]}
+            issues={[]}
           />
 
           <Text style={[styles.guideText, styles.guideTextCleanliness]}>

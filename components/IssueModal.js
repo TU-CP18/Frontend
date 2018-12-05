@@ -7,6 +7,7 @@ import {
   Image,
   TextInput,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import Button from './Button';
 import IssueMarker from './IssueMarker';
@@ -106,7 +107,8 @@ class IssueModal extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 0,
+    padding: 25,
     flexDirection: 'column',
     height: '100%',
   },
@@ -122,6 +124,7 @@ const styles = StyleSheet.create({
     width: '20%',
     marginTop: 4,
     backgroundColor: '#cecece',
+    marginBottom: 10,
   },
   carImage: {
     width: '100%',

@@ -13,7 +13,6 @@ import {
   MapView,
   Location,
   Permissions,
-  Constants,
   IntentLauncherAndroid,
 } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
@@ -179,7 +178,6 @@ class MapRoute extends React.Component {
 
   checkUserLocation = async location => {
     const { coordinates } = this.state;
-    console.log(location);
     const { coords } = location;
     if (Platform.OS === 'android') {
       // follow the user location
@@ -187,7 +185,6 @@ class MapRoute extends React.Component {
       this.animateToCoordinates(coords);
     }
     const destinationCoords = coordinates[coordinates.length - 1];
-    console.log(destinationCoords);
     const distance = geolib.getDistance(coords, destinationCoords);
     // show button if user is close to destination so he can confirm arrival
     // remove arrival button in case the user moves away from the destination

@@ -109,10 +109,7 @@ class RideCompletionScreen extends React.Component {
             checked={rearChecked}
             onPressCheck={() => this.toggleCheckbox('rearChecked')}
             onPressAddIssue={this.showIssueModal}
-            issues={[
-              'Driver Door: Big Dent',
-              'Driver Window: Scratch',
-            ]}
+            issues={[]}
           />
 
           <CarCheckItem
@@ -120,7 +117,7 @@ class RideCompletionScreen extends React.Component {
             checked={driverChecked}
             onPressCheck={() => this.toggleCheckbox('driverChecked')}
             onPressAddIssue={this.showIssueModal}
-            issues={[]}
+            issues={['Driver Door: Big Dent']}
           />
 
           <CarCheckItem
@@ -128,7 +125,10 @@ class RideCompletionScreen extends React.Component {
             checked={frontChecked}
             onPressCheck={() => this.toggleCheckbox('frontChecked')}
             onPressAddIssue={this.showIssueModal}
-            issues={[]}
+            issues={[
+              'Bonnet Right: Vertical Scratch',
+              'Bonnet Bottom Left: Small Dent',
+            ]}
           />
 
           <CarCheckItem
@@ -136,7 +136,7 @@ class RideCompletionScreen extends React.Component {
             checked={codriverChecked}
             onPressCheck={() => this.toggleCheckbox('codriverChecked')}
             onPressAddIssue={this.showIssueModal}
-            issues={['Co-Driver door: Big Dent']}
+            issues={[]}
           />
 
           <Button
@@ -153,6 +153,9 @@ class RideCompletionScreen extends React.Component {
               this.itemsChecked() ? styles.buttonEnabled : styles.buttonDisabled,
             ]}
             textStyle={[
+              this.itemsChecked() ? styles.buttonTextEnabled : styles.buttonTextDisabled,
+            ]}
+            subtitleStyle={[
               this.itemsChecked() ? styles.buttonTextEnabled : styles.buttonTextDisabled,
             ]}
             iconStyle={[

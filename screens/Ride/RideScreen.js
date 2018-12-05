@@ -216,11 +216,11 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     width: '31.5%',
+    height: 50,
   },
   buttonContainer: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    borderRadius: 50,
+    alignItems: 'center',
+    borderRadius: 25,
     backgroundColor: '#000000',
     flex: 1,
     justifyContent: 'flex-start',

@@ -20,7 +20,7 @@ const Rating = ({
           key={index}
           name={active ? 'ios-star' : 'ios-star-outline'}
           onPress={() => onRate(index + 1)}
-          size={36}
+          size={42}
           style={styles.icon}
         />
       );

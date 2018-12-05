@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { MapView } from 'expo';
 import { FontAwesome } from '@expo/vector-icons';
 import CarCheckItem from '../../components/CarCheckItem';
 import Button from '../../components/Button';
 import IssueModal from '../../components/IssueModal';
+import MapMarker from '../../components/MapMarker';
 
 class ExteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -57,8 +57,8 @@ class ExteriorCheckScreen extends React.Component {
     Alert.alert(
       // 'Alert Title',
       'Confirmation Request',
-      'Confirm that you checked the exterior readiness of the '
-      + 'car according to your besten Wissen and Gewissens',
+      'Confirm that you checked the exterior operational readiness of the '
+      + 'car accordingly',
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'OK', onPress: () => navigation.navigate('InteriorCheck') },
@@ -108,14 +108,12 @@ class ExteriorCheckScreen extends React.Component {
               disableArrivalButton: true,
             })}
           >
-            <MapView
-              style={styles.mapPreview}
-              initialRegion={{
-                latitude: 52.5191406,
-                longitude: 13.4014149,
-                latitudeDelta: 0.1,
-                longitudeDelta: 0.1,
+            <MapMarker
+              coordinate={{
+                latitude: 52.523,
+                longitude: 13.413492,
               }}
+              style={styles.mapPreview}
               zoomEnabled={false}
               scrollEnabled={false}
             />
@@ -130,10 +128,7 @@ class ExteriorCheckScreen extends React.Component {
             checked={rearChecked}
             onPressCheck={() => this.toggleCheckbox('rearChecked')}
             onPressAddIssue={this.showIssueModal}
-            issues={[
-              'Driver Door: Big Dent',
-              'Driver Window: Scratch',
-            ]}
+            issues={[]}
           />
 
           <CarCheckItem
@@ -141,7 +136,7 @@ class ExteriorCheckScreen extends React.Component {
             checked={driverChecked}
             onPressCheck={() => this.toggleCheckbox('driverChecked')}
             onPressAddIssue={this.showIssueModal}
-            issues={[]}
+            issues={['Driver Door: Big Dent']}
           />
 
           <CarCheckItem
@@ -149,7 +144,10 @@ class ExteriorCheckScreen extends React.Component {
             checked={frontChecked}
             onPressCheck={() => this.toggleCheckbox('frontChecked')}
             onPressAddIssue={this.showIssueModal}
-            issues={[]}
+            issues={[
+              'Bonnet Right: Vertical Scratch',
+              'Bonnet Bottom Left: Small Dent',
+            ]}
           />
 
           <CarCheckItem
@@ -157,7 +155,7 @@ class ExteriorCheckScreen extends React.Component {
             checked={codriverChecked}
             onPressCheck={() => this.toggleCheckbox('codriverChecked')}
             onPressAddIssue={this.showIssueModal}
-            issues={['Co-Driver door: Big Dent']}
+            issues={[]}
           />
 
           <Button
