@@ -11,7 +11,7 @@ import {
   Icon,
 } from 'react-native-elements';
 import { observer, inject } from 'mobx-react/native';
-import { observable } from 'mobx';
+import { observable, when } from 'mobx';
 import { BackgroundImage } from '../components/BackgroundImage';
 
 @inject('user')
@@ -25,15 +25,18 @@ class LoginScreen extends React.Component {
   @observable password = '';
   @observable keyboardOpen = false;
 
+  constructor(props) {
+    super(props);
+
+    when(
+      () => props.user.authenticated,
+      () => props.navigation.navigate('Main'),
+    );
+  }
+
   componentDidMount() {
     this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this._keyboardDidShow);
     this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.user.authenticated) {
-      this.props.navigation.navigate('Main');
-    }
   }
 
   componentWillUnmount() {
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
   },
   buttonTitle: {
     color: '#000000',
-    fontFamily: 'nemode', 
+    fontFamily: 'nemode',
     fontSize: 28,
   },
   loginButton: {
