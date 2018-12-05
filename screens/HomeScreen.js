@@ -2,21 +2,20 @@ import React from 'react';
 import {
   StyleSheet,
   View,
-  Button,
   KeyboardAvoidingView,
   Image,
   Text,
-  TouchableHighlight, 
+  TouchableHighlight,
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
 
 import { MonoText } from '../components/StyledText';
 import { BackgroundImage } from '../components/BackgroundImage';
+import MapMarker from '../components/MapMarker';
 
 @inject('user')
 @observer
 class HomeScreen extends React.Component {
-
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (!this.props.user.authenticated) {
       this.props.navigation.navigate('Auth');
@@ -26,9 +25,18 @@ class HomeScreen extends React.Component {
   renderIdleState() {
     return (
       <View style={{ flex: 1 }}>
-        <Text style={[styles.messageText, { marginTop: 50 }]}>Hi {this.props.user.name},</Text>
-        <TouchableHighlight style={{ alignItems: 'center', justifyContent: 'center', }} onPress={() => null}>
-          <View style={styles.mapButton} />
+        <Text style={[styles.messageText, { marginTop: 50 }]}>
+          Hi {this.props.user.name},
+        </Text>
+        <TouchableHighlight style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.navigation.navigate('Map')}>
+          <View style={styles.mapContainer}>
+            <MapMarker
+              coordinate={{
+                latitude: 52.523,
+                longitude: 13.413492,
+              }}
+            />
+          </View>
         </TouchableHighlight>
         <Text style={[styles.messageText]}>Head to --Location--</Text>
         <Text style={styles.messageText}>in --x-- minutes</Text>
@@ -49,7 +57,7 @@ class HomeScreen extends React.Component {
         <BackgroundImage />
         {inner}        
         <View style={styles.bottomButtons}>
-          <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={() => null}>
+          <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.user.logout()}>
             <View style={styles.callButton} />
           </TouchableHighlight>
           <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={() => null}>
@@ -72,16 +80,15 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '600',
     color: '#fefefe',
-    textAlign: "center",
+    textAlign: 'center',
   },
-  mapButton: {
+  mapContainer: {
     marginTop: 25,
     marginBottom: 25,
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: '#fefefe',
-    opacity: 0.75,
+    overflow: 'hidden',
   },
   bottomButtons: {
     position: 'absolute',
@@ -100,7 +107,7 @@ const styles = StyleSheet.create({
     marginLeft: 25,
     backgroundColor: '#fefefe',
     opacity: 0.75,
-  }, 
+  },
   logoutButton: {
     width: 75,
     height: 75,
