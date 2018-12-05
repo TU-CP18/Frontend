@@ -3,10 +3,10 @@ import {
   StyleSheet,
   View,
   KeyboardAvoidingView,
-  Image,
   Text,
   TouchableHighlight,
 } from 'react-native';
+import { Icon } from 'react-native-elements';
 import { observer, inject } from 'mobx-react';
 
 import { MonoText } from '../components/StyledText';
@@ -20,6 +20,10 @@ class HomeScreen extends React.Component {
     if (!this.props.user.authenticated) {
       this.props.navigation.navigate('Auth');
     }
+  }
+
+  logout = () => {
+    this.props.user.logout();
   }
 
   renderIdleState() {
@@ -60,8 +64,14 @@ class HomeScreen extends React.Component {
           <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.user.logout()}>
             <View style={styles.callButton} />
           </TouchableHighlight>
-          <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={() => null}>
-            <View style={styles.logoutButton} />
+          <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={this.logout}>
+            <Icon
+              name="input"
+              color="#343434"
+              containerStyle={styles.logoutButton}
+              iconStyle={styles.logoutButtonIconStyle}
+              onPress={() => this.props.navigation.navigate('DevSettings')}
+            />
           </TouchableHighlight>
         </View>
       </KeyboardAvoidingView>
@@ -115,6 +125,9 @@ const styles = StyleSheet.create({
     marginRight: 25,
     backgroundColor: '#fefefe',
     opacity: 0.75,
+  },
+  logoutButtonIconStyle: {
+    
   },
 });
 
