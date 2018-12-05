@@ -8,12 +8,9 @@ import {
 import { MapView } from 'expo';
 import Button from '../../components/Button';
 import { MaterialIcons } from '@expo/vector-icons';
-import { ThemeConsumer } from 'react-native-elements';
-// import { } from '../../components/Button';
 
 class RideScreen extends React.Component {
   static navigationOptions = {
-    // title: 'Manual Mode',
     header: null,
   };
 
@@ -43,35 +40,17 @@ class RideScreen extends React.Component {
           }}
         />
 
-        <View
-          style={{
-            position: 'absolute',
-            top: 40,
-            left: '10%',
-            width: '80%',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            borderRadius: 8,
-            padding: 12,
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}
-        >
-          <MaterialIcons name="warning" size={36} style={{ color: '#ffffff', marginRight: 10, }} />
-          <View>
-            <Text style={{ fontSize: 19, color: '#ffffff' }}>Warning</Text>
-            <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#ffffff' }}>A door is open</Text>
+        {!nextStopShift && (
+          <View style={styles.warningContainer}>
+            <MaterialIcons name="warning" size={36} style={styles.warningIcon} />
+            <View>
+              <Text style={styles.warningTitle}>Warning</Text>
+              <Text style={styles.warningText}>A door is open</Text>
+            </View>
           </View>
-        </View>
+        )}
 
         <View style={styles.content}>
-          {/* <Button
-            onPress={() => navigation.navigate('Control')}
-            title="Control"
-          />
-          <Button
-            onPress={() => navigation.navigate('RideCompletion')}
-            title="End Ride"
-          /> */}
           <TouchableOpacity
             onPress={() => {
               this.setState({ nextStopShift: true, });
@@ -101,12 +80,7 @@ class RideScreen extends React.Component {
               title="STOP"
               subtitle="Autopilot"
               onPress={() => this.setState({ autopilotEnabled: false })}
-              wrapperStyle={{
-                marginTop: 15,
-                marginBottom: 5,
-                marginLeft: 10,
-                marginRight: 10,
-              }}
+              wrapperStyle={styles.modeButtonWrapper}
               containerStyle={{
                 backgroundColor: '#D98B6F', // D94643
                 borderColor: '#D94643',
@@ -127,28 +101,14 @@ class RideScreen extends React.Component {
                 fontSize: 22,
                 alignSelf: 'center',
               }}
-              subtitleStyle={{
-                color: '#ffffff',
-                fontSize: 18,
-                alignSelf: 'center',
-                marginTop: -5,
-                // alignItems: 'center',
-              }}
-              // textWrapperStyle={{
-              //   alignItems: 'center',
-              // }},
+              subtitleStyle={[styles.modeButtonSubtitle, { color: '#ffffff' }]}
             />
           )) || (
             <Button
               title="START"
               subtitle="Autopilot"
               onPress={() => this.setState({ autopilotEnabled: true })}
-              wrapperStyle={{
-                marginTop: 15,
-                marginBottom: 5,
-                marginLeft: 10,
-                marginRight: 10,
-              }}
+              wrapperStyle={styles.modeButtonWrapper}
               containerStyle={{
                 backgroundColor: '#00FF77',
                 borderColor: '#41D904',
@@ -158,16 +118,7 @@ class RideScreen extends React.Component {
                 fontSize: 22,
                 alignSelf: 'center',
               }}
-              subtitleStyle={{
-                color: '#ffffff',
-                fontSize: 18,
-                alignSelf: 'center',
-                marginTop: -5,
-                // alignItems: 'center',
-              }}
-              // textWrapperStyle={{
-              //   alignItems: 'center',
-              // }},
+              subtitleStyle={[styles.modeButtonSubtitle, { color: '#ffffff' }]}
             />
           ))}
 
@@ -176,12 +127,7 @@ class RideScreen extends React.Component {
               title="Stop Ride"
               subtitle="And do a final check"
               onPress={() => navigation.navigate('RideCompletion')}
-              wrapperStyle={{
-                marginTop: 15,
-                marginBottom: 5,
-                marginLeft: 10,
-                marginRight: 10,
-              }}
+              wrapperStyle={styles.modeButtonWrapper}
               containerStyle={{
                 backgroundColor: '#ffffff',
                 borderColor: '#000000',
@@ -191,16 +137,7 @@ class RideScreen extends React.Component {
                 fontSize: 22,
                 alignSelf: 'center',
               }}
-              subtitleStyle={{
-                color: '#000000',
-                fontSize: 18,
-                alignSelf: 'center',
-                marginTop: -5,
-                // alignItems: 'center',
-              }}
-              // textWrapperStyle={{
-              //   alignItems: 'center',
-              // }},
+              subtitleStyle={[styles.modeButtonSubtitle, { color: '#000000' }]}
             />
           )}
 
@@ -258,8 +195,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    // flex: 5,
-    // height: '30%',
   },
   buttonGroup: {
     flexDirection: 'row',
@@ -268,8 +203,6 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     width: '31.5%',
-    // marginLeft: 10,
-    // marginRight: 10,
   },
   buttonContainer: {
     paddingTop: 20,
@@ -288,6 +221,41 @@ const styles = StyleSheet.create({
   },
   buttonSubtitle: {
     color: '#ffffff',
+  },
+  warningContainer: {
+    position: 'absolute',
+    top: 40,
+    left: '10%',
+    width: '80%',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  warningIcon: {
+    color: '#ffffff',
+    marginRight: 10,
+  },
+  warningTitle: {
+    fontSize: 19,
+    color: '#ffffff',
+  },
+  warningText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  modeButtonWrapper: {
+    marginTop: 15,
+    marginBottom: 5,
+    marginLeft: 10,
+    marginRight: 10,
+  },
+  modeButtonSubtitle: {
+    fontSize: 18,
+    alignSelf: 'center',
+    marginTop: -5,
   },
 });
 

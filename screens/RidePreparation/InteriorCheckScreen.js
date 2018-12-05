@@ -46,7 +46,6 @@ class InteriorCheckScreen extends React.Component {
     const { navigation } = this.props;
 
     Alert.alert(
-      // 'Alert Title',
       'Confirmation Request',
       'Confirm that you checked the operional readiness of the car '
       + 'accordingly and that you are prepared to drive manually if required.',

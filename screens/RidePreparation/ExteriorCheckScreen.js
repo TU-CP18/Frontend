@@ -6,10 +6,6 @@ import {
   Alert,
   TouchableOpacity,
   ScrollView,
-  Modal,
-  Image,
-  TextInput,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import { MapView } from 'expo';
 import { FontAwesome } from '@expo/vector-icons';

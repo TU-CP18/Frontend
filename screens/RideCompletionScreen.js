@@ -4,10 +4,6 @@ import {
   View,
   Text,
   ScrollView,
-  Modal,
-  Image,
-  TextInput,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import CarCheckItem from '../components/CarCheckItem';
@@ -84,7 +80,6 @@ class RideCompletionScreen extends React.Component {
   }
 
   render() {
-    const { navigation } = this.props;
     const {
       rearChecked,
       driverChecked,

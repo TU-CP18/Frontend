@@ -28,62 +28,27 @@ class ControlScreen extends React.Component {
 
     return (
       <View style={styles.container}>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 10,
-            margin: 10,
-            backgroundColor: '#cecece',
-            borderRadius: 4,
-            borderWidth: 1,
-            borderColor: '#C1D9D3',
-            alignItems: 'center',
-          }}
-        >
+        <View style={styles.configItem}>
           <MaterialCommunityIcons
             name="fan"
-            style={{
-              fontSize: 28,
-              marginRight: 14,
-            }}
+            style={styles.configIcon}
           />
           <MaterialCommunityIcons
             name="minus"
-            style={{
-              fontSize: 28,
-              // marginRight: 14,
-            }}
+            size={28}
             onPress={() => {
               this.setState({
                 fanLevel: Math.max(0, fanLevel - 1),
               });
             }}
           />
-          <View
-            style={{
-              height: 20,
-              flex: 1,
-              // backgroundColor: '#000000',
-              borderRadius: 10,
-              // #2972D9
-              // marginTop:
-              borderWidth: 2,
-              borderColor: '#000000',
-              // position: 'relative',
-              marginLeft: 5,
-              marginRight: 5,
-            }}
-          >
+          <View style={styles.meter}>
             <View
-              style={{
-                backgroundColor: '#000000',
-                width: `${(fanLevel / MAX_FAN_LEVEL) * 100}%`,
-                // width: '50%',
-                height: '100%',
-                borderRadius: 10,
-              }}
+              style={[
+                styles.meterIndicator,
+                { width: `${(fanLevel / MAX_FAN_LEVEL) * 100}%` },
+              ]}
             />
-
           </View>
           <MaterialCommunityIcons
             name="plus"
@@ -92,33 +57,17 @@ class ControlScreen extends React.Component {
                 fanLevel: Math.min(MAX_FAN_LEVEL, fanLevel + 1),
               });
             }}
-            style={{
-              fontSize: 28,
-              // marginRight: 14,
-            }}
+            size={28}
           />
         </View>
 
-
         <TouchableOpacity onPress={() => this.setState({ lightOn: !lightOn })}>
           <View
-            style={{
-              flexDirection: 'row',
-              padding: 10,
-              margin: 10,
-              backgroundColor: '#cecece',
-              borderRadius: 4,
-              borderWidth: 1,
-              borderColor: '#C1D9D3',
-              alignItems: 'center',
-            }}
+            style={styles.configItem}
           >
             <MaterialCommunityIcons
               name={lightOn ? 'lightbulb-on' : 'lightbulb'}
-              style={{
-                fontSize: 28,
-                marginRight: 14,
-              }}
+              style={styles.configIcon}
             />
             {lightOn && (
               <Text>Switch Light Off</Text>
@@ -137,6 +86,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  configItem: {
+    flexDirection: 'row',
+    padding: 10,
+    margin: 10,
+    backgroundColor: '#cecece',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#C1D9D3',
+    alignItems: 'center',
+  },
+  configIcon: {
+    fontSize: 28,
+    marginRight: 14,
+  },
+  meter: {
+    height: 20,
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#000000',
+    marginLeft: 5,
+    marginRight: 5,
+  },
+  meterIndicator: {
+    backgroundColor: '#000000',
+    height: '100%',
+    borderRadius: 10,
   },
 });
 
