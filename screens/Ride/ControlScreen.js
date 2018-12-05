@@ -8,6 +8,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const MAX_FAN_LEVEL = 10;
+const INITAL_FAN_LEVEL = 3;
 
 class ControlScreen extends React.Component {
   static navigationOptions = {
@@ -18,7 +19,7 @@ class ControlScreen extends React.Component {
     super();
 
     this.state = {
-      fanLevel: 3,
+      fanLevel: INITAL_FAN_LEVEL,
       lightOn: false,
     };
   }

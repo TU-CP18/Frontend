@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   StyleSheet,
   View,
@@ -306,5 +307,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
 });
+
+MapRoute.propTypes = {
+  onArrivalConfirmed: PropTypes.func,
+};
+
+MapRoute.defaultProps = {
+  onArrivalConfirmed: () => undefined,
+};
 
 export default MapRoute;

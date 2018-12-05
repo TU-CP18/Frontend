@@ -24,9 +24,87 @@ class RideScreen extends React.Component {
     };
   }
 
+  renderDriveModeButton = () => {
+    const { navigation } = this.props;
+    const { nextStopShiftReached, autopilotEnabled } = this.state;
+
+    if (nextStopShiftReached) {
+      // end of shift
+      return (
+        <Button
+          title="Stop Ride"
+          subtitle="And do a final check"
+          onPress={() => navigation.navigate('RideCompletion')}
+          wrapperStyle={styles.modeButtonWrapper}
+          containerStyle={{
+            backgroundColor: '#ffffff',
+            borderColor: '#000000',
+          }}
+          textStyle={{
+            color: '#000000',
+            fontSize: 22,
+            alignSelf: 'center',
+          }}
+          subtitleStyle={[styles.modeButtonSubtitle, { color: '#000000' }]}
+        />
+      );
+    }
+
+    if (autopilotEnabled) {
+      return (
+        <Button
+          title="STOP"
+          subtitle="Autopilot"
+          onPress={() => this.setState({ autopilotEnabled: false })}
+          wrapperStyle={styles.modeButtonWrapper}
+          containerStyle={{
+            backgroundColor: '#D98B6F', // D94643
+            borderColor: '#D94643',
+          }}
+          iconLeft="MaterialIcons/warning"
+          iconStyle={{
+            position: 'absolute',
+            left: 15,
+            top: '50%',
+            transform: [{
+              translateY: -10,
+            }],
+            color: '#ffffff',
+            fontSize: 34,
+          }}
+          textStyle={{
+            color: '#ffffff',
+            fontSize: 22,
+            alignSelf: 'center',
+          }}
+          subtitleStyle={[styles.modeButtonSubtitle, { color: '#ffffff' }]}
+        />
+      );
+    }
+
+    return (
+      <Button
+        title="START"
+        subtitle="Autopilot"
+        onPress={() => this.setState({ autopilotEnabled: true })}
+        wrapperStyle={styles.modeButtonWrapper}
+        containerStyle={{
+          backgroundColor: '#00FF77',
+          borderColor: '#41D904',
+        }}
+        textStyle={{
+          color: '#ffffff',
+          fontSize: 22,
+          alignSelf: 'center',
+        }}
+        subtitleStyle={[styles.modeButtonSubtitle, { color: '#ffffff' }]}
+      />
+    );
+  }
+
   render() {
     const { navigation } = this.props;
-    const { autopilotEnabled, nextStopShift, nextStopShiftReached } = this.state;
+    const { nextStopShift, nextStopShiftReached } = this.state;
 
     return (
       <View style={styles.container}>
@@ -75,74 +153,9 @@ class RideScreen extends React.Component {
             </View>
           </TouchableOpacity>
 
-          {!nextStopShiftReached && ((autopilotEnabled && (
-            <Button
-              title="STOP"
-              subtitle="Autopilot"
-              onPress={() => this.setState({ autopilotEnabled: false })}
-              wrapperStyle={styles.modeButtonWrapper}
-              containerStyle={{
-                backgroundColor: '#D98B6F', // D94643
-                borderColor: '#D94643',
-              }}
-              iconLeft="MaterialIcons/warning"
-              iconStyle={{
-                position: 'absolute',
-                left: 15,
-                top: '50%',
-                transform: [{
-                  translateY: -10,
-                }],
-                color: '#ffffff',
-                fontSize: 34,
-              }}
-              textStyle={{
-                color: '#ffffff',
-                fontSize: 22,
-                alignSelf: 'center',
-              }}
-              subtitleStyle={[styles.modeButtonSubtitle, { color: '#ffffff' }]}
-            />
-          )) || (
-            <Button
-              title="START"
-              subtitle="Autopilot"
-              onPress={() => this.setState({ autopilotEnabled: true })}
-              wrapperStyle={styles.modeButtonWrapper}
-              containerStyle={{
-                backgroundColor: '#00FF77',
-                borderColor: '#41D904',
-              }}
-              textStyle={{
-                color: '#ffffff',
-                fontSize: 22,
-                alignSelf: 'center',
-              }}
-              subtitleStyle={[styles.modeButtonSubtitle, { color: '#ffffff' }]}
-            />
-          ))}
-
-          {nextStopShiftReached && (
-            <Button
-              title="Stop Ride"
-              subtitle="And do a final check"
-              onPress={() => navigation.navigate('RideCompletion')}
-              wrapperStyle={styles.modeButtonWrapper}
-              containerStyle={{
-                backgroundColor: '#ffffff',
-                borderColor: '#000000',
-              }}
-              textStyle={{
-                color: '#000000',
-                fontSize: 22,
-                alignSelf: 'center',
-              }}
-              subtitleStyle={[styles.modeButtonSubtitle, { color: '#000000' }]}
-            />
-          )}
+          {this.renderDriveModeButton()}
 
           <View style={styles.buttonGroup}>
-
             <Button
               title="Car"
               subtitle="Controll"
