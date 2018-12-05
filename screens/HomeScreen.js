@@ -3,12 +3,13 @@ import {
   StyleSheet,
   View,
   KeyboardAvoidingView,
+  Image,
   Text,
-  TouchableOpacity,
+  TouchableHighlight,
 } from 'react-native';
-import { Icon } from 'react-native-elements';
 import { observer, inject } from 'mobx-react';
 
+import { MonoText } from '../components/StyledText';
 import { BackgroundImage } from '../components/BackgroundImage';
 import MapMarker from '../components/MapMarker';
 
@@ -21,27 +22,24 @@ class HomeScreen extends React.Component {
     }
   }
 
-  handleCallOperator = () => {
-    console.log('--> Will make a call');
-  }
-
-  handleLogout = () => {
-    this.props.user.logout();
-  }
-
   renderIdleState() {
     return (
       <View style={{ flex: 1 }}>
         <Text style={[styles.messageText, { marginTop: 50 }]}>
           Hi {this.props.user.name},
         </Text>
-        <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.navigation.navigate('Map')}>
-          <View style={styles.mapContainer} pointerEvents="none">
-            <MapMarker coordinate={{ latitude: 52.523, longitude: 13.413492 }} />
+        <TouchableHighlight style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.navigation.navigate('Map')}>
+          <View style={styles.mapContainer}>
+            <MapMarker
+              coordinate={{
+                latitude: 52.523,
+                longitude: 13.413492,
+              }}
+            />
           </View>
-        </TouchableOpacity>
-        <Text style={[styles.messageText]}>Head to Alexanderplatz</Text>
-        <Text style={styles.messageText}>in 10 minutes</Text>
+        </TouchableHighlight>
+        <Text style={[styles.messageText]}>Head to --Location--</Text>
+        <Text style={styles.messageText}>in --x-- minutes</Text>
       </View>
     );
   }
@@ -57,30 +55,14 @@ class HomeScreen extends React.Component {
     return (
       <KeyboardAvoidingView style={[styles.container, this.keyboardOpen ? styles.containerKeyboardOpen : {}]} behavior="padding" enabled>
         <BackgroundImage />
-        {inner}        
+        {inner}
         <View style={styles.bottomButtons}>
-          <TouchableOpacity style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }} onPress={this.handleLogout}>
-            <View pointerEvents="none">
-              <Icon
-                name="input"
-                color="#343434"
-                containerStyle={styles.logoutButton}
-                iconStyle={styles.logoutButtonIconStyle}
-                onPress={() => this.props.navigation.navigate('DevSettings')}
-              />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={this.handleCallOperator}>
-            <View pointerEvents="none">
-              <Icon
-                name="call"
-                color="#343434"
-                containerStyle={styles.callButton}
-                iconStyle={styles.callButtonIconStyle}
-                onPress={() => this.props.navigation.navigate('DevSettings')}
-              />
-            </View>
-          </TouchableOpacity>
+          <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.user.logout()}>
+            <View style={styles.callButton} />
+          </TouchableHighlight>
+          <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={() => null}>
+            <View style={styles.logoutButton} />
+          </TouchableHighlight>
         </View>
       </KeyboardAvoidingView>
     );
@@ -95,7 +77,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#343434',
   },
   messageText: {
-    fontFamily: 'nemode',
     fontSize: 32,
     fontWeight: '600',
     color: '#fefefe',
@@ -127,10 +108,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fefefe',
     opacity: 0.75,
   },
-  callButtonIconStyle: {
-    marginTop: 16,
-    fontSize: 42,
-  },
   logoutButton: {
     width: 75,
     height: 75,
@@ -138,10 +115,6 @@ const styles = StyleSheet.create({
     marginRight: 25,
     backgroundColor: '#fefefe',
     opacity: 0.75,
-  },
-  logoutButtonIconStyle: {
-    marginTop: 16,
-    fontSize: 42,
   },
 });
 

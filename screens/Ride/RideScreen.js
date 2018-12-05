@@ -5,8 +5,8 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-import { MapView } from 'expo';
 import Button from '../../components/Button';
+import MapMarker from '../../components/MapMarker';
 import { MaterialIcons } from '@expo/vector-icons';
 
 class RideScreen extends React.Component {
@@ -108,15 +108,56 @@ class RideScreen extends React.Component {
 
     return (
       <View style={styles.container}>
-        <MapView
-          style={styles.mapPreview}
-          initialRegion={{
-            latitude: 52.5191406,
-            longitude: 13.4014149,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
+        <MapMarker
+          coordinate={{
+            latitude: 52.523,
+            longitude: 13.413492,
           }}
+          style={styles.mapPreview}
         />
+
+        <TouchableOpacity
+          onPress={() => {
+            this.setState({ nextStopShift: true, });
+            if (nextStopShift) {
+              this.setState({ nextStopShiftReached: true, });
+            }
+          }}
+          style={{
+            position: 'absolute',
+            top: 60,
+            left: '10%',
+            right: '10%',
+            width: '80%',
+          }}
+        >
+          <View style={{
+            backgroundColor: '#689FD9',
+            width: '100%',
+            borderRadius: 8,
+            padding: 12,
+          }}>
+            {!nextStopShift && (
+              <Text style={{ color: 'white', fontSize: 18 }}>
+                Next: Pickup Passenger
+              </Text>
+            )}
+            {nextStopShift && !nextStopShiftReached && (
+              <Text style={{ color: 'white', fontSize: 18, }}>
+                Next: End Shift
+                {'\n'}
+                Drive to interchange point
+              </Text>
+            )}
+            {nextStopShiftReached && (
+              <Text style={{ color: 'white', fontSize: 18, }}>
+                Interchange point reached
+                {'\n'}
+                End of shift
+              </Text>
+            )}
+          </View>
+        </TouchableOpacity>
 
         {!nextStopShift && (
           <View style={styles.warningContainer}>
@@ -129,30 +170,6 @@ class RideScreen extends React.Component {
         )}
 
         <View style={styles.content}>
-          <TouchableOpacity
-            onPress={() => {
-              this.setState({ nextStopShift: true, });
-              if (nextStopShift) {
-                this.setState({ nextStopShiftReached: true, });
-              }
-            }}
-          >
-            <View style={{
-              padding: 10,
-              backgroundColor: '#689FD9',
-            }}>
-              {!nextStopShift && (
-                <Text style={{ color: 'white' }}>Next: Pickup Passenger</Text>
-              )}
-              {nextStopShift && !nextStopShiftReached && (
-                <Text style={{ color: 'white' }}>Next: End Shift, drive to interchange point</Text>
-              )}
-              {nextStopShiftReached && (
-                <Text style={{ color: 'white' }}>Interchange point reached, end of shift</Text>
-              )}
-            </View>
-          </TouchableOpacity>
-
           {this.renderDriveModeButton()}
 
           <View style={styles.buttonGroup}>
@@ -237,7 +254,7 @@ const styles = StyleSheet.create({
   },
   warningContainer: {
     position: 'absolute',
-    top: 40,
+    top: 110,
     left: '10%',
     width: '80%',
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
