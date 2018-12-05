@@ -21,7 +21,7 @@ export default class User {
   @action
   async init() {
     try {
-      // await asyncSleep(1000);
+      await asyncSleep(1000);
       const userDetails = JSON.parse(await AsyncStorage.getItem(USER_DETAILS));
       if (userDetails.id_token) {
         this.authenticated = true;
@@ -45,6 +45,7 @@ export default class User {
         runInAction(() => {
           this.authenticated = true;
           this.authToken = data.id_token;
+          console.log('---> user details: ', data);
         });
       } else {
         runInAction(() => {
@@ -78,9 +79,12 @@ export default class User {
   async logout() {
     try {
       await AsyncStorage.removeItem(USER_DETAILS);
-      this.authenticated = false;
-      this.authToken = undefined;
+      runInAction(() => {
+        this.authenticated = false;
+        this.authToken = undefined;
+      });
     } catch (error) {
+      console.log('---> Failed to logout', error);
       console.log(error);
     }
   }
