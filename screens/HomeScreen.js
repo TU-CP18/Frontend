@@ -26,7 +26,6 @@ class HomeScreen extends React.Component {
   }
 
   handleLogout = () => {
-    console.log('--> ', this.props.user);
     this.props.user.logout();
   }
 
