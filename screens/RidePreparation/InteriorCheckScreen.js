@@ -11,6 +11,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import CarCheckItem from '../../components/CarCheckItem';
 import Rating from '../../components/Rating';
 import Button from '../../components/Button';
+import IssueModal from '../../components/IssueModal';
 
 class InteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -35,6 +36,7 @@ class InteriorCheckScreen extends React.Component {
     this.state = {
       interiorChecked: false,
       cleanlinessRating: -1,
+      issueModalVisible: false,
     };
   }
 
@@ -61,9 +63,21 @@ class InteriorCheckScreen extends React.Component {
     return interiorChecked && cleanlinessRating > 0;
   }
 
+  showIssueModal = () => {
+    this.setState({
+      issueModalVisible: true,
+    });
+  }
+
+  hideIssueModal = () => {
+    this.setState({
+      issueModalVisible: false,
+    });
+  }
+
   render() {
     const { navigation } = this.props;
-    const { interiorChecked, cleanlinessRating } = this.state;
+    const { interiorChecked, cleanlinessRating, issueModalVisible } = this.state;
 
     return (
       <View style={styles.container}>
@@ -92,7 +106,7 @@ class InteriorCheckScreen extends React.Component {
             title="Interior is operational"
             checked={interiorChecked}
             onPressCheck={() => this.setState({ interiorChecked: !interiorChecked })}
-            // onPressAddIssue={this.showIssueModal}
+            onPressAddIssue={this.showIssueModal}
             issues={[
               'Passenger Seat: slightly torn open',
               'OMFG, there is blood everywhere!!',
@@ -127,6 +141,11 @@ class InteriorCheckScreen extends React.Component {
           iconStyle={[
             this.checklistDone() ? styles.buttonIconEnabled : styles.buttonIconDisabled,
           ]}
+        />
+
+        <IssueModal
+          visible={issueModalVisible}
+          onHide={this.hideIssueModal}
         />
       </View>
     );
