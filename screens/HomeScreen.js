@@ -4,12 +4,11 @@ import {
   View,
   KeyboardAvoidingView,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { observer, inject } from 'mobx-react';
 
-import { MonoText } from '../components/StyledText';
 import { BackgroundImage } from '../components/BackgroundImage';
 import MapMarker from '../components/MapMarker';
 
@@ -22,7 +21,12 @@ class HomeScreen extends React.Component {
     }
   }
 
-  logout = () => {
+  handleCallOperator = () => {
+    console.log('--> Will make a call');
+  }
+
+  handleLogout = () => {
+    console.log('--> ', this.props.user);
     this.props.user.logout();
   }
 
@@ -32,8 +36,8 @@ class HomeScreen extends React.Component {
         <Text style={[styles.messageText, { marginTop: 50 }]}>
           Hi {this.props.user.name},
         </Text>
-        <TouchableHighlight style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.navigation.navigate('Map')}>
-          <View style={styles.mapContainer}>
+        <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.navigation.navigate('Map')}>
+          <View style={styles.mapContainer} pointerEvents="none">
             <MapMarker
               coordinate={{
                 latitude: 52.523,
@@ -41,7 +45,7 @@ class HomeScreen extends React.Component {
               }}
             />
           </View>
-        </TouchableHighlight>
+        </TouchableOpacity>
         <Text style={[styles.messageText]}>Head to --Location--</Text>
         <Text style={styles.messageText}>in --x-- minutes</Text>
       </View>
@@ -61,18 +65,28 @@ class HomeScreen extends React.Component {
         <BackgroundImage />
         {inner}        
         <View style={styles.bottomButtons}>
-          <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.user.logout()}>
-            <View style={styles.callButton} />
-          </TouchableHighlight>
-          <TouchableHighlight style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={this.logout}>
-            <Icon
-              name="input"
-              color="#343434"
-              containerStyle={styles.logoutButton}
-              iconStyle={styles.logoutButtonIconStyle}
-              onPress={() => this.props.navigation.navigate('DevSettings')}
-            />
-          </TouchableHighlight>
+          <TouchableOpacity style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }} onPress={this.handleLogout}>
+            <View pointerEvents="none">
+              <Icon
+                name="input"
+                color="#343434"
+                containerStyle={styles.logoutButton}
+                iconStyle={styles.logoutButtonIconStyle}
+                onPress={() => this.props.navigation.navigate('DevSettings')}
+              />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', }} onPress={this.handleCallOperator}>
+            <View pointerEvents="none">
+              <Icon
+                name="call"
+                color="#343434"
+                containerStyle={styles.callButton}
+                iconStyle={styles.callButtonIconStyle}
+                onPress={() => this.props.navigation.navigate('DevSettings')}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     );
@@ -118,6 +132,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fefefe',
     opacity: 0.75,
   },
+  callButtonIconStyle: {
+    marginTop: 16,
+    fontSize: 42,
+  },
   logoutButton: {
     width: 75,
     height: 75,
@@ -127,7 +145,8 @@ const styles = StyleSheet.create({
     opacity: 0.75,
   },
   logoutButtonIconStyle: {
-    
+    marginTop: 16,
+    fontSize: 42,
   },
 });
 
