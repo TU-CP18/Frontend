@@ -10,7 +10,9 @@ class MapScreen extends React.Component {
     const { navigation } = this.props;
 
     return (
-      <MapRoute />
+      <MapRoute
+        onArrivalConfirmed={() => navigation.navigate('RidePreparation')}
+      />
     );
   }
 }

@@ -210,6 +210,7 @@ class MapRoute extends React.Component {
   };
 
   renderConfirmalButton() {
+    const { onArrivalConfirmed } = this.props;
     const { destinationReached } = this.state;
     if (!destinationReached) {
       return null;
@@ -218,7 +219,7 @@ class MapRoute extends React.Component {
       <View style={styles.confirmContainer}>
         <TouchableOpacity
           style={styles.confirmButton}
-          onPress={this.onArrivalConfirmed}
+          onPress={onArrivalConfirmed}
         >
           <View style={styles.drawerItem}>
             <Ionicons
@@ -233,10 +234,6 @@ class MapRoute extends React.Component {
       </View>
     );
   }
-
-  onArrivalConfirmed = () => {
-    Alert.alert('Confirmation', 'Arrival confirmed');
-  };
 
   onMapReady = () => {
     this.setState({ isMapReady: true });
