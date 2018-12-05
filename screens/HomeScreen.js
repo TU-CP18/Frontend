@@ -38,16 +38,11 @@ class HomeScreen extends React.Component {
         </Text>
         <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center' }} onPress={() => this.props.navigation.navigate('Map')}>
           <View style={styles.mapContainer} pointerEvents="none">
-            <MapMarker
-              coordinate={{
-                latitude: 52.523,
-                longitude: 13.413492,
-              }}
-            />
+            <MapMarker coordinate={{ latitude: 52.523, longitude: 13.413492 }} />
           </View>
         </TouchableOpacity>
-        <Text style={[styles.messageText]}>Head to --Location--</Text>
-        <Text style={styles.messageText}>in --x-- minutes</Text>
+        <Text style={[styles.messageText]}>Head to Alexanderplatz</Text>
+        <Text style={styles.messageText}>in 10 minutes</Text>
       </View>
     );
   }
@@ -101,6 +96,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#343434',
   },
   messageText: {
+    fontFamily: 'nemode',
     fontSize: 32,
     fontWeight: '600',
     color: '#fefefe',
