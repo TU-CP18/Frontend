@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   StyleSheet,
-  Image,
   View,
   KeyboardAvoidingView,
   Keyboard,
@@ -13,6 +12,7 @@ import {
 } from 'react-native-elements';
 import { observer, inject } from 'mobx-react/native';
 import { observable } from 'mobx';
+import { BackgroundImage } from '../components/BackgroundImage';
 
 @inject('user')
 @observer
@@ -22,9 +22,7 @@ class LoginScreen extends React.Component {
   };
 
   @observable username = '';
-
   @observable password = '';
-
   @observable keyboardOpen = false;
 
   componentDidMount() {
@@ -64,39 +62,33 @@ class LoginScreen extends React.Component {
   };
 
   render() {
-    this.props.user.authenticated;
-
     return (
       <KeyboardAvoidingView style={[styles.container, this.keyboardOpen ? styles.containerKeyboardOpen : {}]} behavior="padding" enabled>
-        <Image
-          style={styles.backgroundImage}
-          source={require('../assets/images/background_van.jpg')}
-        />
+        <BackgroundImage />
         <View style={styles.formContainer}>
           <Input
             placeholder="Username"
             containerStyle={styles.inputContainer}
             inputContainerStyle={styles.input}
-            leftIcon={{ type: 'font-awesome', name: 'user' }}
+            inputStyle={styles.inputText}
             value={this.username}
             onChangeText={this._onUsernameChange}
-            errorStyle={styles.inputError}
-            errorMessage={this.props.user.loginError}
+            autoCapitalize="none"
+            placeholderTextColor="rgba(255, 255, 255, 0.75)"
           />
           <Input
             placeholder="Password"
             secureTextEntry
             containerStyle={styles.inputContainer}
             inputContainerStyle={styles.input}
-            leftIcon={{ type: 'font-awesome', name: 'user' }}
+            inputStyle={styles.inputText}
             value={this.password}
             onChangeText={this._onPasswordChange}
-            errorStyle={styles.inputError}
-            errorMessage={this.props.user.loginError}
+            placeholderTextColor="rgba(255, 255, 255, 0.75)"
           />
           <Button
             title="Einloggen"
-            onPress={this._onLoginPress.bind(this)}
+            onPress={this._onLoginPress}
             titleStyle={styles.buttonTitle}
             buttonStyle={styles.loginButton}
             loading={this.props.user.loginLoading}
@@ -119,15 +111,10 @@ class LoginScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    padding: 25,
+    backgroundColor: '#343434',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  backgroundImage: {
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    height: '100%',
   },
   containerKeyboardOpen: {
     justifyContent: 'flex-start',
@@ -143,14 +130,23 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 20,
     width: '100%',
+    borderBottomColor: '#fefefe',
+    borderBottomWidth: 2.0,
+    opacity: 0.75,
   },
   input: {
     borderRadius: 12,
-    borderWidth: 0.5,
-    borderColor: '#d6d7da',
+    borderWidth: 0,
+    borderColor: 'transparent',
     paddingTop: 10,
     paddingBottom: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'transparent',
+  },
+  inputText: {
+    fontFamily: 'nemode',
+    fontSize: 28,
+    textAlign: 'center',
+    color: '#fefefe',
   },
   inputError: {
     color: 'red',
@@ -158,10 +154,13 @@ const styles = StyleSheet.create({
   },
   buttonTitle: {
     color: '#000000',
+    fontFamily: 'nemode', 
+    fontSize: 28,
   },
   loginButton: {
-    height: 56,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    height: 75,
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    opacity: 0.75,
   },
   devSettingsIcon: {
     position: 'absolute',

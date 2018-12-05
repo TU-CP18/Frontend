@@ -36,6 +36,7 @@ export default class User {
   async login(username, password) {
     try {
       const response = await api.post('/authenticate', { username, password });
+      
       if (response.status === 200) {
         const { data } = response;
 
@@ -51,19 +52,25 @@ export default class User {
         });
       }
     } catch (error) {
-      console.log('error in User.login', error, error.message);
+      if (error.status === 401) {
+        runInAction(() => {
+          this.loginError = 'User not found';
+        });
+      } else {
+        console.log('error in User.login', error, error.message);
 
-      let err = 'Unknown error';
+        let err = 'Unknown error';
 
-      if (!err.response) {
-        err = 'Network Error';
-      } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
-        err = 'User not found';
+        if (!err.response) {
+          err = 'Network Error';
+        } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
+          err = 'User not found';
+        }
+
+        runInAction(() => {
+          this.loginError = err;
+        });
       }
-
-      runInAction(() => {
-        this.loginError = err;
-      });
     }
   }
 
