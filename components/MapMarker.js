@@ -42,7 +42,7 @@ class MapMarker extends React.Component {
   }
 
   render() {
-    const { coordinate, style } = this.props;
+    const { coordinate, style, ...rest } = this.props;
     return (
       <MapView
         style={[styles.map, style]}
@@ -53,6 +53,7 @@ class MapMarker extends React.Component {
         }}
         loadingEnabled
         onMapReady={this.onMapReady}
+        {...rest}
       >
         {this.renderMapMarker()}
       </MapView>
