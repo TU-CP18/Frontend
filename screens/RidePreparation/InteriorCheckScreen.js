@@ -81,22 +81,6 @@ class InteriorCheckScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.content}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Map', {
-              disableArrivalButton: true,
-            })}
-          >
-            <MapMarker
-              coordinate={{
-                latitude: 52.523,
-                longitude: 13.413492,
-              }}
-              style={styles.mapPreview}
-              zoomEnabled={false}
-              scrollEnabled={false}
-            />
-          </TouchableOpacity>
-
           <Text style={styles.guideText}>
             Check the interior of the car and track new issues if required.
           </Text>
@@ -155,10 +139,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  mapPreview: {
-    width: '100%',
-    height: 80,
   },
   guideText: {
     padding: 20,
