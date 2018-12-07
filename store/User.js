@@ -53,10 +53,12 @@ export default class User {
             this.name = `${accountResponse.data.lastName || ''} ${accountResponse.data.firstName || ''}`;
           });
         });
+        return true;
       } else {
         runInAction(() => {
           this.loginError = 'User not found';
         });
+        return false;
       }
     } catch (error) {
       if (error.status === 401) {
@@ -79,6 +81,8 @@ export default class User {
         });
       }
     }
+
+    return false;
   }
 
   @action
