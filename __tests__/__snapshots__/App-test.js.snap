@@ -116,9 +116,10 @@ exports[`App snapshot renders the root without loading screen 1`] = `
                 Array [
                   Object {
                     "alignItems": "center",
-                    "backgroundColor": "transparent",
+                    "backgroundColor": "#343434",
                     "flex": 1,
                     "justifyContent": "center",
+                    "padding": 25,
                   },
                   Object {},
                 ],
@@ -129,13 +130,16 @@ exports[`App snapshot renders the root without loading screen 1`] = `
             }
           >
             <Image
+              blurRadius={5}
               source={1}
               style={
                 Object {
                   "bottom": 0,
-                  "height": "100%",
+                  "height": "125%",
                   "left": 0,
+                  "opacity": 0.5,
                   "position": "absolute",
+                  "top": 0,
                 }
               }
             />
@@ -153,7 +157,10 @@ exports[`App snapshot renders the root without loading screen 1`] = `
               <View
                 style={
                   Object {
+                    "borderBottomColor": "#fefefe",
+                    "borderBottomWidth": 2,
                     "marginBottom": 20,
+                    "opacity": 0.75,
                     "width": "100%",
                   }
                 }
@@ -163,11 +170,11 @@ exports[`App snapshot renders the root without loading screen 1`] = `
                   style={
                     Object {
                       "alignItems": "center",
-                      "backgroundColor": "rgba(255, 255, 255, 0.9)",
+                      "backgroundColor": "transparent",
                       "borderBottomWidth": 1,
-                      "borderColor": "#d6d7da",
+                      "borderColor": "transparent",
                       "borderRadius": 12,
-                      "borderWidth": 0.5,
+                      "borderWidth": 0,
                       "flexDirection": "row",
                       "paddingBottom": 10,
                       "paddingTop": 10,
@@ -179,87 +186,22 @@ exports[`App snapshot renders the root without loading screen 1`] = `
                     }
                   }
                 >
-                  <View
-                    style={
-                      Object {
-                        "alignItems": "center",
-                        "height": 40,
-                        "justifyContent": "center",
-                        "marginLeft": 15,
-                      }
-                    }
-                  >
-                    <View
-                      style={undefined}
-                    >
-                      <View
-                        onPress={undefined}
-                        style={
-                          Object {
-                            "alignItems": "center",
-                            "backgroundColor": "transparent",
-                            "justifyContent": "center",
-                          }
-                        }
-                        theme={
-                          Object {
-                            "colors": Object {
-                              "divider": "#bcbbc1",
-                              "error": "#ff190c",
-                              "grey0": "#393e42",
-                              "grey1": "#43484d",
-                              "grey2": "#5e6977",
-                              "grey3": "#86939e",
-                              "grey4": "#bdc6cf",
-                              "grey5": "#e1e8ee",
-                              "greyOutline": "#bbb",
-                              "primary": "#2089dc",
-                              "searchBg": "#303337",
-                              "secondary": "#8F0CE8",
-                            },
-                          }
-                        }
-                        underlayColor="white"
-                      >
-                        <Text
-                          accessible={true}
-                          allowFontScaling={false}
-                          ellipsizeMode="tail"
-                          style={
-                            Array [
-                              Object {
-                                "color": "black",
-                                "fontSize": 24,
-                              },
-                              Object {
-                                "backgroundColor": "transparent",
-                              },
-                              Object {
-                                "fontFamily": "FontAwesome",
-                                "fontStyle": "normal",
-                                "fontWeight": "normal",
-                              },
-                            ]
-                          }
-                          testID="iconIcon"
-                        >
-                          
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
                   <TextInput
                     allowFontScaling={true}
+                    autoCapitalize="none"
                     onChangeText={[Function]}
                     placeholder="Username"
+                    placeholderTextColor="rgba(255, 255, 255, 0.75)"
                     style={
                       Object {
                         "alignSelf": "center",
-                        "color": "black",
+                        "color": "#fefefe",
                         "flex": 1,
-                        "fontSize": 18,
+                        "fontFamily": "nemode",
+                        "fontSize": 28,
                         "height": 40,
                         "marginLeft": 10,
+                        "textAlign": "center",
                       }
                     }
                     underlineColorAndroid="transparent"
@@ -270,7 +212,10 @@ exports[`App snapshot renders the root without loading screen 1`] = `
               <View
                 style={
                   Object {
+                    "borderBottomColor": "#fefefe",
+                    "borderBottomWidth": 2,
                     "marginBottom": 20,
+                    "opacity": 0.75,
                     "width": "100%",
                   }
                 }
@@ -280,11 +225,11 @@ exports[`App snapshot renders the root without loading screen 1`] = `
                   style={
                     Object {
                       "alignItems": "center",
-                      "backgroundColor": "rgba(255, 255, 255, 0.9)",
+                      "backgroundColor": "transparent",
                       "borderBottomWidth": 1,
-                      "borderColor": "#d6d7da",
+                      "borderColor": "transparent",
                       "borderRadius": 12,
-                      "borderWidth": 0.5,
+                      "borderWidth": 0,
                       "flexDirection": "row",
                       "paddingBottom": 10,
                       "paddingTop": 10,
@@ -296,88 +241,22 @@ exports[`App snapshot renders the root without loading screen 1`] = `
                     }
                   }
                 >
-                  <View
-                    style={
-                      Object {
-                        "alignItems": "center",
-                        "height": 40,
-                        "justifyContent": "center",
-                        "marginLeft": 15,
-                      }
-                    }
-                  >
-                    <View
-                      style={undefined}
-                    >
-                      <View
-                        onPress={undefined}
-                        style={
-                          Object {
-                            "alignItems": "center",
-                            "backgroundColor": "transparent",
-                            "justifyContent": "center",
-                          }
-                        }
-                        theme={
-                          Object {
-                            "colors": Object {
-                              "divider": "#bcbbc1",
-                              "error": "#ff190c",
-                              "grey0": "#393e42",
-                              "grey1": "#43484d",
-                              "grey2": "#5e6977",
-                              "grey3": "#86939e",
-                              "grey4": "#bdc6cf",
-                              "grey5": "#e1e8ee",
-                              "greyOutline": "#bbb",
-                              "primary": "#2089dc",
-                              "searchBg": "#303337",
-                              "secondary": "#8F0CE8",
-                            },
-                          }
-                        }
-                        underlayColor="white"
-                      >
-                        <Text
-                          accessible={true}
-                          allowFontScaling={false}
-                          ellipsizeMode="tail"
-                          style={
-                            Array [
-                              Object {
-                                "color": "black",
-                                "fontSize": 24,
-                              },
-                              Object {
-                                "backgroundColor": "transparent",
-                              },
-                              Object {
-                                "fontFamily": "FontAwesome",
-                                "fontStyle": "normal",
-                                "fontWeight": "normal",
-                              },
-                            ]
-                          }
-                          testID="iconIcon"
-                        >
-                          
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
                   <TextInput
                     allowFontScaling={true}
                     onChangeText={[Function]}
                     placeholder="Password"
+                    placeholderTextColor="rgba(255, 255, 255, 0.75)"
                     secureTextEntry={true}
                     style={
                       Object {
                         "alignSelf": "center",
-                        "color": "black",
+                        "color": "#fefefe",
                         "flex": 1,
-                        "fontSize": 18,
+                        "fontFamily": "nemode",
+                        "fontSize": 28,
                         "height": 40,
                         "marginLeft": 10,
+                        "textAlign": "center",
                       }
                     }
                     underlineColorAndroid="transparent"
@@ -422,11 +301,12 @@ exports[`App snapshot renders the root without loading screen 1`] = `
                     style={
                       Object {
                         "alignItems": "center",
-                        "backgroundColor": "rgba(255, 255, 255, 0.9)",
+                        "backgroundColor": "rgba(255, 255, 255, 0.75)",
                         "borderRadius": 3,
                         "flexDirection": "row",
-                        "height": 56,
+                        "height": 75,
                         "justifyContent": "center",
+                        "opacity": 0.75,
                       }
                     }
                   >
@@ -438,7 +318,8 @@ exports[`App snapshot renders the root without loading screen 1`] = `
                         Object {
                           "backgroundColor": "transparent",
                           "color": "#000000",
-                          "fontSize": 18,
+                          "fontFamily": "nemode",
+                          "fontSize": 28,
                           "padding": 8,
                           "textAlign": "center",
                         }
