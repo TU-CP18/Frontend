@@ -4,6 +4,7 @@ import {
   View,
   KeyboardAvoidingView,
   Keyboard,
+  Alert,
 } from 'react-native';
 import {
   Input,
@@ -60,8 +61,12 @@ class LoginScreen extends React.Component {
     this.password = value;
   };
 
-  _onLoginPress = () => {
-    this.props.user.login(this.username, this.password);
+  _onLoginPress = async () => {
+    const noError = await this.props.user.login(this.username, this.password);
+    console.log('--> noError: ', noError);
+    if (!noError) {
+      Alert.alert('Invalid Credentials', 'User does not exist for the given credentials, please try again');
+    }
   };
 
   render() {

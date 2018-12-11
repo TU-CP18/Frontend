@@ -39,9 +39,7 @@ class HomeScreen extends React.Component {
     return (
       <View style={{ flex: 1 }}>
         <Text style={[styles.messageText, { marginTop: 50 }]}>
-          Hi
-          {user.name}
-          ,
+          Hi {user.name},
         </Text>
         <TouchableOpacity
           style={{ alignItems: 'center', justifyContent: 'center' }}
