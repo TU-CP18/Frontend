@@ -43,6 +43,16 @@ class HomeScreen extends React.Component {
 
     const { loading, shift } = this.props.nextShift;
 
+    if (!loading && !shift) {
+      return (
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.messageText, { marginTop: 50 }]}>Hi {user.name},</Text>
+          <Text style={[styles.messageText, { marginTop: 70 }]}>No shift scheduled</Text>
+          <Text style={[styles.messageText, { marginTop: 10 }]}>in the next 30 mins</Text>
+        </View>
+      );
+    }
+
     const mapButton = loading ? (
       <TouchableOpacity
         disabled={true}
