@@ -93,5 +93,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>nemode.ttf</string>
+		<string>SpaceMono-Regular.ttf</string>
+	</array>
 </dict>
 </plist>

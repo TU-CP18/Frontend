@@ -13,6 +13,9 @@ import { when } from 'mobx';
 import { BackgroundImage } from '../components/BackgroundImage';
 import MapMarker from '../components/MapMarker';
 
+import MLKitRN from '../components/MLKitRN';
+
+
 @inject('user')
 @observer
 class HomeScreen extends React.Component {
@@ -23,6 +26,8 @@ class HomeScreen extends React.Component {
       () => !props.user.authenticated,
       () => props.navigation.navigate('Auth'),
     );
+
+    MLKitRN.show('Awesome', MLKitRN.SHORT);
   }
 
   handleCallOperator = () => {

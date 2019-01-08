@@ -16,7 +16,7 @@
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
   <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-  
+
       <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
       <uses-permission android:name="android.permission.CAMERA" tools:node="remove" />
@@ -42,7 +42,7 @@
 <uses-permission android:name="com.sec.android.provider.badge.permission.READ" tools:node="remove" />
 <uses-permission android:name="com.sec.android.provider.badge.permission.WRITE" tools:node="remove" />
 <uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE" tools:node="remove" />
-      
+
 
   <!-- ADD TEST PERMISSIONS HERE -->
 
@@ -320,6 +320,11 @@
     <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="fb0"/>
 
     <meta-data android:name="standaloneStripeScheme" android:value="25b44abb-63b2-43b4-9cf8-7a2c69d0fdac" />
+
+    <meta-data
+      android:name="com.google.firebase.ml.vision.DEPENDENCIES"
+      android:value="face" />
+    <!-- To use multiple models: android:value="face,model2,model3" -->
   </application>
 
 </manifest>
