@@ -3,3 +3,22 @@ node_modules/**/*
 .idea/**/*
 
 tsconfig.json
+
+# Android Studio
+*.iml
+.gradle
+android/.idea/libraries
+android/.idea/workspace.xml
+android/.idea/gradle.xml
+android/.idea/misc.xml
+android/.idea/modules.xml
+android/.idea/vcs.xml
+
+# Android
+*.apk
+/android/**/build
+/android/**/local.properties
+/android/captures
+/android/expoview/libs/ReactAndroid-temp
+/android/versioned-react-native/ReactAndroid
+ReactAndroid-temp.aar
