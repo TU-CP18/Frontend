@@ -5,7 +5,7 @@ const IssueMarker = ({ x, y }) => (
   <View
     style={[
       styles.issueMarkerOuter,
-      { left: x - 20, top: y - 20 },
+      { left: x - 19, top: y - 19 },
     ]}
   >
     <View style={styles.issueMarkerInner} />
@@ -16,19 +16,19 @@ const styles = StyleSheet.create({
   issueMarkerOuter: {
     position: 'absolute',
     width: 34,
-    borderRadius: 20,
-    borderWidth: 6,
-    borderColor: 'black',
+    borderRadius: 24,
+    borderWidth: 8,
+    borderColor: 'red',
     height: 34,
   },
   issueMarkerInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'red',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'black',
     position: 'absolute',
-    top: 8,
-    left: 8,
+    top: 4,
+    left: 4,
   },
 });
 

@@ -21,12 +21,14 @@ import DevSettingsStore from './store/DevSettings';
 import NextShiftStore from './store/NextShift';
 import ShiftScheduleStore from './store/ShiftSchedule';
 import ChatStore from './store/Chat';
+import IssuesStore from './store/Issues';
 
 const userStore = global.userStore = new UserStore();
 const devSettingsStore = global.devSettings = new DevSettingsStore();
 const nextShiftStore = new NextShiftStore();
 const shiftScheduleStore = new ShiftScheduleStore();
 const chatStore = new ChatStore();
+const issuesStore = global.issues = new IssuesStore();
 
 chatStore.load();
 
@@ -36,7 +38,7 @@ class App extends React.Component {
 
   @observable initialRoute = 'Auth';
 
-  _loadResourcesAsync = async () => Promise.all([
+  loadResourcesAsync = async () => Promise.all([
     Asset.loadAsync([
       require('./assets/images/robot-dev.png'),
       require('./assets/images/robot-prod.png'),
@@ -53,25 +55,27 @@ class App extends React.Component {
     devSettingsStore.init(),
   ]);
 
-  _handleLoadingError = (error) => {
+  handleLoadingError = error => {
     // In this case, you might want to report the error to your error
     // reporting service, for example Sentry
     console.warn(error);
   };
 
-  _handleFinishLoading = () => {
+  handleFinishLoading = () => {
     this.isLoadingComplete = true;
     this.initialRoute = userStore.authenticated ? 'Main' : 'Auth';
   };
 
   render() {
-    if (!this.isLoadingComplete && !this.props.skipLoadingScreen) {
+    const { skipLoadingScreen } = this.props;
+
+    if (!this.isLoadingComplete && !skipLoadingScreen) {
       return (
         <View style={styles.splashContainer}>
           <AppLoading
-            startAsync={this._loadResourcesAsync}
-            onError={this._handleLoadingError}
-            onFinish={this._handleFinishLoading}
+            startAsync={this.loadResourcesAsync}
+            onError={this.handleLoadingError}
+            onFinish={this.handleFinishLoading}
           />
           <Image
             style={styles.splashImage}
@@ -87,6 +91,7 @@ class App extends React.Component {
         nextShift={nextShiftStore}
         shiftSchedule={shiftScheduleStore}
         chat={chatStore}
+        issues={issuesStore}
       >
         <View style={styles.container}>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}

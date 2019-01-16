@@ -6,6 +6,8 @@ import {
   Alert,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  StatusBar,
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
 import { FontAwesome } from '@expo/vector-icons';
@@ -16,22 +18,23 @@ import MapMarker from '../../components/MapMarker';
 import lib from '../../helpers/lib';
 import api from '../../helpers/api';
 
-@inject('nextShift')
+@inject('issues', 'nextShift')
 @observer
 class ExteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     return {
-      title: 'Exterior Check',
-      headerRight: (
-        <FontAwesome
-          onPress={() => navigation.navigate('Contact')}
-          name="phone"
-          size={28}
-          style={{
-            paddingRight: 12,
-          }}
-        />
-      ),
+      // title: 'Exterior Check',
+      // headerMode: 'none',
+      // headerRight: (
+      //   <FontAwesome
+      //     onPress={() => navigation.navigate('Contact')}
+      //     name="phone"
+      //     size={28}
+      //     style={{
+      //       paddingRight: 12,
+      //     }}
+      //   />
+      // ),
     };
   };
 
@@ -45,6 +48,11 @@ class ExteriorCheckScreen extends React.Component {
       codriverChecked: false,
       issueModalVisible: false,
     };
+  }
+
+  componentDidMount() {
+    // const { issues } = this.props;
+    // issues.fetch();
   }
 
   toggleCheckbox = id => {
@@ -115,7 +123,12 @@ class ExteriorCheckScreen extends React.Component {
   };
 
   render() {
-    const { navigation, nextShift } = this.props;
+    const {
+      navigation,
+      issues,
+      nextShift,
+    } = this.props;
+
     const {
       rearChecked,
       driverChecked,
@@ -123,6 +136,21 @@ class ExteriorCheckScreen extends React.Component {
       codriverChecked,
       issueModalVisible,
     } = this.state;
+
+    // if (issues.fetchLoading) {
+    //   return (
+    //     <View style={styles.loadingContainer}>
+    //       <StatusBar
+    //         // backgroundColor="#000000"
+    //         barStyle="light-content"
+    //       />
+    //       <ActivityIndicator
+    //         size="large"
+    //         color="#ffffff"
+    //       />
+    //     </View>
+    //   );
+    // }
 
     return (
       <View style={styles.container}>
@@ -216,6 +244,12 @@ class ExteriorCheckScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
