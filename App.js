@@ -18,9 +18,11 @@ import AppNavigator from './navigation/AppNavigator';
 
 import UserStore from './store/User';
 import DevSettingsStore from './store/DevSettings';
+import NextShiftStore from './store/NextShift';
 
 const userStore = global.userStore = new UserStore();
 const devSettingsStore = global.devSettings = new DevSettingsStore();
+const nextShiftStore = new NextShiftStore();
 
 @observer
 class App extends React.Component {
@@ -76,6 +78,7 @@ class App extends React.Component {
       <Provider
         user={userStore}
         devSettings={devSettingsStore}
+        nextShift={nextShiftStore}
       >
         <View style={styles.container}>
           {Platform.OS === 'ios' && <StatusBar barStyle="default" />}

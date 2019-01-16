@@ -9,11 +9,12 @@ import {
 import { Icon } from 'react-native-elements';
 import { observer, inject } from 'mobx-react';
 import { when } from 'mobx';
+import * as Animatable from 'react-native-animatable';
 
 import { BackgroundImage } from '../components/BackgroundImage';
 import MapMarker from '../components/MapMarker';
 
-@inject('user')
+@inject('user', 'nextShift')
 @observer
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -23,6 +24,10 @@ class HomeScreen extends React.Component {
       () => !props.user.authenticated,
       () => props.navigation.navigate('Auth'),
     );
+  }
+
+  async componentDidMount() {
+    await this.props.nextShift.load();
   }
 
   handleCallOperator = () => {
@@ -36,21 +41,51 @@ class HomeScreen extends React.Component {
   renderIdleState() {
     const { user, navigation } = this.props;
 
+    const { loading, shift } = this.props.nextShift;
+
+    if (!loading && !shift) {
+      return (
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.messageText, { marginTop: 50 }]}>Hi {user.name},</Text>
+          <Text style={[styles.messageText, { marginTop: 70 }]}>No shift scheduled</Text>
+          <Text style={[styles.messageText, { marginTop: 10 }]}>in the next 30 mins</Text>
+        </View>
+      );
+    }
+
+    const mapButton = loading ? (
+      <TouchableOpacity
+        disabled={true}
+        style={{ alignItems: 'center', justifyContent: 'center' }}
+        onPress={() => null}
+      >
+        <View style={styles.mapContainer} pointerEvents="none">
+          <Animatable.View
+              animation="rotate"
+              easing="linear"
+              iterationCount="infinite"
+            >
+              <Icon name="spinner-3" type="evilicon" />
+            </Animatable.View>
+        </View>
+      </TouchableOpacity>
+    ) : (
+      <TouchableOpacity
+        style={{ alignItems: 'center', justifyContent: 'center' }}
+        onPress={() => navigation.navigate('Map')}
+      >
+        <View style={styles.mapContainer} pointerEvents="none">
+          <MapMarker coordinate={{ latitude: shift.latStart, longitude: shift.longStart }} />
+        </View>
+      </TouchableOpacity>
+    );
+
     return (
       <View style={{ flex: 1 }}>
-        <Text style={[styles.messageText, { marginTop: 50 }]}>
-          Hi {user.name},
-        </Text>
-        <TouchableOpacity
-          style={{ alignItems: 'center', justifyContent: 'center' }}
-          onPress={() => navigation.navigate('Map')}
-        >
-          <View style={styles.mapContainer} pointerEvents="none">
-            <MapMarker coordinate={{ latitude: 52.523, longitude: 13.413492 }} />
-          </View>
-        </TouchableOpacity>
-        <Text style={[styles.messageText]}>Head to Alexanderplatz</Text>
-        <Text style={styles.messageText}>in 10 minutes</Text>
+        <Text style={[styles.messageText, { marginTop: 50 }]}>Hi {user.name},</Text>
+        {mapButton}
+        {!loading && <Text style={[styles.messageText]}>Head to [{ shift.latStart }, { shift.longStart }]</Text>}
+        {!loading && <Text style={styles.messageText}>by { new Date(shift.start).toString() }</Text>}
       </View>
     );
   }
