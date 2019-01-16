@@ -14,6 +14,7 @@ const RidePreparationNavigator = createStackNavigator(
   },
   {
     initialRouteName: 'ExteriorCheck',
+    headerMode: 'none',
   },
 );
 
