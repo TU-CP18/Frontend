@@ -26,6 +26,7 @@ class HomeScreen extends React.Component {
   }
 
   handleCallOperator = () => {
+    this.props.navigation.navigate('Contact');
     console.log('--> Will make a call');
   }
 
@@ -82,10 +83,10 @@ class HomeScreen extends React.Component {
                 color="#343434"
                 containerStyle={styles.logoutButton}
                 iconStyle={styles.logoutButtonIconStyle}
-                onPress={() => navigation.navigate('DevSettings')}
               />
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}
             onPress={this.handleCallOperator}
@@ -96,7 +97,6 @@ class HomeScreen extends React.Component {
                 color="#343434"
                 containerStyle={styles.callButton}
                 iconStyle={styles.callButtonIconStyle}
-                onPress={() => navigation.navigate('DevSettings')}
               />
             </View>
           </TouchableOpacity>
