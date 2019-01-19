@@ -19,20 +19,20 @@ class ContactScreen extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({
-      messages: [
-        {
-          _id: 1,
-          text: 'Hello developer',
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
-          },
-        },
-      ],
-    })
+    // this.setState({
+    //   messages: [
+    //     {
+    //       _id: 1,
+    //       text: 'Hello developer',
+    //       createdAt: new Date(),
+    //       user: {
+    //         _id: 2,
+    //         name: 'React Native',
+    //         avatar: 'https://placeimg.com/140/140/any',
+    //       },
+    //     },
+    //   ],
+    // })
 
     const socket = new SockJS('http://localhost:8080/websocket/chat/');
     this.stompClient = Stomp.over(socket);
