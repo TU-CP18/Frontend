@@ -19,10 +19,12 @@ import AppNavigator from './navigation/AppNavigator';
 import UserStore from './store/User';
 import DevSettingsStore from './store/DevSettings';
 import NextShiftStore from './store/NextShift';
+import ShiftScheduleStore from './store/ShiftSchedule';
 
 const userStore = global.userStore = new UserStore();
 const devSettingsStore = global.devSettings = new DevSettingsStore();
 const nextShiftStore = new NextShiftStore();
+const shiftScheduleStore = new ShiftScheduleStore();
 
 @observer
 class App extends React.Component {
@@ -79,9 +81,10 @@ class App extends React.Component {
         user={userStore}
         devSettings={devSettingsStore}
         nextShift={nextShiftStore}
+        shiftSchedule={shiftScheduleStore}
       >
         <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+          {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
           <AppNavigator
             initialRoute={this.initialRoute}
           />
@@ -94,7 +97,7 @@ class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000000',
   },
   splashContainer: {
     ...StyleSheet.absoluteFillObject,

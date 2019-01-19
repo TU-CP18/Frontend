@@ -3,7 +3,13 @@ import MapRoute from '../components/MapRoute';
 
 class MapScreen extends React.Component {
   static navigationOptions = {
-    title: 'Map',
+    title: 'Interchange Location',
+    headerStyle: {
+      backgroundColor: '#000000',
+      elevation: 0,
+      borderBottomWidth: 0,
+    },
+    headerTintColor: '#ffffff',
   };
 
   render() {
@@ -11,7 +17,10 @@ class MapScreen extends React.Component {
 
     return (
       <MapRoute
-        onArrivalConfirmed={() => navigation.navigate('RidePreparation')}
+        showConfirmationButton={false}
+        latitude={navigation.getParam('latitude')}
+        longitude={navigation.getParam('longitude')}
+        initialFocus="interchangePoint"
       />
     );
   }
