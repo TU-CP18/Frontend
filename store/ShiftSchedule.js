@@ -16,7 +16,10 @@ export default class ShiftSchedule {
       const response = await api.get('/shifts/user/all');
 
       // convert shift data
-      this.shifts = response.data.map(shift => {
+      this.shifts = response.data.filter(shift => {
+        // only keep shifts which are in the future or have not been ended
+        return moment(shift.end).isAfter(moment());
+      }).map(shift => {
         const start = moment(shift.start);
         const end = moment(shift.end);
         const diff = moment.utc(end.diff(start)).format('HH:mm');
