@@ -10,7 +10,6 @@ import {
   Platform,
 } from 'react-native';
 import {
-  MapView,
   Location,
   Permissions,
   IntentLauncherAndroid,
@@ -19,11 +18,16 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import geolib from 'geolib';
 import Polyline from '@mapbox/polyline';
+import Mapbox from '@mapbox/react-native-mapbox-gl';
+import MapboxClient from 'mapbox';
+import { lineString } from '@turf/helpers';
 import api from '../helpers/api';
 import lib from '../helpers/lib';
 import appConfig from '../app.json';
 
 const { width, height } = Dimensions.get('window');
+
+Mapbox.setAccessToken('pk.eyJ1IjoiY3BkYWltbGVyIiwiYSI6ImNqcG8xa3FxcDA5Njk0MnQyZWZ4Y2pmNXcifQ.7DfnpBxFa3kFr1vSew8izA');
 
 class MapRoute extends React.Component {
   constructor(props) {
@@ -31,6 +35,7 @@ class MapRoute extends React.Component {
 
     this.state = {
       coordinates: [],
+      route: null,
       focusedLocation: {
         latitude: 0,
         longitude: 0,
@@ -113,45 +118,24 @@ class MapRoute extends React.Component {
    * @returns {Promise<*>}
    */
   getDirections = async (startLoc, destinationLoc) => {
-    const startCoords = Object.values(startLoc);
-    const destinationCoords = Object.values(destinationLoc);
-    if (startCoords.length !== 2 || destinationCoords.length !== 2) {
-      console.error('Given coordinates have wrong format');
-      return {};
-    }
-    try {
-      const response = await axios({
-        method: 'GET',
-        url: 'https://maps.googleapis.com/maps/api/directions/json',
-        params: {
-          origin: startCoords.join(','),
-          destination: destinationCoords.join(','),
-          key: this.apikey,
-        },
-        responseType: 'json',
-        headers: {},
-      });
-      if (response.status !== 200) {
-        // this will execute the catch block
-        throw new Error('Fetching the coordinates of the interception point failed');
-      }
-      const { data } = response;
-      if (data.status !== 'OK') {
-        throw new Error('Determining a route between the two points failed');
-      }
-      const points = Polyline.decode(data.routes[0].overview_polyline.points);
-      const coordinates = points.map(point => {
-        return {
-          latitude: point[0],
-          longitude: point[1],
-        };
-      });
-      this.setState({ coordinates: coordinates });
-      return coordinates;
-    } catch (error) {
-      console.error(error);
-      return error;
-    }
+    const client = new MapboxClient('pk.eyJ1IjoiY3BkYWltbGVyIiwiYSI6ImNqcG8xa3FxcDA5Njk0MnQyZWZ4Y2pmNXcifQ.7DfnpBxFa3kFr1vSew8izA');
+    const res = await client.getDirections(
+      [
+        startLoc,
+        destinationLoc,
+      ],
+      { profile: 'driving', geometry: 'polyline' },
+    );
+    const coordinates = res.entity.routes[0].geometry.coordinates.map(point => {
+      return {
+        latitude: point[1],
+        longitude: point[0],
+      };
+    });
+    this.setState({
+      route: lineString(res.entity.routes[0].geometry.coordinates),
+      coordinates: coordinates,
+    });
   };
 
   /**
@@ -159,6 +143,7 @@ class MapRoute extends React.Component {
    * @returns {Promise<*>}
    */
   getInterceptionCoords = async () => {
+    /*
     try {
       const response = await api.get('/shifts/next');
       if (response.status !== 200) {
@@ -174,16 +159,18 @@ class MapRoute extends React.Component {
       console.error(error);
       return error;
     }
+    */
+    return {
+      latitude: 52.5219,
+      longitude: 13.413492,
+    };
   };
 
   checkUserLocation = async location => {
     const { coordinates } = this.state;
     const { coords } = location;
-    if (Platform.OS === 'android') {
-      // follow the user location
-      // mapview component handles this for ios devices
-      this.animateToCoordinates(coords);
-    }
+    // follow the user location
+    this.animateToCoordinates(coords);
     const destinationCoords = coordinates[coordinates.length - 1];
     const distance = geolib.getDistance(coords, destinationCoords);
     // show button if user is close to destination so he can confirm arrival
@@ -199,11 +186,7 @@ class MapRoute extends React.Component {
     const { focusedLocation } = this.state;
     const { latitude, longitude } = coords;
     if (focusedLocation && latitude && longitude) {
-      this.map.animateToRegion({
-        ...focusedLocation,
-        latitude: latitude,
-        longitude: longitude,
-      });
+      this.map.flyTo([longitude, latitude]);
     }
   };
 
@@ -238,8 +221,8 @@ class MapRoute extends React.Component {
   };
 
   render() {
-    const { coordinates, focusedLocation, isMapReady } = this.state;
-
+    const { route, coordinates, focusedLocation, isMapReady } = this.state;
+    /*
     return (
       <View style={styles.container}>
         <MapView
@@ -262,6 +245,41 @@ class MapRoute extends React.Component {
             />
           )}
         </MapView>
+        {this.renderConfirmalButton()}
+      </View>
+    );
+    */
+    return (
+      <View style={styles.container}>
+        <Mapbox.MapView
+          styleURL={Mapbox.StyleURL.Street}
+          zoomLevel={20}
+          maxZoomLevel={20}
+          centerCoordinate={[13.4132147, 52.5219184]}
+          showUserLocation
+          userTrackingMode={Mapbox.UserTrackingModes.FollowWithHeading}
+          logoEnabled={false}
+          ref={map => { this.map = map; }}
+          onDidFinishRenderingMap={this.onMapReady}
+          style={styles.map}
+        >
+          {route !== null && (
+            <Mapbox.ShapeSource id="routeSource" shape={route}>
+              <Mapbox.LineLayer
+                id="routeFill"
+                style={layerStyles.route}
+              />
+            </Mapbox.ShapeSource>
+          )}
+        </Mapbox.MapView>
+        {coordinates.length > 0 && (
+          <Mapbox.PointAnnotation
+            id="annotation"
+            title="Hallo"
+            coordinate={[13.4132147, 52.5219184]}
+          >
+          </Mapbox.PointAnnotation>
+        )}
         {this.renderConfirmalButton()}
       </View>
     );
@@ -302,6 +320,14 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#ffffff',
     fontSize: 22,
+  },
+});
+
+const layerStyles = Mapbox.StyleSheet.create({
+  route: {
+    lineColor: 'blue',
+    lineWidth: 4,
+    lineOpacity: 1,
   },
 });
 

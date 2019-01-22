@@ -16,6 +16,11 @@ import MapMarker from '../components/MapMarker';
 @inject('user')
 @observer
 class HomeScreen extends React.Component {
+
+  static navigationOptions = {
+    title: 'Home',
+  };
+
   constructor(props) {
     super(props);
 
@@ -39,9 +44,7 @@ class HomeScreen extends React.Component {
     return (
       <View style={{ flex: 1 }}>
         <Text style={[styles.messageText, { marginTop: 50 }]}>
-          Hi
-          {user.name}
-          ,
+          Hi Safety Driver,
         </Text>
         <TouchableOpacity
           style={{ alignItems: 'center', justifyContent: 'center' }}
@@ -52,7 +55,7 @@ class HomeScreen extends React.Component {
           </View>
         </TouchableOpacity>
         <Text style={[styles.messageText]}>Head to Alexanderplatz</Text>
-        <Text style={styles.messageText}>in 10 minutes</Text>
+        <Text style={styles.messageText}>in 30 minutes</Text>
       </View>
     );
   }

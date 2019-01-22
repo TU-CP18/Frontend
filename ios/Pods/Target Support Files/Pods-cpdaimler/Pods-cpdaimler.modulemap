@@ -1,0 +1,6 @@
+module Pods_cpdaimler {
+  umbrella header "Pods-cpdaimler-umbrella.h"
+
+  export *
+  module * { export * }
+}

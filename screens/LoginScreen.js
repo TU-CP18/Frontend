@@ -90,7 +90,7 @@ class LoginScreen extends React.Component {
             placeholderTextColor="rgba(255, 255, 255, 0.75)"
           />
           <Button
-            title="Einloggen"
+            title="Login"
             onPress={this._onLoginPress}
             titleStyle={styles.buttonTitle}
             buttonStyle={styles.loginButton}
