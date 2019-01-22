@@ -33,11 +33,6 @@ const request = (method, url, bodyParams, queryParams) => {
     options.headers.Authorization = `Bearer ${global.userStore.authToken}`;
   }
 
-  // options.transformResponse = data => {
-  //   console.log('Request response:', data);
-  //   return data;
-  // };
-
   return axios(options);
 };
 
