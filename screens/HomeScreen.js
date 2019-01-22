@@ -17,6 +17,10 @@ import MapMarker from '../components/MapMarker';
 @inject('user', 'nextShift')
 @observer
 class HomeScreen extends React.Component {
+  static navigationOptions = {
+    header: null,
+  };
+
   constructor(props) {
     super(props);
 
@@ -38,6 +42,10 @@ class HomeScreen extends React.Component {
     this.props.user.logout();
   }
 
+  handleShiftSchedule = () => {
+    this.props.navigation.navigate('Schedule');
+  }
+
   renderIdleState() {
     const { user, navigation } = this.props;
 
@@ -55,24 +63,24 @@ class HomeScreen extends React.Component {
 
     const mapButton = loading ? (
       <TouchableOpacity
-        disabled={true}
+        disabled
         style={{ alignItems: 'center', justifyContent: 'center' }}
         onPress={() => null}
       >
         <View style={styles.mapContainer} pointerEvents="none">
           <Animatable.View
-              animation="rotate"
-              easing="linear"
-              iterationCount="infinite"
-            >
-              <Icon name="spinner-3" type="evilicon" />
-            </Animatable.View>
+            animation="rotate"
+            easing="linear"
+            iterationCount="infinite"
+          >
+            <Icon name="spinner-3" type="evilicon" />
+          </Animatable.View>
         </View>
       </TouchableOpacity>
     ) : (
       <TouchableOpacity
         style={{ alignItems: 'center', justifyContent: 'center' }}
-        onPress={() => navigation.navigate('Map')}
+        onPress={() => navigation.navigate('NextShiftMap')}
       >
         <View style={styles.mapContainer} pointerEvents="none">
           <MapMarker coordinate={{ latitude: shift.latStart, longitude: shift.longStart }} />
@@ -91,8 +99,6 @@ class HomeScreen extends React.Component {
   }
 
   render() {
-    const { navigation } = this.props;
-
     const inner = (() => {
       // TODO: Add assignment store from which we derive the current assignment
       return this.renderIdleState();
@@ -108,21 +114,35 @@ class HomeScreen extends React.Component {
         {inner}
         <View style={styles.bottomButtons}>
           <TouchableOpacity
-            style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}
-            onPress={this.handleLogout}
+            style={{ alignItems: 'center', justifyContent: 'center' }}
+            onPress={this.handleShiftSchedule}
           >
             <View pointerEvents="none">
               <Icon
-                name="input"
+                name="calendar"
                 color="#343434"
-                containerStyle={styles.logoutButton}
-                iconStyle={styles.logoutButtonIconStyle}
-                onPress={() => navigation.navigate('DevSettings')}
+                type="font-awesome"
+                containerStyle={styles.scheduleButton}
+                iconStyle={styles.scheduleButtonIconStyle}
               />
             </View>
           </TouchableOpacity>
           <TouchableOpacity
-            style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+            onPress={this.handleLogout}
+          >
+            <View pointerEvents="none">
+              <Icon
+                name="gears"
+                type="font-awesome"
+                color="#343434"
+                containerStyle={styles.settingsButton}
+                iconStyle={styles.settingsButtonIconStyle}
+              />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ alignItems: 'center', justifyContent: 'center' }}
             onPress={this.handleCallOperator}
           >
             <View pointerEvents="none">
@@ -131,7 +151,6 @@ class HomeScreen extends React.Component {
                 color="#343434"
                 containerStyle={styles.callButton}
                 iconStyle={styles.callButtonIconStyle}
-                onPress={() => navigation.navigate('DevSettings')}
               />
             </View>
           </TouchableOpacity>
@@ -165,9 +184,9 @@ const styles = StyleSheet.create({
   },
   bottomButtons: {
     position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
+    bottom: 60,
+    left: 20,
+    right: 20,
     height: 75,
     justifyContent: 'center',
     alignItems: 'center',
@@ -177,7 +196,6 @@ const styles = StyleSheet.create({
     width: 75,
     height: 75,
     borderRadius: 75,
-    marginLeft: 25,
     backgroundColor: '#fefefe',
     opacity: 0.75,
   },
@@ -185,15 +203,25 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 42,
   },
-  logoutButton: {
+  scheduleButton: {
     width: 75,
     height: 75,
     borderRadius: 75,
-    marginRight: 25,
     backgroundColor: '#fefefe',
     opacity: 0.75,
   },
-  logoutButtonIconStyle: {
+  scheduleButtonIconStyle: {
+    marginTop: 16,
+    fontSize: 42,
+  },
+  settingsButton: {
+    width: 75,
+    height: 75,
+    borderRadius: 50,
+    backgroundColor: '#fefefe',
+    opacity: 0.75,
+  },
+  settingsButtonIconStyle: {
     marginTop: 16,
     fontSize: 42,
   },

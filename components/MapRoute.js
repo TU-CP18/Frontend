@@ -19,13 +19,13 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import geolib from 'geolib';
 import Polyline from '@mapbox/polyline';
-import api from '../helpers/api';
 import lib from '../helpers/lib';
 import appConfig from '../app.json';
 
 const { width, height } = Dimensions.get('window');
 
 class MapRoute extends React.Component {
+
   constructor(props) {
     super(props);
 
@@ -45,6 +45,13 @@ class MapRoute extends React.Component {
   }
 
   async componentDidMount() {
+    const {
+      showDirections,
+      latitude,
+      longitude,
+      initialFocus,
+    } = this.props;
+
     // ask the user for location permission
     const { locationServicesEnabled } = await Location.getProviderStatusAsync();
     if (!locationServicesEnabled) {
@@ -57,14 +64,25 @@ class MapRoute extends React.Component {
       Alert.alert('Permission', 'You need to enable location services');
       return;
     }
+
     // get the current location of the user
-    // retrieve the destination location where the users shift will start
-    const [currentLocation, destinationLocation] = await Promise.all([
-      this.getLocation(),
-      this.getInterceptionCoords(),
-    ]);
+    const currentLocation = await this.getLocation();
+    const destinationLocation = {
+      latitude,
+      longitude,
+    };
+
+    if (initialFocus === 'gps') {
+      this.focusOnCoords(currentLocation);
+    } else {
+      this.focusOnCoords(destinationLocation);
+    }
+
     // retrieve a direction between these two points
-    await this.getDirections(currentLocation, destinationLocation);
+    if (showDirections) {
+      await this.getDirections(currentLocation, destinationLocation);
+    }
+
     // monitor the current position of the user
     this.watchid = await Location.watchPositionAsync({
       enableHighAccuracy: true,
@@ -88,6 +106,14 @@ class MapRoute extends React.Component {
     const { coords } = await Location.getCurrentPositionAsync({
       enableHighAccuracy: true,
     });
+
+    return {
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    };
+  };
+
+  focusOnCoords = coords => {
     // initalize map at current position
     this.animateToCoordinates(coords);
     this.setState(prevState => {
@@ -99,11 +125,7 @@ class MapRoute extends React.Component {
         },
       };
     });
-    return {
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-    };
-  };
+  }
 
   /**
    * retrieves the coordinates of a route
@@ -154,28 +176,6 @@ class MapRoute extends React.Component {
     }
   };
 
-  /**
-   * get the coordinates of the interception point
-   * @returns {Promise<*>}
-   */
-  getInterceptionCoords = async () => {
-    try {
-      const response = await api.get('/shifts/next');
-      if (response.status !== 200) {
-        // this will execute the catch block
-        throw new Error('Fetching the coordinates of the interception point failed');
-      }
-      const { latStart, longStart } = response.data;
-      return {
-        latitude: latStart,
-        longitude: longStart,
-      };
-    } catch (error) {
-      console.error(error);
-      return error;
-    }
-  };
-
   checkUserLocation = async location => {
     const { coordinates } = this.state;
     const { coords } = location;
@@ -208,11 +208,13 @@ class MapRoute extends React.Component {
   };
 
   renderConfirmalButton() {
-    const { onArrivalConfirmed } = this.props;
+    const { onArrivalConfirmed, showConfirmationButton } = this.props;
     const { destinationReached } = this.state;
-    if (!destinationReached) {
+
+    if (!showConfirmationButton || !destinationReached) {
       return null;
     }
+
     return (
       <View style={styles.confirmContainer}>
         <TouchableOpacity
@@ -307,10 +309,18 @@ const styles = StyleSheet.create({
 
 MapRoute.propTypes = {
   onArrivalConfirmed: PropTypes.func,
+  showDirections: PropTypes.bool,
+  showConfirmationButton: PropTypes.bool,
+  latitude: PropTypes.number.isRequired,
+  longitude: PropTypes.number.isRequired,
+  initialFocus: PropTypes.string,
 };
 
 MapRoute.defaultProps = {
   onArrivalConfirmed: () => undefined,
+  showDirections: true,
+  showConfirmationButton: true,
+  initialFocus: 'gps',
 };
 
 export default MapRoute;
