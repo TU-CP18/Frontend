@@ -14,34 +14,33 @@ import {
   Location,
   Permissions,
   IntentLauncherAndroid,
+  Constants,
 } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
 import geolib from 'geolib';
-import Polyline from '@mapbox/polyline';
+import MapboxClient from 'mapbox';
 import lib from '../helpers/lib';
-import appConfig from '../app.json';
 
 const { width, height } = Dimensions.get('window');
 
 class MapRoute extends React.Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
       coordinates: [],
+      steps: [],
       focusedLocation: {
         latitude: 0,
         longitude: 0,
-        latitudeDelta: 0.0122,
-        longitudeDelta: width / height * 0.0122,
+        latitudeDelta: 0.01,
+        longitudeDelta: width / height * 0.01,
       },
       destinationReached: false,
       isMapReady: false,
     };
 
-    this.apikey = appConfig.expo.android.config.googleMaps.apiKey;
+    this.apikey = Constants.manifest.extra.mapbox.apiKey;
   }
 
   async componentDidMount() {
@@ -125,7 +124,7 @@ class MapRoute extends React.Component {
         },
       };
     });
-  }
+  };
 
   /**
    * retrieves the coordinates of a route
@@ -135,60 +134,65 @@ class MapRoute extends React.Component {
    * @returns {Promise<*>}
    */
   getDirections = async (startLoc, destinationLoc) => {
-    const startCoords = Object.values(startLoc);
-    const destinationCoords = Object.values(destinationLoc);
-    if (startCoords.length !== 2 || destinationCoords.length !== 2) {
-      console.error('Given coordinates have wrong format');
-      return {};
-    }
-    try {
-      const response = await axios({
-        method: 'GET',
-        url: 'https://maps.googleapis.com/maps/api/directions/json',
-        params: {
-          origin: startCoords.join(','),
-          destination: destinationCoords.join(','),
-          key: this.apikey,
-        },
-        responseType: 'json',
-        headers: {},
-      });
-      if (response.status !== 200) {
-        // this will execute the catch block
-        throw new Error('Fetching the coordinates of the interception point failed');
-      }
-      const { data } = response;
-      if (data.status !== 'OK') {
-        throw new Error('Determining a route between the two points failed');
-      }
-      const points = Polyline.decode(data.routes[0].overview_polyline.points);
-      const coordinates = points.map(point => {
-        return {
-          latitude: point[0],
-          longitude: point[1],
-        };
-      });
-      this.setState({ coordinates: coordinates });
-      return coordinates;
-    } catch (error) {
-      console.error(error);
-      return error;
-    }
+    const client = new MapboxClient(this.apikey);
+    const res = await client.getDirections(
+      [
+        startLoc,
+        destinationLoc,
+      ],
+      { profile: 'driving', geometry: 'polyline' },
+    );
+    const coordinates = res.entity.routes[0].geometry.coordinates.map(point => {
+      return {
+        latitude: point[1],
+        longitude: point[0],
+      };
+    });
+    const steps = res.entity.routes[0].legs[0].steps.map(step => {
+      return {
+        latitude: step.maneuver.location[1],
+        longitude: step.maneuver.location[0],
+        bearing: step.maneuver.bearing_after,
+        done: false,
+      };
+    });
+    this.setState({
+      coordinates: coordinates,
+      steps: steps,
+    });
   };
 
   checkUserLocation = async location => {
     const { coordinates } = this.state;
     const { coords } = location;
-    if (Platform.OS === 'android') {
-      // follow the user location
-      // mapview component handles this for ios devices
-      this.animateToCoordinates(coords);
-    }
+    // follow the user location
+    this.animateToCoordinates(coords);
+    // navigate route
+    this.animateNavigation(coords);
     const destinationCoords = coordinates[coordinates.length - 1];
     const distance = geolib.getDistance(coords, destinationCoords);
     // show button if user is close to destination so he can confirm arrival
     // remove arrival button in case the user moves away from the destination
     this.setState({ destinationReached: (distance <= 20) });
+  };
+
+  animateNavigation = async coords => {
+    const { steps } = this.state;
+    let manoeuvred = false;
+    steps.forEach((step, index, arr) => {
+      if (step.done || manoeuvred) {
+        // maneuver has already been done
+        return;
+      }
+      const distance = geolib.getDistance(coords, step);
+      if (distance <= 5) {
+        // user is 5 meters close to intersection point
+        this.map.animateToBearing(step.bearing);
+        arr[index].done = true;
+        manoeuvred = true;
+        this.setState({ steps: arr });
+      }
+    });
   };
 
   /**
@@ -235,40 +239,62 @@ class MapRoute extends React.Component {
     );
   }
 
+  renderRoute() {
+    const { isMapReady, coordinates } = this.state;
+    if (!isMapReady || coordinates.length === 0) {
+      return null;
+    }
+    return (
+      <MapView.Polyline
+        coordinates={coordinates}
+        strokeWidth={5}
+        strokeColor="blue"
+      />
+    );
+  }
+
+  renderMarker() {
+    const { isMapReady, coordinates } = this.state;
+    if (!isMapReady || coordinates.length === 0) {
+      return null;
+    }
+    return (
+      <MapView.Marker
+        coordinate={coordinates[coordinates.length - 1]}
+      />
+    );
+  }
+
   onMapReady = () => {
     this.setState({ isMapReady: true });
   };
 
   render() {
-    const { coordinates, focusedLocation, isMapReady } = this.state;
+    const { focusedLocation } = this.state;
 
     return (
       <View style={styles.container}>
         <MapView
+          provider="google"
           style={styles.map}
           initialRegion={focusedLocation}
           showsUserLocation
           followsUserLocation={Platform.OS === 'ios'}
           loadingEnabled
+          customMapStyle={mapStyle}
           ref={map => { this.map = map; }}
           onMapReady={this.onMapReady}
         >
-          <MapView.Polyline
-            coordinates={coordinates}
-            strokeWidth={3}
-            strokeColor="blue"
-          />
-          {isMapReady && coordinates.length > 0 && (
-            <MapView.Marker
-              coordinate={coordinates[coordinates.length - 1]}
-            />
-          )}
+          {this.renderRoute()}
+          {this.renderMarker()}
         </MapView>
         {this.renderConfirmalButton()}
       </View>
     );
   }
 }
+
+const mapStyle = require('../assets/styles/mapStyle');
 
 const styles = StyleSheet.create({
   container: {

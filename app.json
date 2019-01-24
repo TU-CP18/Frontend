@@ -23,6 +23,11 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "extra": {
+      "mapbox": {
+        "apiKey": "pk.eyJ1IjoiY3BkYWltbGVyIiwiYSI6ImNqcG8xa3FxcDA5Njk0MnQyZWZ4Y2pmNXcifQ.7DfnpBxFa3kFr1vSew8izA"
+      }
+    },
     "ios": {
       "bundleIdentifier": "com.cp.daimler",
       "supportsTablet": true
