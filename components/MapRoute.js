@@ -158,7 +158,6 @@ class MapRoute extends React.Component {
         done: false,
       };
     });
-    console.log(steps);
     this.setState({
       coordinates: coordinates,
       steps: steps,
