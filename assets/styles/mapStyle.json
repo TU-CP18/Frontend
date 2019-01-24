@@ -68,10 +68,10 @@
     ]
   },
   {
-    "featureType": "poi.government",
+    "featureType": "poi.park",
     "stylers": [
       {
-        "visibility": "simplified"
+        "visibility": "off"
       }
     ]
   },
@@ -199,9 +199,6 @@
   {
     "featureType": "road.highway.controlled_access",
     "stylers": [
-      {
-        "color": "#6061ff"
-      },
       {
         "visibility": "on"
       }
