@@ -32,37 +32,37 @@ const Button = ({
 
   return (
     <TouchableOpacity
-      style={[styles.touchableWrapper, wrapperStyle]}
+      style={[s.touchableWrapper, wrapperStyle]}
       onPress={onPress}
       disabled={disabled}
     >
       <View
         style={[
-          styles.container,
-          disabled ? styles.disabledContainer : undefined,
-          transparent ? styles.transparentContainer : undefined,
+          s.container,
+          disabled ? s.disabledContainer : undefined,
+          transparent ? s.transparentContainer : undefined,
           containerStyle,
         ]}
       >
         {iconLeft && (
           <LeftIconComponent
             name={leftIconName}
-            style={[styles.leftIcon, iconStyle]}
+            style={[s.leftIcon, iconStyle]}
             size={24}
           />
         )}
         {(title && (
           (subtitle && (
             <View>
-              <Text style={textStyle}>
+              <Text style={[s.title, textStyle]}>
                 {title}
               </Text>
-              <Text style={[styles.subtitle, subtitleStyle]}>
+              <Text style={[s.subtitle, subtitleStyle]}>
                 {subtitle}
               </Text>
             </View>
           )) || (
-            <Text style={textStyle}>
+            <Text style={[s.title, textStyle]}>
               {title}
             </Text>
           )
@@ -72,7 +72,7 @@ const Button = ({
   );
 };
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   touchableWrapper: {
     borderRadius: 3,
   },
@@ -80,9 +80,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 3,
     borderWidth: 1,
-    borderColor: '#000000',
-    backgroundColor: '#ffffff',
-    padding: 8,
+    borderColor: '#ffffff',
+    backgroundColor: '#000000',
+    padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -94,25 +94,25 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   leftIcon: {
-
+    color: '#ffffff',
   },
   title: {
-    color: '#000000',
+    color: '#ffffff',
     alignSelf: 'center',
+    fontSize: 18,
   },
   subtitle: {
-    color: '#000000',
+    color: '#ffffff',
     fontWeight: 'bold',
     fontSize: 12,
     marginTop: -4,
-    marginTop: 0,
     paddingTop: 0,
   },
 });
 
 Button.propTypes = {
   title: PropTypes.string.isRequired,
-  onPress: PropTypes.func.isRequired,
+  onPress: PropTypes.func,
   disabled: PropTypes.bool,
   transparent: PropTypes.bool,
   iconLeft: PropTypes.string,
@@ -122,6 +122,7 @@ Button.defaultProps = {
   disabled: false,
   transparent: false,
   iconLeft: undefined,
+  onPress: () => {},
 };
 
 export default Button;

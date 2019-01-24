@@ -13,8 +13,6 @@ import Button from './Button';
 import IssueMarker from './IssueMarker';
 import pointInPolygon from '../helpers/pointInPolygon';
 
-const carImage = require('../assets/images/car_rear.png');
-
 class IssueModal extends React.Component {
 
   constructor() {
@@ -77,6 +75,7 @@ class IssueModal extends React.Component {
     const {
       visible,
       onHide,
+      image,
     } = this.props;
     const { issuePosition } = this.state;
 
@@ -99,7 +98,7 @@ class IssueModal extends React.Component {
             >
               <View>
                 <Image
-                  source={carImage}
+                  source={image}
                   style={styles.carImage}
                   ref={this.carImage}
                 />
