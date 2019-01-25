@@ -46,12 +46,14 @@ class MapMarker extends React.Component {
     return (
       <MapView
         style={[styles.map, style]}
+        provider="google"
         initialRegion={{
           ...this.initialRegion,
           latitude: coordinate.latitude,
           longitude: coordinate.longitude,
         }}
         loadingEnabled
+        customMapStyle={mapStyle}
         onMapReady={this.onMapReady}
         {...rest}
       >
@@ -60,6 +62,8 @@ class MapMarker extends React.Component {
     );
   }
 }
+
+const mapStyle = require('../assets/styles/mapStyle');
 
 const styles = StyleSheet.create({
   map: {

@@ -7,41 +7,40 @@ import {
   Alert,
   TouchableOpacity,
   Text,
-  Platform,
 } from 'react-native';
 import {
   MapView,
   Location,
   Permissions,
   IntentLauncherAndroid,
+  Constants,
 } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
 import geolib from 'geolib';
-import Polyline from '@mapbox/polyline';
+import MapboxClient from 'mapbox';
 import lib from '../helpers/lib';
-import appConfig from '../app.json';
 
 const { width, height } = Dimensions.get('window');
 
 class MapRoute extends React.Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
       coordinates: [],
+      steps: [],
       focusedLocation: {
         latitude: 0,
         longitude: 0,
-        latitudeDelta: 0.0122,
-        longitudeDelta: width / height * 0.0122,
+        latitudeDelta: 0.01,
+        longitudeDelta: width / height * 0.01,
       },
       destinationReached: false,
       isMapReady: false,
+      isNavigation: false,
     };
 
-    this.apikey = appConfig.expo.android.config.googleMaps.apiKey;
+    this.apikey = Constants.manifest.extra.mapbox.apiKey;
   }
 
   async componentDidMount() {
@@ -80,7 +79,16 @@ class MapRoute extends React.Component {
 
     // retrieve a direction between these two points
     if (showDirections) {
-      await this.getDirections(currentLocation, destinationLocation);
+      const coords = await this.getDirections(currentLocation, destinationLocation);
+      this.map.fitToCoordinates(coords, {
+        edgePadding: {
+          top: 60,
+          right: 25,
+          bottom: 80,
+          left: 25,
+        },
+        animated: true,
+      });
     }
 
     // monitor the current position of the user
@@ -125,7 +133,7 @@ class MapRoute extends React.Component {
         },
       };
     });
-  }
+  };
 
   /**
    * retrieves the coordinates of a route
@@ -135,60 +143,68 @@ class MapRoute extends React.Component {
    * @returns {Promise<*>}
    */
   getDirections = async (startLoc, destinationLoc) => {
-    const startCoords = Object.values(startLoc);
-    const destinationCoords = Object.values(destinationLoc);
-    if (startCoords.length !== 2 || destinationCoords.length !== 2) {
-      console.error('Given coordinates have wrong format');
-      return {};
-    }
-    try {
-      const response = await axios({
-        method: 'GET',
-        url: 'https://maps.googleapis.com/maps/api/directions/json',
-        params: {
-          origin: startCoords.join(','),
-          destination: destinationCoords.join(','),
-          key: this.apikey,
-        },
-        responseType: 'json',
-        headers: {},
-      });
-      if (response.status !== 200) {
-        // this will execute the catch block
-        throw new Error('Fetching the coordinates of the interception point failed');
-      }
-      const { data } = response;
-      if (data.status !== 'OK') {
-        throw new Error('Determining a route between the two points failed');
-      }
-      const points = Polyline.decode(data.routes[0].overview_polyline.points);
-      const coordinates = points.map(point => {
-        return {
-          latitude: point[0],
-          longitude: point[1],
-        };
-      });
-      this.setState({ coordinates: coordinates });
-      return coordinates;
-    } catch (error) {
-      console.error(error);
-      return error;
-    }
+    const client = new MapboxClient(this.apikey);
+    const res = await client.getDirections(
+      [
+        startLoc,
+        destinationLoc,
+      ],
+      { profile: 'driving', geometry: 'polyline6' },
+    );
+    const coordinates = res.entity.routes[0].geometry.coordinates.map(point => {
+      return {
+        latitude: point[1],
+        longitude: point[0],
+      };
+    });
+    const steps = res.entity.routes[0].legs[0].steps.map(step => {
+      return {
+        latitude: step.maneuver.location[1],
+        longitude: step.maneuver.location[0],
+        bearing: step.maneuver.bearing_after,
+        done: false,
+      };
+    });
+    this.setState({
+      coordinates: coordinates,
+      steps: steps,
+    });
+    return coordinates;
   };
 
   checkUserLocation = async location => {
-    const { coordinates } = this.state;
+    const { coordinates, isNavigation } = this.state;
     const { coords } = location;
-    if (Platform.OS === 'android') {
+    if (isNavigation) {
       // follow the user location
-      // mapview component handles this for ios devices
       this.animateToCoordinates(coords);
+      // navigate route
+      this.animateNavigation(coords);
     }
     const destinationCoords = coordinates[coordinates.length - 1];
     const distance = geolib.getDistance(coords, destinationCoords);
     // show button if user is close to destination so he can confirm arrival
     // remove arrival button in case the user moves away from the destination
     this.setState({ destinationReached: (distance <= 20) });
+  };
+
+  animateNavigation = async coords => {
+    const { steps } = this.state;
+    let manoeuvred = false;
+    steps.forEach((step, index) => {
+      if (step.done || manoeuvred) {
+        // maneuver has already been done
+        return;
+      }
+      const distance = geolib.getDistance(coords, step);
+      if (distance <= 5) {
+        // user is 5 meters close to intersection point
+        this.map.animateToBearing(step.bearing);
+        steps[index].done = true;
+        manoeuvred = true;
+        this.setState({ steps: steps });
+      }
+    });
   };
 
   /**
@@ -199,12 +215,20 @@ class MapRoute extends React.Component {
     const { focusedLocation } = this.state;
     const { latitude, longitude } = coords;
     if (focusedLocation && latitude && longitude) {
-      this.map.animateToRegion({
-        ...focusedLocation,
+      this.map.animateToCoordinate({
         latitude: latitude,
         longitude: longitude,
       });
     }
+  };
+
+  startNavigation = async () => {
+    const { coordinates } = this.state;
+    this.setState({ isNavigation: true });
+    this.map.fitToCoordinates(coordinates.slice(0, 2));
+    this.map.animateToViewingAngle(45);
+    const currentLocation = await this.getLocation();
+    this.animateNavigation(currentLocation);
   };
 
   renderConfirmalButton() {
@@ -235,40 +259,87 @@ class MapRoute extends React.Component {
     );
   }
 
+  renderNavigationButton() {
+    const { showNavigationButton } = this.props;
+    const { destinationReached, isNavigation } = this.state;
+
+    if (destinationReached || isNavigation || !showNavigationButton) {
+      return null;
+    }
+
+    return (
+      <View style={styles.confirmContainer}>
+        <TouchableOpacity
+          style={styles.confirmButton}
+          onPress={this.startNavigation}
+        >
+          <View style={styles.drawerItem}>
+            <Ionicons
+              name="ios-checkmark-circle-outline"
+              size={30}
+              color="#ffffff"
+              style={styles.drawerItemIcon}
+            />
+            <Text style={styles.buttonText}>Start Navigation</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  renderRoute() {
+    const { isMapReady, coordinates } = this.state;
+    if (!isMapReady || coordinates.length === 0) {
+      return null;
+    }
+    return (
+      <MapView.Polyline
+        coordinates={coordinates}
+        strokeWidth={5}
+        strokeColor="blue"
+      />
+    );
+  }
+
+  renderMarker() {
+    const { isMapReady, coordinates } = this.state;
+    if (!isMapReady || coordinates.length === 0) {
+      return null;
+    }
+    return (
+      <MapView.Marker
+        coordinate={coordinates[coordinates.length - 1]}
+      />
+    );
+  }
+
   onMapReady = () => {
     this.setState({ isMapReady: true });
   };
 
   render() {
-    const { coordinates, focusedLocation, isMapReady } = this.state;
-
     return (
       <View style={styles.container}>
         <MapView
+          provider="google"
           style={styles.map}
-          initialRegion={focusedLocation}
           showsUserLocation
-          followsUserLocation={Platform.OS === 'ios'}
           loadingEnabled
+          customMapStyle={mapStyle}
           ref={map => { this.map = map; }}
           onMapReady={this.onMapReady}
         >
-          <MapView.Polyline
-            coordinates={coordinates}
-            strokeWidth={3}
-            strokeColor="blue"
-          />
-          {isMapReady && coordinates.length > 0 && (
-            <MapView.Marker
-              coordinate={coordinates[coordinates.length - 1]}
-            />
-          )}
+          {this.renderRoute()}
+          {this.renderMarker()}
         </MapView>
         {this.renderConfirmalButton()}
+        {this.renderNavigationButton()}
       </View>
     );
   }
 }
+
+const mapStyle = require('../assets/styles/mapStyle');
 
 const styles = StyleSheet.create({
   container: {
@@ -295,7 +366,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
-    backgroundColor: 'lightblue',
+    backgroundColor: '#000000',
+    borderColor: '#ffffff',
+    borderWidth: 1,
     borderRadius: 15,
   },
   drawerItemIcon: {
@@ -311,6 +384,7 @@ MapRoute.propTypes = {
   onArrivalConfirmed: PropTypes.func,
   showDirections: PropTypes.bool,
   showConfirmationButton: PropTypes.bool,
+  showNavigationButton: PropTypes.bool,
   latitude: PropTypes.number.isRequired,
   longitude: PropTypes.number.isRequired,
   initialFocus: PropTypes.string,
@@ -320,6 +394,7 @@ MapRoute.defaultProps = {
   onArrivalConfirmed: () => undefined,
   showDirections: true,
   showConfirmationButton: true,
+  showNavigationButton: true,
   initialFocus: 'gps',
 };
 

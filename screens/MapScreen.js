@@ -18,6 +18,7 @@ class MapScreen extends React.Component {
     return (
       <MapRoute
         showConfirmationButton={false}
+        showNavigationButton={false}
         latitude={navigation.getParam('latitude')}
         longitude={navigation.getParam('longitude')}
         initialFocus="interchangePoint"
