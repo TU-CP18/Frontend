@@ -7,7 +7,6 @@ import {
   Alert,
   TouchableOpacity,
   Text,
-  Platform,
 } from 'react-native';
 import {
   MapView,
@@ -81,7 +80,15 @@ class MapRoute extends React.Component {
     // retrieve a direction between these two points
     if (showDirections) {
       const coords = await this.getDirections(currentLocation, destinationLocation);
-      this.map.fitToCoordinates(coords);
+      this.map.fitToCoordinates(coords, {
+        edgePadding: {
+          top: 60,
+          right: 25,
+          bottom: 80,
+          left: 25,
+        },
+        animated: true,
+      });
     }
 
     // monitor the current position of the user
@@ -142,7 +149,7 @@ class MapRoute extends React.Component {
         startLoc,
         destinationLoc,
       ],
-      { profile: 'driving', geometry: 'polyline' },
+      { profile: 'driving', geometry: 'polyline6' },
     );
     const coordinates = res.entity.routes[0].geometry.coordinates.map(point => {
       return {
@@ -219,6 +226,7 @@ class MapRoute extends React.Component {
     const { coordinates } = this.state;
     this.setState({ isNavigation: true });
     this.map.fitToCoordinates(coordinates.slice(0, 2));
+    this.map.animateToViewingAngle(45);
     const currentLocation = await this.getLocation();
     this.animateNavigation(currentLocation);
   };
@@ -316,7 +324,6 @@ class MapRoute extends React.Component {
           provider="google"
           style={styles.map}
           showsUserLocation
-          followsUserLocation={Platform.OS === 'ios'}
           loadingEnabled
           customMapStyle={mapStyle}
           ref={map => { this.map = map; }}
