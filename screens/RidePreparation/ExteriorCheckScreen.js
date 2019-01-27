@@ -7,12 +7,17 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { observer, inject } from 'mobx-react';
 import { FontAwesome } from '@expo/vector-icons';
 import CarCheckItem from '../../components/CarCheckItem';
 import Button from '../../components/Button';
 import IssueModal from '../../components/IssueModal';
 import MapMarker from '../../components/MapMarker';
+import lib from '../../helpers/lib';
+import api from '../../helpers/api';
 
+@inject('nextShift')
+@observer
 class ExteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     return {
@@ -47,11 +52,9 @@ class ExteriorCheckScreen extends React.Component {
     this.setState({
       [id]: newValue,
     });
-  }
+  };
 
   onPressOpenCar = () => {
-    const { navigation } = this.props;
-
     if (!this.itemsChecked()) return;
 
     Alert.alert(
@@ -61,11 +64,32 @@ class ExteriorCheckScreen extends React.Component {
       + 'car accordingly',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: () => navigation.navigate('InteriorCheck') },
+        { text: 'OK', onPress: this.onConfirmOpenCar },
       ],
       { cancelable: true },
     );
-  }
+  };
+
+  onConfirmOpenCar = async () => {
+    const { navigation, nextShift } = this.props;
+    const currentLocation = await lib.getLocation();
+
+    try {
+      const res = await api.post(`/shifts/${nextShift.shift.id}/authenticate`, { currentLocation });
+      if (res.status === 200) {
+        navigation.navigate('InteriorCheck');
+      } else {
+        Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
+      }
+    } catch (error) {
+      if (error.status === 401) {
+        console.log('Open car: authentication error', error);
+      } else {
+        console.log('error in Open car', error, error.message);
+      }
+      Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
+    }
+  };
 
   itemsChecked = () => {
     const {
@@ -76,22 +100,22 @@ class ExteriorCheckScreen extends React.Component {
     } = this.state;
 
     return rearChecked && driverChecked && frontChecked && codriverChecked;
-  }
+  };
 
   showIssueModal = () => {
     this.setState({
       issueModalVisible: true,
     });
-  }
+  };
 
   hideIssueModal = () => {
     this.setState({
       issueModalVisible: false,
     });
-  }
+  };
 
   render() {
-    const { navigation } = this.props;
+    const { navigation, nextShift } = this.props;
     const {
       rearChecked,
       driverChecked,
@@ -105,13 +129,16 @@ class ExteriorCheckScreen extends React.Component {
         <ScrollView>
           <TouchableOpacity
             onPress={() => navigation.navigate('Map', {
-              disableArrivalButton: true,
+              latitude: nextShift.shift.latStart,
+              longitude: nextShift.shift.longStart,
+              showDirections: false,
+              initialFocus: 'gps',
             })}
           >
             <MapMarker
               coordinate={{
-                latitude: 52.523,
-                longitude: 13.413492,
+                latitude: nextShift.shift.latStart,
+                longitude: nextShift.shift.longStart,
               }}
               style={styles.mapPreview}
               zoomEnabled={false}
