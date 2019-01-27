@@ -76,13 +76,17 @@ class ContactScreen extends React.Component {
     // console.log('onReceivedMessage:');
     // console.log(messages);
     // console.log('JSON parse:');
-    // console.log([JSON.parse(messages.body)]);
-    this.setState(previousState => {
-      return {
-        messages: GiftedChat.append(previousState.messages, [(JSON.parse(messages.body))]),
-      };
-    });
-  }
+    const messageObject = JSON.parse(messages.body);
+    // console.log(messageObject);
+    // console.log(this.userDetails);
+    if (messageObject.user._id !== this.userDetails.id) {
+      this.setState(previousState => {
+        return {
+          messages: GiftedChat.append(previousState.messages, [(messageObject)]),
+        };
+      });
+    }
+  };
 
   onSend(messages = []) {
     // console.log('onSend:');
@@ -93,9 +97,9 @@ class ContactScreen extends React.Component {
 
     const chatMessage = {
       _id: Date.now(),
-      user: { _id: 1 },
+      user: { _id: this.userDetails.id },
       sender: `${this.userDetails.firstName} ${this.userDetails.lastName}`,
-      content: messages[0].text,
+      text: messages[0].text,
       type: 'CHAT',
     };
     // this.stompClient.send('/topic/public', JSON.stringify(messages[0]));
