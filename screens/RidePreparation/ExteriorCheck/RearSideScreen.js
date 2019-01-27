@@ -1,9 +1,8 @@
 import React from 'react';
 import ExteriorCheck from '../../../components/ExteriorCheck';
+import { rearContour, rearParts } from '../../../constants/vectors';
 
 const frontSide = require('../../../assets/images/car_models/rear_side.jpg');
-
-const issues = [];
 
 class ExteriorCheckRearSideScreen extends React.Component {
   static navigationOptions = props => {
@@ -18,9 +17,11 @@ class ExteriorCheckRearSideScreen extends React.Component {
   render() {
     return (
       <ExteriorCheck
+        side="rear"
         image={frontSide}
-        issues={issues}
         onConfirm={this.onConfirm}
+        contourVector={rearContour}
+        parts={rearParts}
       />
     );
   }

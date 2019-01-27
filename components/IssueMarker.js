@@ -1,35 +1,56 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
+import PropTypes from 'prop-types';
 
-const IssueMarker = ({ x, y }) => (
+const IssueMarker = ({ x, y, number }) => (
   <View
     style={[
-      styles.issueMarkerOuter,
-      { left: x - 19, top: y - 19 },
+      s.issueMarkerOuter,
+      { left: x - 18, top: y - 18 },
     ]}
   >
-    <View style={styles.issueMarkerInner} />
+    <View style={s.issueMarkerInner}>
+      {number && (<Text style={s.number}>{number}</Text>)}
+    </View>
   </View>
 );
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   issueMarkerOuter: {
     position: 'absolute',
     width: 34,
-    borderRadius: 24,
-    borderWidth: 8,
-    borderColor: 'red',
     height: 34,
+    borderRadius: 17,
+    borderWidth: 4,
+    borderColor: '#ffffff',
   },
   issueMarkerInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: 'black',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
     position: 'absolute',
-    top: 4,
-    left: 4,
+    top: 3,
+    left: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  number: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
+
+IssueMarker.propTypes = {
+  x: PropTypes.number,
+  y: PropTypes.number,
+  number: PropTypes.number,
+};
+
+IssueMarker.defaultProps = {
+  x: 0,
+  y: 0,
+  number: undefined,
+}
 
 export default IssueMarker;
