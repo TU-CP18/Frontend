@@ -32,8 +32,8 @@ class MapRoute extends React.Component {
       focusedLocation: {
         latitude: 0,
         longitude: 0,
-        latitudeDelta: 0.01,
-        longitudeDelta: width / height * 0.01,
+        latitudeDelta: 0.0122,
+        longitudeDelta: width / height * 0.0122,
       },
       destinationReached: false,
       isMapReady: false,
@@ -65,7 +65,7 @@ class MapRoute extends React.Component {
     }
 
     // get the current location of the user
-    const currentLocation = await this.getLocation();
+    const currentLocation = await lib.getLocation();
     const destinationLocation = {
       latitude,
       longitude,
@@ -89,13 +89,12 @@ class MapRoute extends React.Component {
         },
         animated: true,
       });
+      // monitor the current position of the user
+      this.watchid = await Location.watchPositionAsync({
+        enableHighAccuracy: true,
+        distanceInterval: 1,
+      }, this.checkUserLocation);
     }
-
-    // monitor the current position of the user
-    this.watchid = await Location.watchPositionAsync({
-      enableHighAccuracy: true,
-      distanceInterval: 1,
-    }, this.checkUserLocation);
   }
 
   componentWillUnmount() {
@@ -104,34 +103,17 @@ class MapRoute extends React.Component {
     }
   }
 
-  /**
-   * retrieve current coordinates and move to them on the map
-   * assumes that location permission has already been granted
-   * @returns {Promise<{latitude: (number|*|string), longitude: (number|*|string)}>}
-   */
-  getLocation = async () => {
-    // get current position if permission has been granted
-    const { coords } = await Location.getCurrentPositionAsync({
-      enableHighAccuracy: true,
-    });
-
-    return {
+  focusOnCoords = coords => {
+    const { focusedLocation } = this.state;
+    const region = {
+      ...focusedLocation,
       latitude: coords.latitude,
       longitude: coords.longitude,
     };
-  };
-
-  focusOnCoords = coords => {
     // initalize map at current position
-    this.animateToCoordinates(coords);
-    this.setState(prevState => {
-      return {
-        focusedLocation: {
-          ...prevState.focusedLocation,
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        },
-      };
+    this.map.animateToRegion(region);
+    this.setState({
+      focusedLocation: region,
     });
   };
 
@@ -212,9 +194,8 @@ class MapRoute extends React.Component {
    * @param coords
    */
   animateToCoordinates = async coords => {
-    const { focusedLocation } = this.state;
     const { latitude, longitude } = coords;
-    if (focusedLocation && latitude && longitude) {
+    if (latitude && longitude) {
       this.map.animateToCoordinate({
         latitude: latitude,
         longitude: longitude,
@@ -227,7 +208,7 @@ class MapRoute extends React.Component {
     this.setState({ isNavigation: true });
     this.map.fitToCoordinates(coordinates.slice(0, 2));
     this.map.animateToViewingAngle(45);
-    const currentLocation = await this.getLocation();
+    const currentLocation = await lib.getLocation();
     this.animateNavigation(currentLocation);
   };
 
