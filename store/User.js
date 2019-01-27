@@ -37,7 +37,7 @@ export default class User {
   async login(username, password) {
     try {
       const tokenResponse = await api.post('/authenticate', { username, password });
-
+      
       if (tokenResponse.status === 200) {
         await AsyncStorage.setItem(USER_DETAILS, JSON.stringify({ ...tokenResponse.data }));
 
