@@ -5,14 +5,16 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from 'react-native';
-// import { observer, inject } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
-// import IssueMarker from '../../../components/IssueMarker';
 import Button from '../../../components/Button';
 
 const markerImg = require('../../../assets/images/marker.png');
 
+@inject('issues')
+@observer
 class ExteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     return {
@@ -33,10 +35,10 @@ class ExteriorCheckScreen extends React.Component {
     };
   }
 
-  // componentDidMount() {
-  //   // const { issues } = this.props;
-  //   // issues.fetch();
-  // }
+  componentDidMount() {
+    const { issues } = this.props;
+    issues.fetch();
+  }
 
   RuleItem = ({ id, text, showMoreLink, showMoreText, icon }) => (
     <View style={s.ruleItem}>
@@ -70,23 +72,19 @@ class ExteriorCheckScreen extends React.Component {
   render() {
     const {
       navigation,
-      // issues,
+      issues,
     } = this.props;
 
-    // if (issues.fetchLoading) {
-    //   return (
-    //     <View style={styles.loadingContainer}>
-    //       <StatusBar
-    //         // backgroundColor="#000000"
-    //         barStyle="light-content"
-    //       />
-    //       <ActivityIndicator
-    //         size="large"
-    //         color="#ffffff"
-    //       />
-    //     </View>
-    //   );
-    // }
+    if (issues.fetchLoading) {
+      return (
+        <View style={s.loadingContainer}>
+          <ActivityIndicator
+            size="large"
+            color="#ffffff"
+          />
+        </View>
+      );
+    }
 
     return (
       <View style={s.container}>

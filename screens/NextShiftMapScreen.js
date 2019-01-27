@@ -1,10 +1,8 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react';
-import { Alert } from 'react-native';
 import MapRoute from '../components/MapRoute';
-import api from '../helpers/api';
 
-@inject('nextShift')
+@inject('nextShift', 'currentShift')
 @observer
 class NextShiftMapScreen extends React.Component {
   static navigationOptions = {
@@ -18,16 +16,15 @@ class NextShiftMapScreen extends React.Component {
   };
 
   onPressArrivalConfirmed = async () => {
-    const { navigation, nextShift } = this.props;
+    const {
+      navigation,
+      nextShift,
+      currentShift,
+    } = this.props;
 
-    try {
-      const res = await api.post(`/shifts/${nextShift.shift.id}/track`, { state: 'confirmedArrival' });
-      if (res.status !== 200) {
-        console.log('error when confirming arrival', res);
-      }
-    } catch (error) {
-      console.log('error when confirming arrival', error);
-    }
+    // TODO: add buttonLoading prop to MapRoute
+    await currentShift.startShift(nextShift.shift);
+
     // we redirect the user no matter the response as the purpose is solely tracking
     navigation.navigate('RidePreparation');
   };

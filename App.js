@@ -15,18 +15,23 @@ import {
 import { observable } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
 import AppNavigator from './navigation/AppNavigator';
+import Alert from './components/Alert';
 
 import UserStore from './store/User';
 import DevSettingsStore from './store/DevSettings';
 import NextShiftStore from './store/NextShift';
+import CurrentShiftStore from './store/CurrentShift';
 import ShiftScheduleStore from './store/ShiftSchedule';
 import IssuesStore from './store/Issues';
+import AlertStore from './store/Alert';
 
 const userStore = global.userStore = new UserStore();
 const devSettingsStore = global.devSettings = new DevSettingsStore();
 const nextShiftStore = new NextShiftStore();
+const currentShiftStore = global.currentShift = new CurrentShiftStore();
 const shiftScheduleStore = new ShiftScheduleStore();
 const issuesStore = global.issues = new IssuesStore();
+const alertStore = global.alertNotification = new AlertStore();
 
 @observer
 class App extends React.Component {
@@ -85,14 +90,17 @@ class App extends React.Component {
         user={userStore}
         devSettings={devSettingsStore}
         nextShift={nextShiftStore}
+        currentShift={currentShiftStore}
         shiftSchedule={shiftScheduleStore}
         issues={issuesStore}
+        alert={alertStore}
       >
         <View style={styles.container}>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
           <AppNavigator
             initialRoute={this.initialRoute}
           />
+          <Alert />
         </View>
       </Provider>
     );

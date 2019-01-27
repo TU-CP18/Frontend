@@ -1,25 +1,8 @@
 import React from 'react';
 import ExteriorCheck from '../../../components/ExteriorCheck';
+import { frontContour, frontParts } from '../../../constants/vectors';
 
 const frontSide = require('../../../assets/images/car_models/front_side.jpg');
-
-const issues = [
-  {
-    x: 300,
-    y: 300,
-    desc: 'Windshield - Steinschlag',
-  },
-  {
-    x: 340,
-    y: 340,
-    desc: 'Left light - Riss im Glas',
-  },
-  {
-    x: 400,
-    y: 400,
-    desc: 'Motorhaube - Große Delle',
-  },
-];
 
 class ExteriorCheckFrontSideScreen extends React.Component {
   static navigationOptions = props => {
@@ -34,9 +17,11 @@ class ExteriorCheckFrontSideScreen extends React.Component {
   render() {
     return (
       <ExteriorCheck
+        side="front"
         image={frontSide}
-        issues={issues}
         onConfirm={this.onConfirm}
+        contourVector={frontContour}
+        parts={frontParts}
       />
     );
   }

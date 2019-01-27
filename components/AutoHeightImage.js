@@ -12,6 +12,9 @@ const AutoHeightImage = ({
   style,
   width,
   source,
+  scaleFactorCallback,
+  heightCallback,
+  refCallback,
   ...rest
 }) => {
   const asset = resolveAssetSource(source);
@@ -23,12 +26,17 @@ const AutoHeightImage = ({
     }
   }
 
-  const height = refWidth / asset.width * asset.height;
+  const scale = refWidth / asset.width;
+  const height = scale * asset.height;
+
+  scaleFactorCallback(scale);
+  heightCallback(height);
 
   return (
     <Image
       source={source}
       style={[style, { width, height }]}
+      ref={refCallback}
       {...rest}
     />
   );
@@ -40,6 +48,13 @@ AutoHeightImage.propTypes = {
     PropTypes.string,
     PropTypes.number,
   ]).isRequired,
+  scaleFactorCallback: PropTypes.func,
+  heightCallback: PropTypes.func,
+};
+
+AutoHeightImage.defaultProps = {
+  scaleFactorCallback: () => {},
+  heightCallback: () => {},
 };
 
 export default AutoHeightImage;
