@@ -36,6 +36,9 @@ class HomeScreen extends React.Component {
   }
 
   handleCallOperator = () => {
+    // TODO: remove
+    const { navigation } = this.props;
+    navigation.navigate('Ride');
     console.log('--> Will make a call');
   }
 

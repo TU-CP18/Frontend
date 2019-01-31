@@ -71,16 +71,16 @@ export default class CurrentShiftStore {
         this.openCarSucceeded = true;
       } else {
         this.openCarError = true;
-        Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
+        Alert.alert('Authorization issue', 'You are not allowed to open the car. Contact your fleet manager.');
       }
     } catch (error) {
       this.openCarError = true;
-      if (error.status === 401) {
-        console.log('Open car: authentication error', error);
+      if (error.status === 403) {
+        console.log('Open car: authorization error', error);
       } else {
         console.log('error in Open car', error, error.message);
       }
-      Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
+      Alert.alert('Authorization issue', 'You are not allowed to open the car. Contact your fleet manager.');
     } finally {
       this.openCarLoading = false;
       this.openCarSucceeded = true;
