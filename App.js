@@ -18,9 +18,13 @@ import AppNavigator from './navigation/AppNavigator';
 
 import UserStore from './store/User';
 import DevSettingsStore from './store/DevSettings';
+import ChatStore from './store/Chat';
 
 const userStore = global.userStore = new UserStore();
 const devSettingsStore = global.devSettings = new DevSettingsStore();
+const chatStore = new ChatStore();
+
+chatStore.load();
 
 @observer
 class App extends React.Component {
@@ -76,6 +80,7 @@ class App extends React.Component {
       <Provider
         user={userStore}
         devSettings={devSettingsStore}
+        chat={chatStore}
       >
         <View style={styles.container}>
           {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
