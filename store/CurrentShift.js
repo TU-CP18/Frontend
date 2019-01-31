@@ -1,10 +1,22 @@
 import { observable, action } from 'mobx';
+import { Alert } from 'react-native';
 import api from '../helpers/api';
+import lib from '../helpers/lib';
 
 export default class CurrentShiftStore {
+  @observable shiftId = null;
+
   @observable car = null;
+
   @observable loading = null;
+
   @observable error = null;
+
+  @observable openCarLoading = false;
+
+  @observable openCarSucceeded = false;
+
+  @observable openCarError = false;
 
   /**
    * Start shift take the shift saved in the NextShift store
@@ -14,11 +26,13 @@ export default class CurrentShiftStore {
    *
    * @param {*} nextShift
    */
-  @action
+  @action.bound
   async startShift(nextShift) {
+    this.shiftId = nextShift.id;
+
     // track state
     try {
-      const res = await api.post(`/shifts/${nextShift.shift.id}/track`, {
+      const res = await api.post(`/shifts/${this.shiftId}/track`, {
         state: 'confirmedArrival',
       });
       if (res.status !== 200) {
@@ -33,7 +47,7 @@ export default class CurrentShiftStore {
     this.loading = true;
 
     try {
-      const response = await api.get(`/shifts/${nextShift.id}`);
+      const response = await api.get(`/shifts/${this.shiftId}`);
       console.log('response.data.car', response.data.car);
       this.car = response.data.car;
     } catch (e) {
@@ -41,6 +55,35 @@ export default class CurrentShiftStore {
       console.log(e);
     } finally {
       this.loading = false;
+    }
+  }
+
+  @action.bound
+  async openCar() {
+    const currentLocation = await lib.getLocation();
+    this.openCarSucceeded = false;
+    this.openCarLoading = true;
+    this.openCarError = false;
+
+    try {
+      const res = await api.post(`/shifts/${this.shiftId}/authorize`, { currentLocation });
+      if (res.status === 200) {
+        this.openCarSucceeded = true;
+      } else {
+        this.openCarError = true;
+        Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
+      }
+    } catch (error) {
+      this.openCarError = true;
+      if (error.status === 401) {
+        console.log('Open car: authentication error', error);
+      } else {
+        console.log('error in Open car', error, error.message);
+      }
+      Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
+    } finally {
+      this.openCarLoading = false;
+      this.openCarSucceeded = true;
     }
   }
 }
