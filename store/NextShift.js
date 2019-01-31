@@ -1,5 +1,6 @@
-import { observable } from "mobx";
-import api from "../helpers/api";
+import { observable } from 'mobx';
+import { Location } from 'expo';
+import api from '../helpers/api';
 
 const TWO_MINUTES = 2 * 60 * 1000;
 
@@ -22,6 +23,15 @@ export default class NextShiftStore {
         this.error = 'Error';
         console.log(e);
       } finally {
+        const { locationServicesEnabled } = await Location.getProviderStatusAsync();
+        if (locationServicesEnabled && this.shift) {
+          const geocode = await Location.reverseGeocodeAsync({
+            latitude: this.shift.latStart,
+            longitude: this.shift.longStart,
+          });
+          const [address] = geocode;
+          this.shift.address = address;
+        }
         this.loading = false;
         this.lastLoaded = new Date();
       }
