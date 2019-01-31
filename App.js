@@ -20,11 +20,15 @@ import UserStore from './store/User';
 import DevSettingsStore from './store/DevSettings';
 import NextShiftStore from './store/NextShift';
 import ShiftScheduleStore from './store/ShiftSchedule';
+import ChatStore from './store/Chat';
 
 const userStore = global.userStore = new UserStore();
 const devSettingsStore = global.devSettings = new DevSettingsStore();
 const nextShiftStore = new NextShiftStore();
 const shiftScheduleStore = new ShiftScheduleStore();
+const chatStore = new ChatStore();
+
+chatStore.load();
 
 @observer
 class App extends React.Component {
@@ -82,6 +86,7 @@ class App extends React.Component {
         devSettings={devSettingsStore}
         nextShift={nextShiftStore}
         shiftSchedule={shiftScheduleStore}
+        chat={chatStore}
       >
         <View style={styles.container}>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}

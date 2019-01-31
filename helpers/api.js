@@ -36,7 +36,7 @@ const request = (method, url, bodyParams, queryParams) => {
   return axios(options);
 };
 
-const get = (url, queryParams) => request('get', url, queryParams);
+const get = (url, queryParams) => request('get', url, null, queryParams);
 const post = (url, bodyParams, queryParams) => request('post', url, bodyParams, queryParams);
 const put = (url, bodyParams, queryParams) => request('put', url, bodyParams, queryParams);
 const patch = (url, bodyParams, queryParams) => request('patch', url, bodyParams, queryParams);
