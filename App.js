@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
   Image,
+  NativeModules,
 } from 'react-native';
 import {
   AppLoading,
@@ -34,6 +35,12 @@ const shiftScheduleStore = new ShiftScheduleStore();
 const chatStore = new ChatStore();
 const issuesStore = global.issues = new IssuesStore();
 const alertStore = global.alertNotification = new AlertStore();
+
+const { UIManager } = NativeModules;
+
+if (UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 chatStore.load();
 

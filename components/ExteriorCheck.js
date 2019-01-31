@@ -1,11 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   StyleSheet,
   View,
   Text,
   TextInput,
   TouchableWithoutFeedback,
-  NativeModules,
   LayoutAnimation,
   Dimensions,
   ScrollView,
@@ -23,15 +23,11 @@ import IssueMarker from './IssueMarker';
 import pointInPolygon from '../helpers/pointInPolygon';
 
 const screenWidth = Dimensions.get('window').width;
-const { UIManager } = NativeModules;
-
-UIManager.setLayoutAnimationEnabledExperimental &&
-  UIManager.setLayoutAnimationEnabledExperimental(true);
 
 @inject('issues', 'alert')
 @observer
 class ExteriorCheck extends React.Component {
-  static getNavigationOptions = (title, { navigation }) => {
+  static getNavigationOptions = title => {
     return {
       title: title,
       headerStyle: {
@@ -70,7 +66,12 @@ class ExteriorCheck extends React.Component {
         if (!loading && !props.issues.insertError) {
           // when inserting is done and there has been no error
           // switch back to the issue list view
-          this.setState({ issueFormVisible: false });
+          LayoutAnimation.easeInEaseOut();
+          this.setState({
+            issueFormVisible: false,
+            issueDesc: '',
+            issuePosition: {},
+          });
         }
       },
     );
@@ -98,9 +99,10 @@ class ExteriorCheck extends React.Component {
    * provided coordinates according to the scale factor of the images.
    */
   translateToScalledImage = (x, y) => {
+    const { scaleFactor } = this.state;
     return {
-      x: x * this.state.scaleFactor,
-      y: y * this.state.scaleFactor,
+      x: x * scaleFactor,
+      y: y * scaleFactor,
     };
   }
 
@@ -109,9 +111,10 @@ class ExteriorCheck extends React.Component {
    * translates them to the respective coordinates in the original image.
    */
   translateFromScalledImage = (x, y) => {
+    const { scaleFactor } = this.state;
     return {
-      x: x / this.state.scaleFactor,
-      y: y / this.state.scaleFactor,
+      x: x / scaleFactor,
+      y: y / scaleFactor,
     };
   }
 
@@ -135,7 +138,8 @@ class ExteriorCheck extends React.Component {
       }
 
       let selectedPart = 'Frame';
-      for (let part of parts) {
+      for (let i = 0; i < parts.length; i += 1) {
+        const part = parts[i];
         if (pointInPolygon([x, y], part.vector)) {
           selectedPart = part.name;
           break;
@@ -336,36 +340,21 @@ class ExteriorCheck extends React.Component {
                 </Text>
               </View>
               {issueList.length === 0 && (
-                <Text style={{ color: '#ffffff', alignSelf: 'center', fontSize: 16, marginTop: 40, }}>
+                <Text style={s.noIssuesInfo}>
                   There are currently no issue tracked
                 </Text>
               ) || (
-                <ScrollView style={{ paddingHorizontal: 20, paddingVertical: 20, }}>
+                <ScrollView style={s.issueScrollView}>
                   {issueList.map((issue, index) => {
                     return (
-                      <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14}}>
-                        <View
-                          style={{
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 36,
-                            height: 36,
-                            borderRadius: 18,
-                            backgroundColor: '#ffffff',
-                          }}
-                        >
+                      <View key={index} style={s.issueItem}>
+                        <View style={s.issueNumber}>
                           <Text textAlign="center">
                             {index + 1}
                           </Text>
                         </View>
                         <Text
-                          style={{
-                            color: '#ffffff',
-                            marginLeft: 20,
-                            fontSize: 16,
-                            marginRight: 20,
-                            // flexWrap: 'wrap',
-                          }}
+                          style={s.issueDescription}
                           numberOfLines={3}
                         >
                           {issue.shortDescription}
@@ -396,7 +385,7 @@ class ExteriorCheck extends React.Component {
 
           <View style={[s.form, { marginRight: issueFormVisible ? 0 : '-100%' }]}>
             <View style={s.formContent}>
-              <Text style={{ alignSelf: 'center', color: '#ffffff', fontSize: 20, marginBottom: 20,}}>
+              <Text style={s.formTitle}>
                 Add new Issue
               </Text>
               <Text style={{ color: '#ffffff', marginBottom: 20, fontSize: 16, }}>
@@ -459,13 +448,48 @@ const s = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
+  issueItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  issueScrollView: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  issueNumber: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#ffffff',
+  },
+  issueDescription: {
+    color: '#ffffff',
+    marginLeft: 20,
+    fontSize: 16,
+    marginRight: 20,
+  },
+  noIssuesInfo: {
+    color: '#ffffff',
+    alignSelf: 'center',
+    fontSize: 16,
+    marginTop: 40,
+  },
+
   form: {
     width: '100%',
   },
-
   formContent: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  formTitle: {
+    alignSelf: 'center',
+    color: '#ffffff',
+    fontSize: 20,
+    marginBottom: 20,
   },
   descInput: {
     borderWidth: 1,
@@ -499,5 +523,25 @@ const s = StyleSheet.create({
     marginBottom: 20,
   },
 });
+
+ExteriorCheck.propTypes = {
+  contourVector: PropTypes.arrayOf(
+    PropTypes.arrayOf(PropTypes.number),
+  ).isRequired,
+  parts: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string,
+      vector: PropTypes.arrayOf(
+        PropTypes.arrayOf(PropTypes.number),
+      ),
+    }),
+  ).isRequired,
+  image: PropTypes.number.isRequired,
+  onConfirm: PropTypes.func,
+};
+
+ExteriorCheck.defaultProps = {
+  onConfirm: () => {},
+};
 
 export default ExteriorCheck;
