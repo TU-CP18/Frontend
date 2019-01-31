@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
   Image,
+  NativeModules,
 } from 'react-native';
 import {
   AppLoading,
@@ -32,6 +33,12 @@ const currentShiftStore = global.currentShift = new CurrentShiftStore();
 const shiftScheduleStore = new ShiftScheduleStore();
 const issuesStore = global.issues = new IssuesStore();
 const alertStore = global.alertNotification = new AlertStore();
+
+const { UIManager } = NativeModules;
+
+if (UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 @observer
 class App extends React.Component {
