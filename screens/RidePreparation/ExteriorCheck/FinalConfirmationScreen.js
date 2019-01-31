@@ -7,11 +7,12 @@ import {
   Alert,
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
+import { reaction } from 'mobx';
 import { Entypo } from '@expo/vector-icons';
 import Rating from '../../../components/Rating';
 import Button from '../../../components/Button';
 
-@inject('alert')
+@inject('currentShift', 'alert')
 @observer
 class ExteriorCheckFinalConfirmationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -35,18 +36,23 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
     };
   };
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       rating: -1,
     };
+
+    reaction(
+      () => props.currentShift.openCarSucceeded,
+      succeeded => succeeded && props.navigation.navigate('InteriorCheck'),
+    );
   }
 
   onPressOpenCar = () => {
     const {
-      navigation,
       alert,
+      currentShift,
     } = this.props;
     const {
       rating,
@@ -67,7 +73,7 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
       + 'car accordingly',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: () => navigation.navigate('InteriorCheck') },
+        { text: 'OK', onPress: currentShift.openCar },
       ],
       { cancelable: true },
     );
@@ -81,19 +87,18 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
     return (
       <View style={s.container}>
         <View style={{ flex: 1, }}>
-          <Text style={{ color: '#ffffff', marginBottom: 16, }}>
+          <Text style={{ color: '#ffffff', marginBottom: 16 }}>
             Please rate the cleanliness of the car before opening th car.
           </Text>
           <Text style={{ color: '#ffffff' }}>
             If the car is quite dirty and needs a wash, provide a low rating.
           </Text>
           <Rating
-            style={{ marginTop: 20,}}
+            style={{ marginTop: 20 }}
             rating={rating}
-            onRate={(rating) => {
-              console.log("rating", rating)
+            onRate={userRating => {
               this.setState({
-                rating,
+                rating: userRating,
               });
             }}
           />

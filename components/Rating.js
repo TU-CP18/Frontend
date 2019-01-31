@@ -43,7 +43,7 @@ Rating.propTypes = {
   rating: PropTypes.number,
   onRate: PropTypes.func,
   count: PropTypes.number,
-  style: PropTypes.object,
+  style: PropTypes.any,
 };
 
 Rating.defaultProps = {
