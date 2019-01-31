@@ -62,7 +62,10 @@ class ScheduleScreen extends React.Component {
                 {`${item.fromTime} - ${item.toTime} (${item.durationHours} hours)`}
               </Text>
               <Text style={s.address}>
-                {(item.street && `${item.street}, ${item.city}`) || 'No location assigned yet'}
+                {(item.address.street
+                  && `${item.address.street}, ${item.address.postalCode} ${item.address.city}`)
+                  || 'No location assigned yet'
+                }
               </Text>
             </View>
             {item.latStart && (

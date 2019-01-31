@@ -1,4 +1,5 @@
 import { observable } from 'mobx';
+import { Location } from 'expo';
 import moment from 'moment';
 import api from '../helpers/api';
 
@@ -14,15 +15,24 @@ export default class ShiftSchedule {
 
     try {
       const response = await api.get('/shifts/user/all');
+      const { locationServicesEnabled } = await Location.getProviderStatusAsync();
 
       // convert shift data
-      this.shifts = response.data.filter(shift => {
+      let futureShifts = response.data.filter(shift => {
         // only keep shifts which are in the future or have not been ended
         return moment(shift.end).isAfter(moment());
-      }).map(shift => {
+      });
+      futureShifts = futureShifts.map(async shift => {
         const start = moment(shift.start);
         const end = moment(shift.end);
         const diff = moment.utc(end.diff(start)).format('HH:mm');
+        let address = null;
+        if (locationServicesEnabled && shift.latStart && shift.longStart) {
+          [address] = await Location.reverseGeocodeAsync({
+            latitude: shift.latStart,
+            longitude: shift.longStart,
+          });
+        }
 
         return {
           ...shift,
@@ -31,10 +41,11 @@ export default class ShiftSchedule {
           fromTime: start.format('HH:mm'), // 'hh:mm a' for am/pm
           toTime: end.format('HH:mm'),
           durationHours: diff,
-          street: shift.latStart ? 'Schönhauser Allee' : undefined,
-          city: '10439 Berlin',
+          address: address,
         };
-      }).sort((a, b) => {
+      });
+      futureShifts = await Promise.all(futureShifts);
+      this.shifts = futureShifts.sort((a, b) => {
         return moment(a.start).isBefore(moment(b.end)) ? -1 : 1;
       });
     } catch (e) {

@@ -31,7 +31,8 @@ class HomeScreen extends React.Component {
   }
 
   async componentDidMount() {
-    await this.props.nextShift.load();
+    const { nextShift } = this.props;
+    await nextShift.load();
   }
 
   handleCallOperator = () => {
@@ -90,10 +91,22 @@ class HomeScreen extends React.Component {
 
     return (
       <View style={{ flex: 1 }}>
-        <Text style={[styles.messageText, { marginTop: 50 }]}>Hi {user.name},</Text>
+        <Text style={[styles.messageText, { marginTop: 50 }]}>
+          {`Hi ${user.name},`}
+        </Text>
         {mapButton}
-        {!loading && <Text style={[styles.messageText]}>Head to [{ shift.latStart }, { shift.longStart }]</Text>}
-        {!loading && <Text style={styles.messageText}>by { new Date(shift.start).toString() }</Text>}
+        {!loading
+        && (
+          <Text style={[styles.messageText]}>
+            {`Head to ${shift.address.name}, ${shift.address.postalCode} ${shift.address.city}`}
+          </Text>
+        )}
+        {!loading && (
+          <Text style={styles.messageText}>
+          by
+            {` ${new Date(shift.start).toString()}`}
+          </Text>
+        )}
       </View>
     );
   }
