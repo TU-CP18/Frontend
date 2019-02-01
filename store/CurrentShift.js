@@ -18,6 +18,10 @@ export default class CurrentShiftStore {
 
   @observable openCarError = false;
 
+  constructor() {
+    this.persistCleanliness = CurrentShiftStore.persistCleanliness;
+  }
+
   /**
    * Start shift take the shift saved in the NextShift store
    * and sets it as the current shift.
@@ -59,12 +63,16 @@ export default class CurrentShiftStore {
   }
 
   @action.bound
-  async openCar() {
+  async openCar(rating) {
     const currentLocation = await lib.getLocation();
     this.openCarSucceeded = false;
     this.openCarLoading = true;
     this.openCarError = false;
 
+    // persist rating of the cleanlines
+    await this.persistCleanliness(rating);
+
+    // authorize the opening of the car
     try {
       const res = await api.post(`/shifts/${this.shiftId}/authorize`, { currentLocation });
       if (res.status === 200) {
@@ -83,7 +91,39 @@ export default class CurrentShiftStore {
       Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
     } finally {
       this.openCarLoading = false;
+
+      // TODO: temporary, remove when authorize endpoint is available
       this.openCarSucceeded = true;
+    }
+  }
+
+  @action.bound
+  async finishRidePreparation(rating) {
+    // persist rating of the cleanlines
+    await this.persistCleanliness(rating);
+  }
+
+  /**
+   * Persist the rating of the clealiness by the user.
+   * Part can be either 'interior' or 'exterior'.
+   * Event be be either 'preRide' or 'postRide'.
+   * Rating is a number.
+   *
+   * @param {part, event, rating} rating
+   */
+  static async persistCleanliness(rating) {
+    try {
+      const carId = global.currentShift.car.id;
+      await api.post(`/cars/${carId}/cleanliness`, {
+        part: rating.part,
+        event: rating.event,
+        rating: rating.score,
+      });
+    } catch (e) {
+      // do noghinb, when the cleanliness could not be saved this is
+      // unfortunate but negligible
+      // TODO: log event for the FM or throw an error
+      console.log(e);
     }
   }
 }

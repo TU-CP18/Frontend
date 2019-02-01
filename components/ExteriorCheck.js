@@ -9,7 +9,6 @@ import {
   LayoutAnimation,
   Dimensions,
   ScrollView,
-  ActivityIndicator,
 } from 'react-native';
 import {
   Svg,
@@ -20,6 +19,7 @@ import { Entypo } from '@expo/vector-icons';
 import Button from './Button';
 import AutoHeightImage from './AutoHeightImage';
 import IssueMarker from './IssueMarker';
+import LoadingIndicator from './LoadingIndicator';
 import pointInPolygon from '../helpers/pointInPolygon';
 
 const screenWidth = Dimensions.get('window').width;
@@ -27,7 +27,7 @@ const screenWidth = Dimensions.get('window').width;
 @inject('issues', 'alert')
 @observer
 class ExteriorCheck extends React.Component {
-  static getNavigationOptions = title => {
+  static getNavigationOptions = (title, navigation) => {
     return {
       title: title,
       headerStyle: {
@@ -38,7 +38,7 @@ class ExteriorCheck extends React.Component {
       headerTintColor: '#ffffff',
       headerRight: (
         <Entypo
-          onPress={() => alert('This is a button!')}
+          onPress={() => navigation.navigate('Contact')}
           name="chat"
           size={32}
           color="#ffffff"
@@ -60,8 +60,11 @@ class ExteriorCheck extends React.Component {
       imageheight: 300,
     };
 
+    // react so insertLoading change in the issues store
     reaction(
+      // reaction change check
       () => props.issues.insertLoading,
+      // reaction callback
       loading => {
         if (!loading && !props.issues.insertError) {
           // when inserting is done and there has been no error
@@ -84,11 +87,17 @@ class ExteriorCheck extends React.Component {
     });
   }
 
+  /**
+   * Opens the issue from.
+   */
   showIssueForm = () => {
     LayoutAnimation.easeInEaseOut();
     this.setState({ issueFormVisible: true });
   }
 
+  /**
+   * Closes the issue from.
+   */
   hideIssueForm = () => {
     LayoutAnimation.easeInEaseOut();
     this.setState({ issueFormVisible: false });
@@ -98,7 +107,7 @@ class ExteriorCheck extends React.Component {
    * Given original coordinates, this method translates the
    * provided coordinates according to the scale factor of the images.
    */
-  translateToScalledImage = (x, y) => {
+  translateToScaledImage = (x, y) => {
     const { scaleFactor } = this.state;
     return {
       x: x * scaleFactor,
@@ -110,7 +119,7 @@ class ExteriorCheck extends React.Component {
    * Given coordinates gathered from the scalled images, this method
    * translates them to the respective coordinates in the original image.
    */
-  translateFromScalledImage = (x, y) => {
+  translateFromScaledImage = (x, y) => {
     const { scaleFactor } = this.state;
     return {
       x: x / scaleFactor,
@@ -118,25 +127,31 @@ class ExteriorCheck extends React.Component {
     };
   }
 
+  /**
+   * When touching the car image, the method is called to set the issue
+   * position according to the gesture event position. The position will be
+   * scaled to the original image size.
+   */
   setIssuePosition = event => {
     // https://facebook.github.io/react-native/docs/gesture-responder-system
 
     const clickPageX = event.nativeEvent.pageX;
     const clickPageY = event.nativeEvent.pageY;
 
-
     this.carImage.current.measure((_fx, _fy, _width, _height, px, py) => {
       const locX = clickPageX - px;
       const locY = clickPageY - py;
 
-      const { x, y } = this.translateFromScalledImage(locX, locY);
+      const { x, y } = this.translateFromScaledImage(locX, locY);
 
       const { contourVector, parts } = this.props;
 
+      // check if car has been selected
       if (!pointInPolygon([x, y], contourVector)) {
         return;
       }
 
+      // identiy the selected part
       let selectedPart = 'Frame';
       for (let i = 0; i < parts.length; i += 1) {
         const part = parts[i];
@@ -146,18 +161,23 @@ class ExteriorCheck extends React.Component {
         }
       }
 
+      // save the (original) "unscaled" coords x, y
+      // and the scaled coors for to display them over the sclaed iamge
       this.setState({
         issuePosition: {
           x: x,
           y: y,
-          scalledX: locX,
-          scalledY: locY,
+          scaledX: locX,
+          scaledY: locY,
           part: selectedPart,
         },
       });
     });
   }
 
+  /**
+   * Creates the issue with the selected coords and part, and the provided description.
+   */
   createIssue = () => {
     const {
       issues,
@@ -179,6 +199,7 @@ class ExteriorCheck extends React.Component {
       return;
     }
 
+    // call the addIssue action on the issues store
     issues.addIssue(
       issuePosition.x,
       issuePosition.y,
@@ -206,7 +227,7 @@ class ExteriorCheck extends React.Component {
     // possible enhancements: curves (https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths)
 
     // set the initial point
-    const startPos = this.translateToScalledImage(
+    const startPos = this.translateToScaledImage(
       part.vector[0][0],
       part.vector[0][1],
     );
@@ -214,7 +235,7 @@ class ExteriorCheck extends React.Component {
 
     for (let i = 1; i < part.vector.length; i += 1) {
       // draw next line
-      const nextPos = this.translateToScalledImage(
+      const nextPos = this.translateToScaledImage(
         part.vector[i][0],
         part.vector[i][1],
       );
@@ -271,15 +292,7 @@ class ExteriorCheck extends React.Component {
     });
 
     if (issues.insertLoading) {
-      // TODO: hover above other UI and create common component
-      return (
-        <View style={s.loadingContainer}>
-          <ActivityIndicator
-            size="large"
-            color="#ffffff"
-          />
-        </View>
-      );
+      return (<LoadingIndicator />);
     }
 
     return (
@@ -303,24 +316,23 @@ class ExteriorCheck extends React.Component {
               }}
             />
             {issueList && !issueFormVisible && issueList.map((issue, index) => {
-              const { x, y } = this.translateToScalledImage(issue.posX, issue.posY);
+              const { x, y } = this.translateToScaledImage(issue.posX, issue.posY);
               return (
                 <IssueMarker
                   key={issue.id}
                   x={x}
                   y={y}
                   number={index + 1}
-                  // style={{ opacity: issueFormVisible ? 0 : 1 }}
                 />
               );
             })}
-            {issuePosition.scalledX && issueFormVisible && (
+            {issuePosition.scaledX && issueFormVisible && (
               <IssueMarker
-                x={issuePosition.scalledX}
-                y={issuePosition.scalledY}
+                x={issuePosition.scaledX}
+                y={issuePosition.scaledY}
               />
             )}
-            {issuePosition.scalledX && issueFormVisible && (
+            {issuePosition.scaledX && issueFormVisible && (
               <this.RenderPart
                 selectedPart={issuePosition.part}
                 parts={parts}
@@ -335,7 +347,7 @@ class ExteriorCheck extends React.Component {
           <View style={[s.main, { marginLeft: issueFormVisible ? '-100%' : 0 }]}>
             <View style={s.issueList}>
               <View style={{ alignItems: 'center', }}>
-                <Text style={{ color: '#ffffff', fontSize: 22, }}>
+                <Text style={{ color: '#ffffff', fontSize: 22 }}>
                   Tracked Issues
                 </Text>
               </View>
@@ -347,7 +359,7 @@ class ExteriorCheck extends React.Component {
                 <ScrollView style={s.issueScrollView}>
                   {issueList.map((issue, index) => {
                     return (
-                      <View key={index} style={s.issueItem}>
+                      <View key={issue.id} style={s.issueItem}>
                         <View style={s.issueNumber}>
                           <Text textAlign="center">
                             {index + 1}
@@ -393,7 +405,8 @@ class ExteriorCheck extends React.Component {
                 enter a short description.
               </Text>
               <Text style={{ color: '#ffffff', marginBottom: 10, }}>
-                Selected Part: {issuePosition.part || '-'}
+                Selected Part:
+                {issuePosition.part || '-'}
               </Text>
               <TextInput
                 style={s.descInput}
@@ -426,12 +439,6 @@ class ExteriorCheck extends React.Component {
 }
 
 const s = StyleSheet.create({
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   container: {
     flex: 1,
     backgroundColor: '#000000',

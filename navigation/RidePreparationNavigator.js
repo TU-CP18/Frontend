@@ -24,14 +24,6 @@ const RidePreparationNavigator = createStackNavigator(
   },
   {
     initialRouteName: 'ExteriorCheckStart',
-    // headerMode: 'none',
-    // header: {}
-    // headerStyle: {
-    //   backgroundColor: '#000000',
-    //   elevation: 0,
-    //   borderBottomWidth: 0,
-    // },
-    // headerTintColor: '#ffffff',
   },
 );
 

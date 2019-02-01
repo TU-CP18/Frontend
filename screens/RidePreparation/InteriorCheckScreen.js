@@ -6,7 +6,6 @@ import {
   Alert,
   TextInput,
   ScrollView,
-  NativeModules,
   LayoutAnimation,
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
@@ -15,12 +14,7 @@ import { Entypo } from '@expo/vector-icons';
 import Rating from '../../components/Rating';
 import Button from '../../components/Button';
 
-const { UIManager } = NativeModules;
-
-UIManager.setLayoutAnimationEnabledExperimental &&
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-
-@inject('issues', 'alert')
+@inject('issues', 'alert', 'currentShift')
 @observer
 class InteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -34,7 +28,7 @@ class InteriorCheckScreen extends React.Component {
       headerTintColor: '#ffffff',
       headerRight: (
         <Entypo
-          onPress={() => alert('This is a button!')}
+          onPress={() => navigation.navigate('Contact')}
           name="chat"
           size={32}
           color="#ffffff"
@@ -53,8 +47,11 @@ class InteriorCheckScreen extends React.Component {
       issueDesc: '',
     };
 
+    // react so insertLoading change in the issues store
     reaction(
+      // react so insertLoading change in the issues store
       () => props.issues.insertLoading,
+      // reaction callback
       loading => {
         if (!loading && !props.issues.insertError) {
           // when inserting is done and there has been no error
@@ -73,6 +70,7 @@ class InteriorCheckScreen extends React.Component {
     const {
       navigation,
       alert,
+      currentShift,
     } = this.props;
     const {
       rating,
@@ -92,7 +90,17 @@ class InteriorCheckScreen extends React.Component {
       + 'accordingly and that you are prepared to drive manually if required.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Confirm', onPress: () => navigation.navigate('Ride') },
+        {
+          text: 'Confirm',
+          onPress: async () => {
+            await currentShift.finishRidePreparation({
+              part: 'interior',
+              event: 'preRide',
+              rating: rating,
+            });
+            navigation.navigate('Ride');
+          },
+        },
       ],
       { cancelable: true },
     );
@@ -152,23 +160,24 @@ class InteriorCheckScreen extends React.Component {
       <View style={s.caroussel}>
         <View style={[s.main, { marginLeft: issueFormVisible ? '-100%' : 0 }]}>
           <View style={s.content}>
-            <Text style={s.guideText}>
-              Before you can start the ride, please track new issues and confirm that the car is operational.
+            <Text style={[s.guideText, { marginTop: 10 }]}>
+              Before you can start the ride, please track new issues of the interior and
+              confirm that the car is operational.
             </Text>
 
-            <Text style={s.guideText}>
+            <Text style={s.titleText}>
               Existing Issues
             </Text>
 
             {issueList.length === 0 && (
-              <Text style={{ color: '#ffffff', fontSize: 16, marginBottom: 20, }}>
+              <Text style={[s.guideText, { marginBottom: 40 }]}>
                 There are currently no issue tracked
               </Text>
             ) || (
               <ScrollView>
                 {issueList.map((issue, index) => {
                   return (
-                    <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14}}>
+                    <View key={issue.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14}}>
                       <View
                         style={{
                           alignItems: 'center',
@@ -189,7 +198,6 @@ class InteriorCheckScreen extends React.Component {
                           marginLeft: 20,
                           fontSize: 16,
                           marginRight: 20,
-                          // flexWrap: 'wrap',
                         }}
                         numberOfLines={3}
                       >
@@ -201,12 +209,15 @@ class InteriorCheckScreen extends React.Component {
               </ScrollView>
             )}
 
+            <Text style={s.titleText}>
+              Interior Cleanliness
+            </Text>
             <Text style={[s.guideText, s.guideTextCleanliness]}>
-              Please also rate how clean the interior of the car is
+              Please also rate cleanliness of the interior.
             </Text>
             <Rating
               rating={rating}
-              onRate={rating => this.setState({ rating: rating })}
+              onRate={userRating => this.setState({ rating: userRating })}
               style={s.rating}
             />
           </View>
@@ -230,16 +241,17 @@ class InteriorCheckScreen extends React.Component {
 
         <View style={[s.form, { marginRight: issueFormVisible ? 0 : '-100%' }]}>
           <View style={s.formContent}>
-            <Text style={{ alignSelf: 'center', color: '#ffffff', fontSize: 20, marginBottom: 20,}}>
+            <Text style={[s.titleText, { alignSelf: 'center', marginBottom: 20 }]}>
               Add new Issue
             </Text>
-            {/* <Text style={{ color: '#ffffff', marginBottom: 20, fontSize: 16, }}>
-              Please marke the position of the discovered issue on the image and
-              enter a short description.
+            <Text style={s.guideText}>
+              Provide a short description of the discovered issue. Examples may be
+              broken parts of the interior, signs of vandalism etc.
             </Text>
-            <Text style={{ color: '#ffffff', marginBottom: 10, }}>
-              Selected Part: {issuePosition.part || '-'}
-            </Text> */}
+            <Text style={[s.guideText, { marginBottom: 20 }]}>
+              In case you think the car should not transport passengers, please contact the
+              Fleet Manager.
+            </Text>
             <TextInput
               style={s.descInput}
               underlineColorAndroid="transparent"
@@ -287,10 +299,16 @@ const s = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
+  titleText: {
+    color: '#ffffff',
+    fontSize: 20,
+    marginTop: 10,
+    marginBottom: 10,
+  },
   guideText: {
     color: '#ffffff',
-    marginBottom: 12,
-    fontSize: 16,
+    fontSize: 17,
+    marginBottom: 10,
   },
   guideTextCleanliness: {
     paddingBottom: 4,
