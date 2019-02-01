@@ -4,7 +4,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 
 const Rating = ({
   rating,
@@ -12,29 +12,30 @@ const Rating = ({
   count,
   style,
 }) => (
-  <View style={[styles.container, style]}>
-    {[...Array(count).keys()].map((index) => {
+  <View style={[s.container, style]}>
+    {[...Array(count).keys()].map(index => {
       const active = index < rating;
       return (
-        <Ionicons
+        <FontAwesome
           key={index}
-          name={active ? 'ios-star' : 'ios-star-outline'}
+          name={active ? 'star' : 'star-o'}
           onPress={() => onRate(index + 1)}
-          size={42}
-          style={styles.icon}
+          color="#ffffff"
+          size={54}
+          style={s.icon}
         />
       );
     })}
   </View>
 );
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    backgroundColor: 'black',
   },
   icon: {
     marginRight: 5,
-    color: 'black',
   },
 });
 
@@ -42,12 +43,14 @@ Rating.propTypes = {
   rating: PropTypes.number,
   onRate: PropTypes.func,
   count: PropTypes.number,
+  style: PropTypes.any,
 };
 
 Rating.defaultProps = {
   rating: 0,
   count: 5,
   onRate: () => undefined,
+  style: {},
 };
 
 export default Rating;

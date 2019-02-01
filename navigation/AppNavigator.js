@@ -21,7 +21,7 @@ export default ({ initialRoute = 'Auth' }) => {
     },
     {
       initialRouteName: initialRoute,
-      headerMode: 'none',
+      // headerMode: 'none',
     },
   );
 

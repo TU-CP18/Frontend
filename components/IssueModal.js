@@ -11,8 +11,7 @@ import {
 } from 'react-native';
 import Button from './Button';
 import IssueMarker from './IssueMarker';
-
-const carImage = require('../assets/images/car_rear.png');
+import pointInPolygon from '../helpers/pointInPolygon';
 
 class IssueModal extends React.Component {
 
@@ -22,14 +21,53 @@ class IssueModal extends React.Component {
     this.state = {
       issuePosition: {},
     };
+    this.carImage = React.createRef();
   }
 
+  carPolygonModel = [
+    [40, 40],
+    [200, 40],
+    [200, 200],
+    [40, 200],
+  ];
+
+  measureCarImage = () => new Promise((resolve, reject) => {
+    if (!this.carImage) reject();
+    this.carImage.measure((fx, fy, width, height, px, py) => {
+      resolve({ px, py, width, height });
+    });
+  })
+
   setIssuePosition = event => {
-    this.setState({
-      issuePosition: {
-        x: event.nativeEvent.locationX,
-        y: event.nativeEvent.locationY,
-      },
+    // const {
+    //   px,
+    //   py,
+    //   width,
+    //   height,
+    // } = await this.measureCarImage();
+    //     x: event.nativeEvent.locationX,
+
+    const clickPageX = event.nativeEvent.pageX;
+    const clickPageY = event.nativeEvent.pageY;
+
+    // console.log(pointInPolygon([40, 40], this.carPolygonModel));
+
+    this.carImage.current.measure((fx, fy, width, height, px, py) => {
+      console.log(width, height);
+      const imageX = clickPageX - px;
+      const imageY = clickPageY - py;
+
+      if (!pointInPolygon([imageX, imageY], this.carPolygonModel)) {
+        console.log("Did not selected car area...");
+        return;
+      }
+
+      this.setState({
+        issuePosition: {
+          x: imageX,
+          y: imageY,
+        },
+      });
     });
   }
 
@@ -37,6 +75,7 @@ class IssueModal extends React.Component {
     const {
       visible,
       onHide,
+      image,
     } = this.props;
     const { issuePosition } = this.state;
 
@@ -46,6 +85,7 @@ class IssueModal extends React.Component {
         transparent={false}
         visible={visible}
         onRequestClose={onHide}
+        onShow={this.measureImage}
       >
         <View style={styles.container}>
           <View style={styles.content}>
@@ -58,8 +98,9 @@ class IssueModal extends React.Component {
             >
               <View>
                 <Image
-                  source={carImage}
+                  source={image}
                   style={styles.carImage}
+                  ref={this.carImage}
                 />
                 {issuePosition.x && (
                   <IssueMarker
@@ -84,7 +125,7 @@ class IssueModal extends React.Component {
             <Button
               title="Cancel"
               transparent
-              onPress={onHide}
+              onPress={() => { console.log("jaja"); /*console.log(this.carImage.current);*/ onHide(); }}
               wrapperStyle={{
                 marginRight: 20,
               }}
@@ -107,7 +148,7 @@ class IssueModal extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 0,
+    paddingTop: Platform.OS === 'ios' ? 60 : 20,
     padding: 25,
     flexDirection: 'column',
     height: '100%',

@@ -1,4 +1,4 @@
-import { observable } from 'mobx';
+import { observable, action } from 'mobx';
 import { Location } from 'expo';
 import api from '../helpers/api';
 
@@ -13,6 +13,7 @@ export default class NextShiftStore {
 
   lastLoaded = null;
 
+  @action.bound
   async load() {
     if (new Date() - this.lastLoaded >= TWO_MINUTES) {
       this.loading = true;

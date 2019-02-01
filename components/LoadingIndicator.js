@@ -4,7 +4,6 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native';
-// import PropTypes from 'prop-types';
 
 const LoadingIndicator = () => (
   <View style={s.container}>
@@ -17,13 +16,10 @@ const LoadingIndicator = () => (
 
 const s = StyleSheet.create({
   container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#000000',
   },
 });
 

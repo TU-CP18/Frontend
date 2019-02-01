@@ -4,46 +4,85 @@ import {
   View,
   Text,
   Alert,
-  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  LayoutAnimation,
 } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import CarCheckItem from '../../components/CarCheckItem';
+import { observer, inject } from 'mobx-react';
+import { reaction } from 'mobx';
+import { Entypo } from '@expo/vector-icons';
 import Rating from '../../components/Rating';
 import Button from '../../components/Button';
-import IssueModal from '../../components/IssueModal';
-import MapMarker from '../../components/MapMarker';
 
+@inject('issues', 'alert', 'currentShift')
+@observer
 class InteriorCheckScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     return {
       title: 'Interior Check',
+      headerStyle: {
+        backgroundColor: '#000000',
+        elevation: 0,
+        borderBottomWidth: 0,
+      },
+      headerTintColor: '#ffffff',
       headerRight: (
-        <FontAwesome
+        <Entypo
           onPress={() => navigation.navigate('Contact')}
-          name="phone"
-          size={28}
-          style={{
-            paddingRight: 12,
-          }}
+          name="chat"
+          size={32}
+          color="#ffffff"
+          style={{ marginRight: 16, marginTop: 6 }}
         />
       ),
     };
   };
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
-      interiorChecked: false,
-      cleanlinessRating: -1,
-      issueModalVisible: false,
+      rating: -1,
+      issueFormVisible: false,
+      issueDesc: '',
     };
+
+    // react so insertLoading change in the issues store
+    reaction(
+      // react so insertLoading change in the issues store
+      () => props.issues.insertLoading,
+      // reaction callback
+      loading => {
+        if (!loading && !props.issues.insertError) {
+          // when inserting is done and there has been no error
+          // switch back to the issue list view
+          LayoutAnimation.easeInEaseOut();
+          this.setState({
+            issueFormVisible: false,
+            issueDesc: '',
+          });
+        }
+      },
+    );
   }
 
   onPressStartRide = () => {
-    if (!this.checklistDone()) return;
+    const {
+      navigation,
+      alert,
+      currentShift,
+    } = this.props;
+    const {
+      rating,
+    } = this.state;
 
-    const { navigation } = this.props;
+    if (rating === -1) {
+      alert.show(
+        'Rating missing',
+        'Please rate the cleanliness of the interior before you proceed',
+      );
+      return;
+    }
 
     Alert.alert(
       'Confirmation Request',
@@ -51,99 +90,225 @@ class InteriorCheckScreen extends React.Component {
       + 'accordingly and that you are prepared to drive manually if required.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Confirm', onPress: () => navigation.navigate('Ride') },
+        {
+          text: 'Confirm',
+          onPress: async () => {
+            await currentShift.finishRidePreparation({
+              part: 'interior',
+              event: 'preRide',
+              rating: rating,
+            });
+            navigation.navigate('Ride');
+          },
+        },
       ],
       { cancelable: true },
     );
   }
 
-  checklistDone = () => {
-    const { interiorChecked, cleanlinessRating } = this.state;
-    return interiorChecked && cleanlinessRating > 0;
-  }
-
-  showIssueModal = () => {
+  showIssueForm = () => {
+    LayoutAnimation.easeInEaseOut();
     this.setState({
-      issueModalVisible: true,
+      issueFormVisible: true,
     });
   }
 
-  hideIssueModal = () => {
+  hideIssueForm = () => {
+    LayoutAnimation.easeInEaseOut();
     this.setState({
-      issueModalVisible: false,
+      issueFormVisible: false,
     });
+  }
+
+  createIssue = () => {
+    const {
+      issues,
+      alert,
+    } = this.props;
+    const {
+      issueDesc,
+    } = this.state;
+
+    if (!issueDesc || issueDesc.length === 0) {
+      alert.show('Description missing', 'Please provide a description for the issue');
+      return;
+    }
+
+    issues.addIssue(
+      0,
+      0,
+      'interior/general',
+      issueDesc,
+    );
   }
 
   render() {
-    const { navigation } = this.props;
-    const { interiorChecked, cleanlinessRating, issueModalVisible } = this.state;
+    const {
+      issues,
+    } = this.props;
+    const {
+      rating,
+      issueFormVisible,
+      issueDesc,
+    } = this.state;
+
+    const issueList = issues.issues.slice().filter(issue => {
+      return issue.part.startsWith('interior');
+    });
 
     return (
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.guideText}>
-            Check the interior of the car and track new issues if required.
-          </Text>
+      <View style={s.caroussel}>
+        <View style={[s.main, { marginLeft: issueFormVisible ? '-100%' : 0 }]}>
+          <View style={s.content}>
+            <Text style={[s.guideText, { marginTop: 10 }]}>
+              Before you can start the ride, please track new issues of the interior and
+              confirm that the car is operational.
+            </Text>
 
-          <CarCheckItem
-            title="Interior is operational"
-            checked={interiorChecked}
-            onPressCheck={() => this.setState({ interiorChecked: !interiorChecked })}
-            onPressAddIssue={this.showIssueModal}
-            issues={[]}
-          />
+            <Text style={s.titleText}>
+              Existing Issues
+            </Text>
 
-          <Text style={[styles.guideText, styles.guideTextCleanliness]}>
-            Please rate the cleanliness of the car
-          </Text>
-          <Rating
-            rating={cleanlinessRating}
-            onRate={(rating) => this.setState({ cleanlinessRating: rating })}
-            style={styles.rating}
-          />
+            {issueList.length === 0 && (
+              <Text style={[s.guideText, { marginBottom: 40 }]}>
+                There are currently no issue tracked
+              </Text>
+            ) || (
+              <ScrollView>
+                {issueList.map((issue, index) => {
+                  return (
+                    <View key={issue.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14}}>
+                      <View
+                        style={{
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 36,
+                          height: 36,
+                          borderRadius: 18,
+                          backgroundColor: '#ffffff',
+                        }}
+                      >
+                        <Text textAlign="center">
+                          {index + 1}
+                        </Text>
+                      </View>
+                      <Text
+                        style={{
+                          color: '#ffffff',
+                          marginLeft: 20,
+                          fontSize: 16,
+                          marginRight: 20,
+                        }}
+                        numberOfLines={3}
+                      >
+                        {issue.description}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            )}
+
+            <Text style={s.titleText}>
+              Interior Cleanliness
+            </Text>
+            <Text style={[s.guideText, s.guideTextCleanliness]}>
+              Please also rate cleanliness of the interior.
+            </Text>
+            <Rating
+              rating={rating}
+              onRate={userRating => this.setState({ rating: userRating })}
+              style={s.rating}
+            />
+          </View>
+
+          <View style={s.buttonGroup}>
+            <Button
+              onPress={this.showIssueForm}
+              title="Add Issue"
+              iconLeft="Entypo/plus"
+              containerStyle={s.addIssueButtonContainer}
+              textStyle={s.addIssueText}
+            />
+            <Button
+              onPress={this.onPressStartRide}
+              title="Start Ride"
+              wrapperStyle={s.confirmButtonWrapper}
+              containerStyle={s.confirmButtonContainer}
+            />
+          </View>
         </View>
 
-        <Button
-          onPress={this.onPressStartRide}
-          title="Start Ride"
-          iconLeft="MaterialCommunityIcons/car-connected"
-          disabled={!this.checklistDone()}
-          wrapperStyle={{
-            margin: 10,
-          }}
-          containerStyle={[
-            styles.buttonContainer,
-            this.checklistDone() ? styles.buttonEnabled : styles.buttonDisabled,
-          ]}
-          textStyle={[
-            this.checklistDone() ? styles.buttonTextEnabled : styles.buttonTextDisabled,
-          ]}
-          iconStyle={[
-            this.checklistDone() ? styles.buttonIconEnabled : styles.buttonIconDisabled,
-          ]}
-        />
-
-        <IssueModal
-          visible={issueModalVisible}
-          onHide={this.hideIssueModal}
-        />
+        <View style={[s.form, { marginRight: issueFormVisible ? 0 : '-100%' }]}>
+          <View style={s.formContent}>
+            <Text style={[s.titleText, { alignSelf: 'center', marginBottom: 20 }]}>
+              Add new Issue
+            </Text>
+            <Text style={s.guideText}>
+              Provide a short description of the discovered issue. Examples may be
+              broken parts of the interior, signs of vandalism etc.
+            </Text>
+            <Text style={[s.guideText, { marginBottom: 20 }]}>
+              In case you think the car should not transport passengers, please contact the
+              Fleet Manager.
+            </Text>
+            <TextInput
+              style={s.descInput}
+              underlineColorAndroid="transparent"
+              placeholder="Type short description here ..."
+              value={issueDesc}
+              onChangeText={text => this.setState({ issueDesc: text })}
+              placeholderTextColor="#ffffff"
+            />
+          </View>
+          <View style={s.buttonGroup}>
+            <Button
+              onPress={this.hideIssueForm}
+              title="Cancel"
+              containerStyle={s.addIssueButtonContainer}
+              textStyle={s.addIssueText}
+            />
+            <Button
+              onPress={this.createIssue}
+              title="Add Issue"
+              wrapperStyle={s.confirmButtonWrapper}
+              containerStyle={s.confirmButtonContainer}
+            />
+          </View>
+        </View>
       </View>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
+const s = StyleSheet.create({
+  caroussel: {
+    flexDirection: 'row',
     flex: 1,
-    backgroundColor: '#fff',
+    width: '100%',
+  },
+  main: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  form: {
+    width: '100%',
+    backgroundColor: '#000000',
   },
   content: {
     flex: 1,
+    paddingHorizontal: 20,
+  },
+  titleText: {
+    color: '#ffffff',
+    fontSize: 20,
+    marginTop: 10,
+    marginBottom: 10,
   },
   guideText: {
-    padding: 20,
-    paddingLeft: 10,
-    fontSize: 16,
+    color: '#ffffff',
+    fontSize: 17,
+    marginBottom: 10,
   },
   guideTextCleanliness: {
     paddingBottom: 4,
@@ -152,22 +317,40 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     marginBottom: 20,
   },
-  buttonContainer: {
+  formContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  descInput: {
+    borderWidth: 1,
+    borderColor: '#ffffff',
+    padding: 10,
+    borderRadius: 4,
+    height: 38,
+    color: '#ffffff',
+  },
+
+  buttonGroup: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+
+  addIssueButtonContainer: {
+    borderWidth: 0,
+  },
+  addIssueText: {
+    fontSize: 18,
+  },
+
+  confirmButtonWrapper: {
+    flex: 1,
+    marginLeft: 20,
+  },
+  confirmButtonContainer: {
     paddingTop: 12,
     paddingBottom: 12,
-  },
-  buttonEnabled: {
-    backgroundColor: '#1CFF95',
-    borderColor: '#cecece',
-  },
-  buttonDisabled: {
-    backgroundColor: '#cecece',
-  },
-  buttonTextEnabled: {
-    color: '#ffffff',
-  },
-  buttonIconEnabled: {
-    color: '#ffffff',
+    marginBottom: 20,
   },
 });
 

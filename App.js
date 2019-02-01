@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
   Image,
+  NativeModules,
 } from 'react-native';
 import {
   AppLoading,
@@ -15,18 +16,31 @@ import {
 import { observable } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
 import AppNavigator from './navigation/AppNavigator';
+import Alert from './components/Alert';
 
 import UserStore from './store/User';
 import DevSettingsStore from './store/DevSettings';
 import NextShiftStore from './store/NextShift';
+import CurrentShiftStore from './store/CurrentShift';
 import ShiftScheduleStore from './store/ShiftSchedule';
 import ChatStore from './store/Chat';
+import IssuesStore from './store/Issues';
+import AlertStore from './store/Alert';
 
 const userStore = global.userStore = new UserStore();
 const devSettingsStore = global.devSettings = new DevSettingsStore();
 const nextShiftStore = new NextShiftStore();
+const currentShiftStore = global.currentShift = new CurrentShiftStore();
 const shiftScheduleStore = new ShiftScheduleStore();
 const chatStore = new ChatStore();
+const issuesStore = global.issues = new IssuesStore();
+const alertStore = global.alertNotification = new AlertStore();
+
+const { UIManager } = NativeModules;
+
+if (UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 chatStore.load();
 
@@ -36,7 +50,7 @@ class App extends React.Component {
 
   @observable initialRoute = 'Auth';
 
-  _loadResourcesAsync = async () => Promise.all([
+  loadResourcesAsync = async () => Promise.all([
     Asset.loadAsync([
       require('./assets/images/robot-dev.png'),
       require('./assets/images/robot-prod.png'),
@@ -53,25 +67,27 @@ class App extends React.Component {
     devSettingsStore.init(),
   ]);
 
-  _handleLoadingError = (error) => {
+  handleLoadingError = error => {
     // In this case, you might want to report the error to your error
     // reporting service, for example Sentry
     console.warn(error);
   };
 
-  _handleFinishLoading = () => {
+  handleFinishLoading = () => {
     this.isLoadingComplete = true;
     this.initialRoute = userStore.authenticated ? 'Main' : 'Auth';
   };
 
   render() {
-    if (!this.isLoadingComplete && !this.props.skipLoadingScreen) {
+    const { skipLoadingScreen } = this.props;
+
+    if (!this.isLoadingComplete && !skipLoadingScreen) {
       return (
         <View style={styles.splashContainer}>
           <AppLoading
-            startAsync={this._loadResourcesAsync}
-            onError={this._handleLoadingError}
-            onFinish={this._handleFinishLoading}
+            startAsync={this.loadResourcesAsync}
+            onError={this.handleLoadingError}
+            onFinish={this.handleFinishLoading}
           />
           <Image
             style={styles.splashImage}
@@ -85,14 +101,18 @@ class App extends React.Component {
         user={userStore}
         devSettings={devSettingsStore}
         nextShift={nextShiftStore}
+        currentShift={currentShiftStore}
         shiftSchedule={shiftScheduleStore}
         chat={chatStore}
+        issues={issuesStore}
+        alert={alertStore}
       >
         <View style={styles.container}>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
           <AppNavigator
             initialRoute={this.initialRoute}
           />
+          <Alert />
         </View>
       </Provider>
     );
