@@ -10,6 +10,7 @@ import { Audio } from 'expo';
 import Button from '../../components/Button';
 import MapRoute from '../../components/MapRoute';
 import { FontAwesome } from '@expo/vector-icons';
+import asyncSleep from '../../helpers/asyncSleep';
 
 class RideScreen extends React.Component {
   static navigationOptions = {
@@ -100,6 +101,12 @@ class RideScreen extends React.Component {
     try {
       await this.soundObject.loadAsync(require('../../assets/sounds/hello.mp3'));
       await this.soundObject.playAsync();
+      await this.soundObject.setIsLoopingAsync(true);
+      // play it for 30 seconds
+      await asyncSleep(30000);
+      if (this.soundObject) {
+        this.soundObject.stopAsync();
+      }
     } catch (error) {
       console.error(error);
     }
