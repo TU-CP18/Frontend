@@ -21,7 +21,7 @@ const Rating = ({
           name={active ? 'star' : 'star-o'}
           onPress={() => onRate(index + 1)}
           color="#ffffff"
-          size={42}
+          size={54}
           style={s.icon}
         />
       );

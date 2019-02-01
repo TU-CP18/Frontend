@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
 import { reaction } from 'mobx';
+import { StackActions, NavigationActions } from 'react-navigation';
 import { Entypo } from '@expo/vector-icons';
 import Rating from '../../../components/Rating';
 import Button from '../../../components/Button';
@@ -26,7 +27,7 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
       headerTintColor: '#ffffff',
       headerRight: (
         <Entypo
-          onPress={() => alert('This is a button!')}
+          onPress={() => navigation.navigate('Contect')}
           name="chat"
           size={32}
           color="#ffffff"
@@ -43,9 +44,24 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
       rating: -1,
     };
 
+    // react so insertLoading change in the issues store
     reaction(
+      // react so insertLoading change in the issues store
       () => props.currentShift.openCarSucceeded,
-      succeeded => succeeded && props.navigation.navigate('InteriorCheck'),
+      // reaction callback
+      succeeded => {
+        if (!succeeded) return;
+
+        // Reset the stack so that the user cannot return from the
+        // interior inspection to the exterior inspection screen.
+        // Another approach could be to create another sub-navigation-stack
+        // see /navigation/RidePreparationNavigator.js
+        const resetAction = StackActions.reset({
+          index: 0,
+          actions: [NavigationActions.navigate({ routeName: 'InteriorCheck' })],
+        });
+        props.navigation.dispatch(resetAction);
+      },
     );
   }
 
@@ -67,13 +83,18 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
     }
 
     Alert.alert(
-      // 'Alert Title',
       'Confirmation Request',
-      'Confirm that you checked the exterior operational readiness of the '
-      + 'car accordingly',
+      'Confirm that you checked the exterior of the car accordingly',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: currentShift.openCar },
+        {
+          text: 'Confirm',
+          onPress: () => currentShift.openCar({
+            part: 'exterior',
+            event: 'preRide',
+            score: rating,
+          }),
+        },
       ],
       { cancelable: true },
     );
@@ -86,11 +107,11 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
 
     return (
       <View style={s.container}>
-        <View style={{ flex: 1, }}>
-          <Text style={{ color: '#ffffff', marginBottom: 16 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={s.guideText}>
             Please rate the cleanliness of the car before opening th car.
           </Text>
-          <Text style={{ color: '#ffffff' }}>
+          <Text style={s.guideText}>
             If the car is quite dirty and needs a wash, provide a low rating.
           </Text>
           <Rating
@@ -106,8 +127,10 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
 
         <Button
           title="Open Car"
-          containerStyle={{ marginBottom: 20, padding: 16, }}
+          containerStyle={{ marginBottom: 20, padding: 16 }}
+          iconStyle={{ position: 'absolute', top: 14, left: 12 }}
           onPress={this.onPressOpenCar}
+          iconLeft="FontAwesome/unlock-alt"
         />
       </View>
     );
@@ -120,6 +143,11 @@ const s = StyleSheet.create({
     backgroundColor: '#000000',
     paddingHorizontal: 20,
     paddingVertical: 20,
+  },
+  guideText: {
+    color: '#ffffff',
+    fontSize: 17,
+    marginBottom: 10,
   },
 });
 

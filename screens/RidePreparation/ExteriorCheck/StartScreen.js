@@ -4,12 +4,12 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
-  ActivityIndicator,
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import Button from '../../../components/Button';
+import AutoHeightImage from '../../../components/AutoHeightImage';
+import LoadingIndicator from '../../../components/LoadingIndicator';
 
 const markerImg = require('../../../assets/images/marker.png');
 
@@ -30,9 +30,7 @@ class ExteriorCheckScreen extends React.Component {
 
   constructor() {
     super();
-    this.state = {
-
-    };
+    this.state = {};
   }
 
   componentDidMount() {
@@ -76,25 +74,18 @@ class ExteriorCheckScreen extends React.Component {
     } = this.props;
 
     if (issues.fetchLoading) {
-      return (
-        <View style={s.loadingContainer}>
-          <ActivityIndicator
-            size="large"
-            color="#ffffff"
-          />
-        </View>
-      );
+      return (<LoadingIndicator />);
     }
 
     return (
       <View style={s.container}>
-        <View style={{ flex: 1, }}>
-          <View style={{ marginBottom: 20, }}>
+        <View style={{ flex: 1 }}>
+          <View style={{ marginBottom: 10 }}>
             <Text style={s.guideText}>
               Before you can open the car and start the ride, you have to inspect the exterior
-              of the car. To start click the button on the bottom.
+              of the car. To start, click the button on the bottom.
             </Text>
-            <Text style={[s.guideText, { marginTop: 10,}]}>
+            <Text style={s.guideText}>
               Please follow the following rules during the inspection:
             </Text>
           </View>
@@ -106,19 +97,16 @@ class ExteriorCheckScreen extends React.Component {
             showMoreText="Some description for minor issue. This also add a whole new screen with
                           example containing images"
             icon={(
-              // TODO: use auto height
-              // https://stackoverflow.com/questions/42170127/auto-scale-image-height-with-react-native
-              <Image
+              <AutoHeightImage
                 source={markerImg}
-                style={{ width: '60%', height: 58 }}
-                resizeMode="contain"
+                width={40}
               />
             )}
           />
 
           <this.RuleItem
             id="major"
-            text="On bigger issues which impair the operational readiness of the car, please
+            text="On bigger issues, which impair the operational readiness of the car, please
             contact the Fleet manager immediately."
             showMoreLink="What are major issues?"
             showMoreText="Some description for major issue. This also add a whole new screen with
@@ -141,7 +129,7 @@ class ExteriorCheckScreen extends React.Component {
 
         <Button
           title="Start Inspection"
-          containerStyle={{ marginBottom: 20, padding: 16, }}
+          containerStyle={{ marginBottom: 20, padding: 16 }}
           onPress={() => navigation.navigate('ExteriorCheckFrontSide')}
         />
       </View>
@@ -150,12 +138,6 @@ class ExteriorCheckScreen extends React.Component {
 }
 
 const s = StyleSheet.create({
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   container: {
     flex: 1,
     backgroundColor: '#000000',
@@ -165,6 +147,7 @@ const s = StyleSheet.create({
   guideText: {
     color: '#ffffff',
     fontSize: 17,
+    marginBottom: 10,
   },
   ruleItem: {
     flexDirection: 'row',

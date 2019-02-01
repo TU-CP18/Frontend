@@ -1,17 +1,23 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-} from 'react-native';
+import { StyleSheet } from 'react-native';
+import { GiftedChat } from 'react-native-gifted-chat';
+import { inject, observer } from 'mobx-react';
 
+@inject('chat')
+@observer
 class ContactScreen extends React.Component {
   static navigationOptions = {
     title: 'Contact',
   };
 
   render() {
+    const { chat } = this.props;
+
     return (
-      <View style={styles.container} />
+      <GiftedChat
+        messages={chat.messages.slice()}
+        onSend={messages => chat.sendMessage(messages)}
+      />
     );
   }
 }

@@ -23,6 +23,7 @@ import DevSettingsStore from './store/DevSettings';
 import NextShiftStore from './store/NextShift';
 import CurrentShiftStore from './store/CurrentShift';
 import ShiftScheduleStore from './store/ShiftSchedule';
+import ChatStore from './store/Chat';
 import IssuesStore from './store/Issues';
 import AlertStore from './store/Alert';
 
@@ -31,6 +32,7 @@ const devSettingsStore = global.devSettings = new DevSettingsStore();
 const nextShiftStore = new NextShiftStore();
 const currentShiftStore = global.currentShift = new CurrentShiftStore();
 const shiftScheduleStore = new ShiftScheduleStore();
+const chatStore = new ChatStore();
 const issuesStore = global.issues = new IssuesStore();
 const alertStore = global.alertNotification = new AlertStore();
 
@@ -39,6 +41,8 @@ const { UIManager } = NativeModules;
 if (UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+chatStore.load();
 
 @observer
 class App extends React.Component {
@@ -99,6 +103,7 @@ class App extends React.Component {
         nextShift={nextShiftStore}
         currentShift={currentShiftStore}
         shiftSchedule={shiftScheduleStore}
+        chat={chatStore}
         issues={issuesStore}
         alert={alertStore}
       >

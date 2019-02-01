@@ -2,6 +2,9 @@ import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import PropTypes from 'prop-types';
 
+/**
+ * Issue marker used to display issue on the car image.
+ */
 const IssueMarker = ({ x, y, number }) => (
   <View
     style={[
