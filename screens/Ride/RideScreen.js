@@ -6,10 +6,10 @@ import {
   Vibration,
   Platform,
 } from 'react-native';
+import { Audio } from 'expo';
 import Button from '../../components/Button';
 import MapRoute from '../../components/MapRoute';
 import { FontAwesome } from '@expo/vector-icons';
-import { Audio } from 'expo';
 
 class RideScreen extends React.Component {
   static navigationOptions = {
@@ -22,7 +22,7 @@ class RideScreen extends React.Component {
     this.state = {
       nextStopShift: false,
       nextStopShiftReached: false,
-      countdown: 10,
+      countdown: 30,
     };
   }
 
