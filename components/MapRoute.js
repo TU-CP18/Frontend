@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import geolib from 'geolib';
 import MapboxClient from 'mapbox';
 import lib from '../helpers/lib';
+import Button from './Button';
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,8 +31,8 @@ class MapRoute extends React.Component {
       coordinates: [],
       steps: [],
       focusedLocation: {
-        latitude: 0,
-        longitude: 0,
+        latitude: props.latitude,
+        longitude: props.longitude,
         latitudeDelta: 0.0122,
         longitudeDelta: width / height * 0.0122,
       },
@@ -97,6 +98,13 @@ class MapRoute extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    const { isNavigation } = this.props;
+    if (isNavigation && isNavigation !== prevProps.isNavigation) {
+      this.startNavigation();
+    }
+  }
+
   componentWillUnmount() {
     if (this.watchid) {
       this.watchid.remove();
@@ -155,6 +163,7 @@ class MapRoute extends React.Component {
   };
 
   checkUserLocation = async location => {
+    const { onDestinationReached } = this.props;
     const { coordinates, isNavigation } = this.state;
     const { coords } = location;
     if (isNavigation) {
@@ -167,7 +176,10 @@ class MapRoute extends React.Component {
     const distance = geolib.getDistance(coords, destinationCoords);
     // show button if user is close to destination so he can confirm arrival
     // remove arrival button in case the user moves away from the destination
-    this.setState({ destinationReached: (distance <= 20) });
+    if (distance <= 20) {
+      this.setState({ destinationReached: true });
+      onDestinationReached();
+    }
   };
 
   animateNavigation = async coords => {
@@ -299,11 +311,12 @@ class MapRoute extends React.Component {
   };
 
   render() {
+    const { style } = this.props;
     return (
       <View style={styles.container}>
         <MapView
           provider="google"
-          style={styles.map}
+          style={[styles.map, style]}
           showsUserLocation
           loadingEnabled
           customMapStyle={mapStyle}
@@ -363,9 +376,11 @@ const styles = StyleSheet.create({
 
 MapRoute.propTypes = {
   onArrivalConfirmed: PropTypes.func,
+  onDestinationReached: PropTypes.func,
   showDirections: PropTypes.bool,
   showConfirmationButton: PropTypes.bool,
   showNavigationButton: PropTypes.bool,
+  isNavigation: PropTypes.bool,
   latitude: PropTypes.number.isRequired,
   longitude: PropTypes.number.isRequired,
   initialFocus: PropTypes.string,
@@ -373,9 +388,11 @@ MapRoute.propTypes = {
 
 MapRoute.defaultProps = {
   onArrivalConfirmed: () => undefined,
+  onDestinationReached: () => undefined,
   showDirections: true,
   showConfirmationButton: true,
   showNavigationButton: true,
+  isNavigation: false,
   initialFocus: 'gps',
 };
 

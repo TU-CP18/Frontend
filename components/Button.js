@@ -5,8 +5,30 @@ import {
   View,
   TouchableOpacity,
   Text,
+  Image,
 } from 'react-native';
 import Icons from '@expo/vector-icons';
+
+const renderIcon = (iconLeft, iconStyle) => {
+  if (iconLeft.length) {
+    const leftIconName = iconLeft.split('/')[1];
+    const LeftIconComponent = Icons[iconLeft.split('/')[0]];
+    return (
+      <LeftIconComponent
+        name={leftIconName}
+        style={[s.leftIcon, iconStyle]}
+        size={24}
+      />
+    );
+  } else {
+    return (
+      <Image
+        source={iconLeft}
+        style={iconStyle}
+      />
+    );
+  }
+};
 
 const Button = ({
   title,
@@ -22,13 +44,6 @@ const Button = ({
   iconStyle,
   transparent,
 }) => {
-  let LeftIconComponent;
-  let leftIconName;
-
-  if (iconLeft) {
-    leftIconName = iconLeft.split('/')[1];
-    LeftIconComponent = Icons[iconLeft.split('/')[0]];
-  }
 
   return (
     <TouchableOpacity
@@ -45,11 +60,7 @@ const Button = ({
         ]}
       >
         {iconLeft && (
-          <LeftIconComponent
-            name={leftIconName}
-            style={[s.leftIcon, iconStyle]}
-            size={24}
-          />
+          renderIcon(iconLeft, iconStyle)
         )}
         {(title && (
           (subtitle && (
@@ -115,7 +126,10 @@ Button.propTypes = {
   onPress: PropTypes.func,
   disabled: PropTypes.bool,
   transparent: PropTypes.bool,
-  iconLeft: PropTypes.string,
+  iconLeft: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
 };
 
 Button.defaultProps = {

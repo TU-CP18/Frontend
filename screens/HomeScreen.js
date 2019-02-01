@@ -36,17 +36,18 @@ class HomeScreen extends React.Component {
   }
 
   handleCallOperator = () => {
-    this.props.navigation.navigate('Contact');
-    console.log('--> Will make a call');
-  }
+    const { navigation } = this.props;
+    navigation.navigate('Contact');
+  };
 
   handleLogout = () => {
     this.props.user.logout();
-  }
+  };
 
   handleShiftSchedule = () => {
-    this.props.navigation.navigate('Schedule');
-  }
+    const { navigation } = this.props;
+    navigation.navigate('Schedule');
+  };
 
   renderIdleState() {
     const { user, navigation } = this.props;
@@ -152,8 +153,6 @@ class HomeScreen extends React.Component {
                 color="#343434"
                 containerStyle={styles.settingsButton}
                 iconStyle={styles.settingsButtonIconStyle}
-                containerStyle={styles.logoutButton}
-                iconStyle={styles.logoutButtonIconStyle}
               />
             </View>
           </TouchableOpacity>

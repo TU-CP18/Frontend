@@ -3,12 +3,18 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity,
+  Vibration,
+  Platform,
 } from 'react-native';
+import { Audio } from 'expo';
+import { observer, inject } from 'mobx-react';
+import { FontAwesome } from '@expo/vector-icons';
 import Button from '../../components/Button';
-import MapMarker from '../../components/MapMarker';
-import { MaterialIcons } from '@expo/vector-icons';
+import MapRoute from '../../components/MapRoute';
+import asyncSleep from '../../helpers/asyncSleep';
 
+@inject('user', 'chat')
+@observer
 class RideScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -18,197 +24,232 @@ class RideScreen extends React.Component {
     super();
 
     this.state = {
-      autopilotEnabled: false,
       nextStopShift: false,
       nextStopShiftReached: false,
+      countdown: 30,
     };
   }
 
+  componentWillUnmount() {
+    clearInterval(this.countdown);
+  }
+
+  onPressStartRide = () => {
+    this.setState({ nextStopShift: true });
+    this.startCountdown();
+  };
+
+  startCountdown = () => {
+    this.countdown = setInterval(() => {
+      this.decrementCountdown();
+    }, 1000);
+  };
+
+  decrementCountdown = () => {
+    const { countdown } = this.state;
+    if (countdown === 0) {
+      clearInterval(this.countdown);
+      this.startVibration();
+    } else {
+      this.setState(prevState => (
+        { countdown: prevState.countdown - 1 }
+      ));
+    }
+  };
+
+  restartCountdown = () => {
+    const { countdown } = this.state;
+    if (countdown > 0) {
+      clearInterval(this.countdown);
+    }
+    // stop vibration
+    Vibration.cancel();
+    clearInterval(this.vibration);
+    // stop potential audio
+    if (this.soundObject) {
+      this.soundObject.stopAsync();
+    }
+    this.setState({ countdown: 30 });
+    this.startCountdown();
+  };
+
+  startVibration = () => {
+    if (Platform.OS === 'android') {
+      // vibrate for 30 seconds
+      Vibration.vibrate(30000);
+      this.startAudio();
+    }
+    if (Platform.OS === 'ios') {
+      // vibrate for 30 seconds
+      let i = 1;
+      this.vibration = setInterval(() => {
+        Vibration.vibrate(500);
+        i++;
+        if (i === 50) {
+          Vibration.cancel();
+          clearInterval(this.vibration);
+          this.startAudio();
+        }
+      }, 600);
+    }
+  };
+
+  startAudio = async () => {
+    const { countdown } = this.state;
+    if (countdown > 0) {
+      // user has swiped the button during vibration
+      return;
+    }
+    this.soundObject = new Audio.Sound();
+    try {
+      await this.soundObject.loadAsync(require('../../assets/sounds/hello.mp3'));
+      await this.soundObject.playAsync();
+      await this.soundObject.setIsLoopingAsync(true);
+      // play it for 30 seconds
+      await asyncSleep(30000);
+      if (this.soundObject) {
+        this.soundObject.stopAsync();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    this.sendNotificationToFleetManager();
+  };
+
+  sendNotificationToFleetManager = () => {
+    const { chat, user } = this.props;
+    const { countdown } = this.state;
+    if (countdown > 0) {
+      // user has swiped the button during audio
+      return;
+    }
+    // send message to fleet manager
+    chat.sendMessage([{
+      _id: Math.round(Math.random() * 1000000),
+      text: 'I am currently unaware for more than one minute',
+      createdAt: new Date(),
+      user: {
+        _id: user.id,
+      },
+    }]);
+  };
+
   renderDriveModeButton = () => {
     const { navigation } = this.props;
-    const { nextStopShiftReached, autopilotEnabled } = this.state;
+    const { nextStopShiftReached, nextStopShift, countdown } = this.state;
 
     if (nextStopShiftReached) {
       // end of shift
       return (
         <Button
-          title="Stop Ride"
-          subtitle="And do a final check"
-          onPress={() => navigation.navigate('RideCompletion')}
+          title="Finish Ride"
           wrapperStyle={styles.modeButtonWrapper}
-          containerStyle={{
-            backgroundColor: '#ffffff',
-            borderColor: '#000000',
-          }}
-          textStyle={{
-            color: '#000000',
-            fontSize: 22,
-            alignSelf: 'center',
-          }}
-          subtitleStyle={[styles.modeButtonSubtitle, { color: '#000000' }]}
+          onPress={() => navigation.navigate('RideCompletion')}
         />
       );
     }
-
-    if (autopilotEnabled) {
+    if (nextStopShift && !nextStopShiftReached) {
       return (
         <Button
-          title="STOP"
-          subtitle="Autopilot"
-          onPress={() => this.setState({ autopilotEnabled: false })}
-          wrapperStyle={styles.modeButtonWrapper}
-          containerStyle={{
-            backgroundColor: '#D98B6F', // D94643
-            borderColor: '#D94643',
-          }}
-          iconLeft="MaterialIcons/warning"
+          title={`Awareness Check ${countdown}`}
+          iconLeft={require('../../assets/images/swipe-icon.png')}
           iconStyle={{
-            position: 'absolute',
-            left: 15,
-            top: '50%',
-            transform: [{
-              translateY: -10,
-            }],
-            color: '#ffffff',
-            fontSize: 34,
+            resizeMode: 'contain', height: 25, width: 31.5, marginRight: 5,
           }}
-          textStyle={{
-            color: '#ffffff',
-            fontSize: 22,
-            alignSelf: 'center',
-          }}
-          subtitleStyle={[styles.modeButtonSubtitle, { color: '#ffffff' }]}
+          wrapperStyle={styles.modeButtonWrapper}
+          onPress={this.restartCountdown}
         />
       );
     }
-
     return (
       <Button
-        title="START"
-        subtitle="Autopilot"
-        onPress={() => this.setState({ autopilotEnabled: true })}
+        title="Start Ride"
         wrapperStyle={styles.modeButtonWrapper}
-        containerStyle={{
-          backgroundColor: '#00FF77',
-          borderColor: '#41D904',
-        }}
-        textStyle={{
-          color: '#ffffff',
-          fontSize: 22,
-          alignSelf: 'center',
-        }}
-        subtitleStyle={[styles.modeButtonSubtitle, { color: '#ffffff' }]}
+        onPress={this.onPressStartRide}
       />
     );
-  }
+  };
+
+  renderControlButtons = () => {
+    const { navigation } = this.props;
+    return (
+      <View style={styles.buttonGroup}>
+        <Button
+          title="Car"
+          subtitle="Control"
+          onPress={() => navigation.navigate('Control')}
+          iconLeft="Ionicons/md-settings"
+          wrapperStyle={styles.buttonWrapper}
+          containerStyle={styles.buttonContainer}
+          iconStyle={styles.buttonIcon}
+          textStyle={styles.buttonText}
+          subtitleStyle={styles.buttonSubtitle}
+        />
+
+        <Button
+          title="Report"
+          subtitle="Incident"
+          onPress={() => {}}
+          iconLeft="MaterialIcons/report"
+          wrapperStyle={styles.buttonWrapper}
+          containerStyle={styles.buttonContainer}
+          iconStyle={styles.buttonIcon}
+          textStyle={styles.buttonText}
+          subtitleStyle={styles.buttonSubtitle}
+        />
+
+        <Button
+          title="Contact"
+          subtitle="Manager"
+          onPress={() => navigation.navigate('Contact')}
+          iconLeft="FontAwesome/phone"
+          wrapperStyle={styles.buttonWrapper}
+          containerStyle={styles.buttonContainer}
+          iconStyle={styles.buttonIcon}
+          textStyle={styles.buttonText}
+          subtitleStyle={styles.buttonSubtitle}
+        />
+      </View>
+    );
+  };
+
+  renderPhaseText = () => {
+    const { nextStopShift, nextStopShiftReached } = this.state;
+    if (nextStopShiftReached) {
+      return 'Interchange point reached';
+    }
+    if (nextStopShift && !nextStopShiftReached) {
+      return 'Drive to interchange point';
+    }
+    return 'Pickup Passenger';
+  };
 
   render() {
-    const { navigation } = this.props;
-    const { nextStopShift, nextStopShiftReached } = this.state;
+    const { nextStopShift } = this.state;
 
     return (
       <View style={styles.container}>
-        <MapMarker
-          coordinate={{
-            latitude: 52.523,
-            longitude: 13.413492,
-          }}
+        <MapRoute
+          showNavigationButton={false}
+          showConfirmationButton={false}
+          isNavigation={nextStopShift}
+          onDestinationReached={() => this.setState({ nextStopShiftReached: true })}
+          latitude={52.523}
+          longitude={13.413492}
           style={styles.mapPreview}
         />
 
-        <TouchableOpacity
-          onPress={() => {
-            this.setState({ nextStopShift: true, });
-            if (nextStopShift) {
-              this.setState({ nextStopShiftReached: true, });
-            }
-          }}
-          style={{
-            position: 'absolute',
-            top: 60,
-            left: '10%',
-            right: '10%',
-            width: '80%',
-          }}
-        >
-          <View style={{
-            backgroundColor: '#689FD9',
-            width: '100%',
-            borderRadius: 8,
-            padding: 12,
-          }}>
-            {!nextStopShift && (
-              <Text style={{ color: 'white', fontSize: 18 }}>
-                Next: Pickup Passenger
-              </Text>
-            )}
-            {nextStopShift && !nextStopShiftReached && (
-              <Text style={{ color: 'white', fontSize: 18, }}>
-                Next: End Shift
-                {'\n'}
-                Drive to interchange point
-              </Text>
-            )}
-            {nextStopShiftReached && (
-              <Text style={{ color: 'white', fontSize: 18, }}>
-                Interchange point reached
-                {'\n'}
-                End of shift
-              </Text>
-            )}
+        <View style={styles.warningContainer}>
+          <Text style={styles.warningText}>Next Stop</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome name="caret-right" size={30} style={styles.warningIcon} />
+            <Text style={styles.warningTitle}>{this.renderPhaseText()}</Text>
           </View>
-        </TouchableOpacity>
-
-        {!nextStopShift && (
-          <View style={styles.warningContainer}>
-            <MaterialIcons name="warning" size={36} style={styles.warningIcon} />
-            <View>
-              <Text style={styles.warningTitle}>Warning</Text>
-              <Text style={styles.warningText}>A door is open</Text>
-            </View>
-          </View>
-        )}
+        </View>
 
         <View style={styles.content}>
           {this.renderDriveModeButton()}
-
-          <View style={styles.buttonGroup}>
-            <Button
-              title="Car"
-              subtitle="Controll"
-              onPress={() => navigation.navigate('Control')}
-              iconLeft="Ionicons/md-settings"
-              wrapperStyle={styles.buttonWrapper}
-              containerStyle={styles.buttonContainer}
-              iconStyle={styles.buttonIcon}
-              textStyle={styles.buttonText}
-              subtitleStyle={styles.buttonSubtitle}
-            />
-
-            <Button
-              title="Report"
-              subtitle="Incident"
-              onPress={() => {}}
-              iconLeft="MaterialIcons/report"
-              wrapperStyle={styles.buttonWrapper}
-              containerStyle={styles.buttonContainer}
-              iconStyle={styles.buttonIcon}
-              textStyle={styles.buttonText}
-              subtitleStyle={styles.buttonSubtitle}
-            />
-
-            <Button
-              title="Contact"
-              subtitle="Fl. Manager"
-              onPress={() => {}}
-              iconLeft="FontAwesome/phone"
-              wrapperStyle={styles.buttonWrapper}
-              containerStyle={styles.buttonContainer}
-              iconStyle={styles.buttonIcon}
-              textStyle={styles.buttonText}
-              subtitleStyle={styles.buttonSubtitle}
-            />
-          </View>
+          {this.renderControlButtons()}
         </View>
       </View>
     );
@@ -225,6 +266,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+    backgroundColor: '#000000',
   },
   buttonGroup: {
     flexDirection: 'row',
@@ -238,6 +280,8 @@ const styles = StyleSheet.create({
   buttonContainer: {
     alignItems: 'center',
     borderRadius: 25,
+    borderColor: '#ffffff',
+    borderWidth: 1,
     backgroundColor: '#000000',
     flex: 1,
     justifyContent: 'flex-start',
@@ -254,18 +298,17 @@ const styles = StyleSheet.create({
   },
   warningContainer: {
     position: 'absolute',
-    top: 110,
+    top: 50,
     left: '10%',
+    right: '10%',
     width: '80%',
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     borderRadius: 8,
     padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   warningIcon: {
     color: '#ffffff',
-    marginRight: 10,
+    marginRight: 5,
   },
   warningTitle: {
     fontSize: 19,

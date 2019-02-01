@@ -12,6 +12,8 @@ export default class User {
 
   @observable name;
 
+  @observable id;
+
   @observable loginLoading = false;
 
   @observable loginError;
@@ -26,7 +28,8 @@ export default class User {
       if (userDetails.id_token) {
         this.authenticated = true;
         this.authToken = userDetails.id_token;
-        this.name = `${userDetails.lastName || ''} ${userDetails.firstName || ''}`;
+        this.id = userDetails.id;
+        this.name = `${userDetails.firstName || ''} ${userDetails.lastName || ''}`;
       }
     } catch (error) {
       console.log(error);
