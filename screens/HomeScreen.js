@@ -152,6 +152,8 @@ class HomeScreen extends React.Component {
                 color="#343434"
                 containerStyle={styles.settingsButton}
                 iconStyle={styles.settingsButtonIconStyle}
+                containerStyle={styles.logoutButton}
+                iconStyle={styles.logoutButtonIconStyle}
               />
             </View>
           </TouchableOpacity>
