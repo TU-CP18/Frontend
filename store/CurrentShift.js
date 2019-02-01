@@ -18,6 +18,12 @@ export default class CurrentShiftStore {
 
   @observable openCarError = false;
 
+  @observable closeCarLoading = false;
+
+  @observable closeCarSucceeded = false;
+
+  @observable closeCarError = false;
+
   constructor() {
     this.persistCleanliness = CurrentShiftStore.persistCleanliness;
   }
@@ -101,6 +107,59 @@ export default class CurrentShiftStore {
   async finishRidePreparation(rating) {
     // persist rating of the cleanlines
     await this.persistCleanliness(rating);
+  }
+
+  @action.bound
+  async closeCar(rating) {
+    const currentLocation = await lib.getLocation();
+    this.closeCarSucceeded = false;
+    this.closeCarLoading = true;
+    this.closeCarError = false;
+
+    console.log("closing car")
+
+    // persist rating of the cleanlines
+    await this.persistCleanliness({
+      part: 'interior',
+      event: 'postRide',
+      rating: rating,
+    });
+
+    console.log("cleanliness persisted")
+
+    // authorize the closeing of the car
+    try {
+      const res = await api.post(`/shifts/${this.shiftId}/authorize`, { currentLocation });
+      if (res.status === 200) {
+        this.closeCarSucceeded = true;
+      } else {
+        this.closeCarError = true;
+        Alert.alert('Authentication issue', 'You are not allowed to close the car. Contact your fleet manager.');
+      }
+    } catch (error) {
+      this.closeCarError = true;
+      if (error.status === 401) {
+        console.log('Close car: authentication error', error);
+      } else {
+        console.log('error in Close car', error, error.message);
+      }
+      Alert.alert('Authentication issue', 'You are not allowed to close the car. Contact your fleet manager.');
+    } finally {
+      this.closeCarLoading = false;
+
+      // TODO: temporary, remove when authorize endpoint is available
+      this.closeCarSucceeded = true;
+    }
+  }
+
+  @action.bound
+  async finishShift(rating) {
+    // persist rating of the cleanlines
+    await this.persistCleanliness({
+      part: 'exterior',
+      event: 'postRide',
+      rating: rating,
+    });
   }
 
   /**
