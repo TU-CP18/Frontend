@@ -8,6 +8,12 @@ import { inject, observer } from 'mobx-react';
 class ContactScreen extends React.Component {
   static navigationOptions = {
     title: 'Contact',
+    headerStyle: {
+      backgroundColor: '#000000',
+      elevation: 0,
+      borderBottomWidth: 0,
+    },
+    headerTintColor: '#ffffff',
   };
 
   render() {
