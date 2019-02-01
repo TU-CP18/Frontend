@@ -26,6 +26,7 @@ export default class User {
       await asyncSleep(1000);
       const userDetails = JSON.parse(await AsyncStorage.getItem(USER_DETAILS));
       if (userDetails.id_token) {
+        this.id = userDetails.id;
         this.authenticated = true;
         this.authToken = userDetails.id_token;
         this.id = userDetails.id;
@@ -53,16 +54,17 @@ export default class User {
           await AsyncStorage.setItem(USER_DETAILS, JSON.stringify({ ...tokenResponse.data, ...accountResponse.data }));
 
           runInAction(async () => {
+            this.id = accountResponse.data.id;
             this.name = `${accountResponse.data.lastName || ''} ${accountResponse.data.firstName || ''}`;
           });
         });
         return true;
-      } else {
-        runInAction(() => {
-          this.loginError = 'User not found';
-        });
-        return false;
       }
+
+      runInAction(() => {
+        this.loginError = 'User not found';
+      });
+      return false;
     } catch (error) {
       if (error.status === 401) {
         runInAction(() => {

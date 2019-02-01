@@ -9,4 +9,5 @@ const host = manifest.packagerOpts
 
 export default {
   host: `http://${host}:8080/api`,
+  loggerHost: 'http://log-collector.isecp.de/api/log',
 };
