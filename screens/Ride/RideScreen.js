@@ -7,11 +7,14 @@ import {
   Platform,
 } from 'react-native';
 import { Audio } from 'expo';
+import { observer, inject } from 'mobx-react';
+import { FontAwesome } from '@expo/vector-icons';
 import Button from '../../components/Button';
 import MapRoute from '../../components/MapRoute';
-import { FontAwesome } from '@expo/vector-icons';
 import asyncSleep from '../../helpers/asyncSleep';
 
+@inject('user', 'chat')
+@observer
 class RideScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -114,12 +117,21 @@ class RideScreen extends React.Component {
   };
 
   sendNotificationToFleetManager = () => {
+    const { chat, user } = this.props;
     const { countdown } = this.state;
     if (countdown > 0) {
       // user has swiped the button during audio
       return;
     }
-    // TODO: send message to FM
+    // send message to fleet manager
+    chat.sendMessage([{
+      _id: Math.round(Math.random() * 1000000),
+      text: 'I am currently unaware for more than one minute',
+      createdAt: new Date(),
+      user: {
+        _id: user.id,
+      },
+    }]);
   };
 
   renderDriveModeButton = () => {
@@ -158,7 +170,50 @@ class RideScreen extends React.Component {
     );
   };
 
-  renderPhaseText() {
+  renderControlButtons = () => {
+    const { navigation } = this.props;
+    return (
+      <View style={styles.buttonGroup}>
+        <Button
+          title="Car"
+          subtitle="Control"
+          onPress={() => navigation.navigate('Control')}
+          iconLeft="Ionicons/md-settings"
+          wrapperStyle={styles.buttonWrapper}
+          containerStyle={styles.buttonContainer}
+          iconStyle={styles.buttonIcon}
+          textStyle={styles.buttonText}
+          subtitleStyle={styles.buttonSubtitle}
+        />
+
+        <Button
+          title="Report"
+          subtitle="Incident"
+          onPress={() => {}}
+          iconLeft="MaterialIcons/report"
+          wrapperStyle={styles.buttonWrapper}
+          containerStyle={styles.buttonContainer}
+          iconStyle={styles.buttonIcon}
+          textStyle={styles.buttonText}
+          subtitleStyle={styles.buttonSubtitle}
+        />
+
+        <Button
+          title="Contact"
+          subtitle="Manager"
+          onPress={() => navigation.navigate('Contact')}
+          iconLeft="FontAwesome/phone"
+          wrapperStyle={styles.buttonWrapper}
+          containerStyle={styles.buttonContainer}
+          iconStyle={styles.buttonIcon}
+          textStyle={styles.buttonText}
+          subtitleStyle={styles.buttonSubtitle}
+        />
+      </View>
+    );
+  };
+
+  renderPhaseText = () => {
     const { nextStopShift, nextStopShiftReached } = this.state;
     if (nextStopShiftReached) {
       return 'Interchange point reached';
@@ -167,10 +222,9 @@ class RideScreen extends React.Component {
       return 'Drive to interchange point';
     }
     return 'Pickup Passenger';
-  }
+  };
 
   render() {
-    const { navigation } = this.props;
     const { nextStopShift } = this.state;
 
     return (
@@ -195,44 +249,7 @@ class RideScreen extends React.Component {
 
         <View style={styles.content}>
           {this.renderDriveModeButton()}
-
-          <View style={styles.buttonGroup}>
-            <Button
-              title="Car"
-              subtitle="Control"
-              onPress={() => navigation.navigate('Control')}
-              iconLeft="Ionicons/md-settings"
-              wrapperStyle={styles.buttonWrapper}
-              containerStyle={styles.buttonContainer}
-              iconStyle={styles.buttonIcon}
-              textStyle={styles.buttonText}
-              subtitleStyle={styles.buttonSubtitle}
-            />
-
-            <Button
-              title="Report"
-              subtitle="Incident"
-              onPress={() => {}}
-              iconLeft="MaterialIcons/report"
-              wrapperStyle={styles.buttonWrapper}
-              containerStyle={styles.buttonContainer}
-              iconStyle={styles.buttonIcon}
-              textStyle={styles.buttonText}
-              subtitleStyle={styles.buttonSubtitle}
-            />
-
-            <Button
-              title="Contact"
-              subtitle="Manager"
-              onPress={() => {}}
-              iconLeft="FontAwesome/phone"
-              wrapperStyle={styles.buttonWrapper}
-              containerStyle={styles.buttonContainer}
-              iconStyle={styles.buttonIcon}
-              textStyle={styles.buttonText}
-              subtitleStyle={styles.buttonSubtitle}
-            />
-          </View>
+          {this.renderControlButtons()}
         </View>
       </View>
     );

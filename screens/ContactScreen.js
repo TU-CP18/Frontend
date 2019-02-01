@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { inject, observer } from 'mobx-react';
 
-@inject('chat')
+@inject('user', 'chat')
 @observer
 class ContactScreen extends React.Component {
   static navigationOptions = {
@@ -11,12 +11,15 @@ class ContactScreen extends React.Component {
   };
 
   render() {
-    const { chat } = this.props;
+    const { chat, user } = this.props;
 
     return (
       <GiftedChat
         messages={chat.messages.slice()}
         onSend={messages => chat.sendMessage(messages)}
+        user={{
+          _id: user.id,
+        }}
       />
     );
   }

@@ -21,6 +21,7 @@ export default class ChatStore {
     this.topic = `/topic/public/${this.userDetails.id}`;
 
     // load history
+    /*
     this.loading = true;
     try {
       const response = await api.get('/_search/chat-messages', {
@@ -54,15 +55,16 @@ export default class ChatStore {
     } finally {
       this.loading = false;
     }
+    */
   }
 
   onConnected = () => {
     this.stompClient.subscribe(this.topic, this.onReceivedMessage);
-  }
+  };
 
   onError = error => {
     console.log('Could not connect to WebSocket server. Please refresh this page to try again!', error);
-  }
+  };
 
   @action
   sendMessage(messages = []) {
