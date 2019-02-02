@@ -1,9 +1,10 @@
+import { AsyncStorage } from 'react-native';
 import { observable, action } from 'mobx';
-import api from '../helpers/api';
 import { GiftedChat } from 'react-native-gifted-chat';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
-import { AsyncStorage } from 'react-native';
+import * as moment from 'moment';
+import api from '../helpers/api';
 
 const USER_DETAILS = 'user/user_details';
 
@@ -19,6 +20,7 @@ export default class ChatStore {
     this.stompClient.connect({}, this.onConnected, this.onError);
     this.userDetails = JSON.parse(await AsyncStorage.getItem(USER_DETAILS));
     this.topic = `/topic/public/${this.userDetails.id}`;
+    this.fleetManagerId = 3; // should we get this dynamically?
 
     // load history
     this.loading = true;
@@ -67,6 +69,18 @@ export default class ChatStore {
       type: 'CHAT',
     };
     this.stompClient.send(this.topic, {}, JSON.stringify(chatMessage));
+    // send message to database
+    const chatMessageDb = {
+      createdAt: moment.format,
+      recipient: {
+        id: this.fleetManagerId,
+      },
+      sender: {
+        id: this.userDetails.id,
+      },
+      text: messages[0].text,
+    };
+    api.post('/chat-messages/', JSON.stringify(chatMessageDb), null, { 'Content-Type': 'application/json' });
   }
 
   /**
