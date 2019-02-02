@@ -1,7 +1,7 @@
 
 
 import axios from 'axios';
-import { loggerHost } from '../constants/Api';
+import api from '../constants/Api';
 
 /* VEHICLE event types */
 const NAV_ESTOP = 'NAV_ESTOP';
@@ -28,8 +28,7 @@ const RIDE_AWARENESS_IGNORED = 'RIDE_AWARENESS_IGNORED'; // The driver ignored t
 const log = type => {
   const options = {
     method: 'POST',
-    baseURL: loggerHost,
-    url: url,
+    url: api.loggerHost,
     responseType: 'json',
     headers: {},
   };
@@ -46,17 +45,29 @@ const log = type => {
     hostname: `sd-mobile-device-${global.userStore.id}`,
     driverId: global.userStore.id,
     shiftId: global.currentShift.shiftId,
-    license: global.currentShift.car.license.carLicence,
+    license: global.nextShift.shift.car.id,
   };
 
   return axios(options);
 };
+
+/**
+ * Soft log catches all errors. The caller does not care for success or failure.
+ */
+const slog = async type => {
+  try {
+    await log(type);
+  } catch (error) {
+    console.log(`error while logging event ${type}:`, error);
+  }
+}
 
 // export all constans and the log method
 // in that way it can be called via logger.log(logger.NAV_ESTOP);
 // without importing the constants explicitely
 export default {
   log,
+  slog,
   NAV_ESTOP,
   CONTROL_SET,
   SHIFT_INTERCEPTING,

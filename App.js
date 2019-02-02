@@ -29,7 +29,7 @@ import AlertStore from './store/Alert';
 
 const userStore = global.userStore = new UserStore();
 const devSettingsStore = global.devSettings = new DevSettingsStore();
-const nextShiftStore = new NextShiftStore();
+const nextShiftStore = global.nextShift = new NextShiftStore();
 const currentShiftStore = global.currentShift = new CurrentShiftStore();
 const shiftScheduleStore = new ShiftScheduleStore();
 const chatStore = new ChatStore();

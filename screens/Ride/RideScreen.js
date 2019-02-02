@@ -12,8 +12,9 @@ import { FontAwesome } from '@expo/vector-icons';
 import Button from '../../components/Button';
 import MapRoute from '../../components/MapRoute';
 import asyncSleep from '../../helpers/asyncSleep';
+import logger from '../../helpers/logger';
 
-@inject('user', 'chat')
+@inject('user', 'chat', 'currentShift')
 @observer
 class RideScreen extends React.Component {
   static navigationOptions = {
@@ -35,9 +36,17 @@ class RideScreen extends React.Component {
   }
 
   onPressStartRide = () => {
+    const { currentShift } = this.props;
+    currentShift.startRide();
     this.setState({ nextStopShift: true });
     this.startCountdown();
   };
+
+  onDestinationReachted = () => {
+    const { currentShift } = this.props;
+    currentShift.finishRide();
+    this.setState({ nextStopShiftReached: true });
+  }
 
   startCountdown = () => {
     this.countdown = setInterval(() => {
@@ -59,6 +68,7 @@ class RideScreen extends React.Component {
 
   restartCountdown = () => {
     const { countdown } = this.state;
+    logger.slog(logger.RIDE_AWARENESS_CHECKED);
     if (countdown > 0) {
       clearInterval(this.countdown);
     }
@@ -119,6 +129,7 @@ class RideScreen extends React.Component {
   sendNotificationToFleetManager = () => {
     const { chat, user } = this.props;
     const { countdown } = this.state;
+    logger.slog(logger.RIDE_AWARENESS_IGNORED);
     if (countdown > 0) {
       // user has swiped the button during audio
       return;
@@ -233,7 +244,7 @@ class RideScreen extends React.Component {
           showNavigationButton={false}
           showConfirmationButton={false}
           isNavigation={nextStopShift}
-          onDestinationReached={() => this.setState({ nextStopShiftReached: true })}
+          onDestinationReached={this.onDestinationReachted}
           latitude={52.523}
           longitude={13.413492}
           style={styles.mapPreview}

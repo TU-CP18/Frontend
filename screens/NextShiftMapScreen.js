@@ -37,6 +37,7 @@ class NextShiftMapScreen extends React.Component {
         onArrivalConfirmed={this.onPressArrivalConfirmed}
         latitude={nextShift.shift.latStart}
         longitude={nextShift.shift.longStart}
+        trackNavigationEvent
       />
     );
   }
