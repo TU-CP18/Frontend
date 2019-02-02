@@ -2,15 +2,12 @@ import { observable, action } from 'mobx';
 import { Alert } from 'react-native';
 import api from '../helpers/api';
 import lib from '../helpers/lib';
+import logger from '../helpers/logger';
 
 export default class CurrentShiftStore {
   @observable shiftId = null;
 
   @observable car = null;
-
-  @observable loading = null;
-
-  @observable error = null;
 
   @observable openCarLoading = false;
 
@@ -39,33 +36,10 @@ export default class CurrentShiftStore {
   @action.bound
   async startShift(nextShift) {
     this.shiftId = nextShift.id;
+    this.car = nextShift.car;
 
-    // track state
-    try {
-      const res = await api.post(`/shifts/${this.shiftId}/track`, {
-        state: 'confirmedArrival',
-      });
-      if (res.status !== 200) {
-        console.log('error when confirming arrival', res);
-      }
-    } catch (error) {
-      console.log('error when confirming arrival', error);
-    }
-
-    // nextShift currently does not hold the car entity
-    // receive the complete shift object
-    this.loading = true;
-
-    try {
-      const response = await api.get(`/shifts/${this.shiftId}`);
-      console.log('response.data.car', response.data.car);
-      this.car = response.data.car;
-    } catch (e) {
-      this.error = 'Error';
-      console.log(e);
-    } finally {
-      this.loading = false;
-    }
+    // track event
+    logger.slog(logger.SHIFT_CONFIRM_ARRIVAL);
   }
 
   @action.bound
@@ -105,6 +79,9 @@ export default class CurrentShiftStore {
       // TODO: temporary, remove when authorize endpoint is available
       this.openCarSucceeded = true;
     }
+
+    // track event
+    logger.slog(logger.VEHICLE_OPEN);
   }
 
   @action.bound
@@ -115,6 +92,16 @@ export default class CurrentShiftStore {
       event: 'preRide',
       rating: rating,
     });
+  }
+
+  async startRide() {
+    // track event
+    logger.slog(logger.RIDE_START);
+  }
+
+  async finishRide() {
+    // track event
+    logger.slog(logger.RIDE_FINISH);
   }
 
   @action.bound
@@ -154,6 +141,8 @@ export default class CurrentShiftStore {
       // TODO: temporary, remove when authorize endpoint is available
       this.closeCarSucceeded = true;
     }
+
+    logger.slog(logger.VEHICLE_CLOSE);
   }
 
   @action.bound
@@ -164,6 +153,8 @@ export default class CurrentShiftStore {
       event: 'postRide',
       rating: rating,
     });
+
+    logger.slog(logger.SHIFT_FINISH);
   }
 
   /**

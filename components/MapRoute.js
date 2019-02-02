@@ -20,6 +20,7 @@ import geolib from 'geolib';
 import MapboxClient from 'mapbox';
 import lib from '../helpers/lib';
 import Button from './Button';
+import logger from '../helpers/logger';
 
 const { width, height } = Dimensions.get('window');
 
@@ -216,12 +217,19 @@ class MapRoute extends React.Component {
   };
 
   startNavigation = async () => {
+    const { trackNavigationEvent } = this.props;
     const { coordinates } = this.state;
+
     this.setState({ isNavigation: true });
     this.map.fitToCoordinates(coordinates.slice(0, 2));
     this.map.animateToViewingAngle(45);
     const currentLocation = await lib.getLocation();
     this.animateNavigation(currentLocation);
+
+    if (trackNavigationEvent) {
+      // log event
+      logger.slog(logger.SHIFT_INTERCEPTING);
+    }
   };
 
   renderConfirmalButton() {
@@ -384,6 +392,7 @@ MapRoute.propTypes = {
   latitude: PropTypes.number.isRequired,
   longitude: PropTypes.number.isRequired,
   initialFocus: PropTypes.string,
+  trackNavigationEvent: PropTypes.bool,
 };
 
 MapRoute.defaultProps = {
@@ -394,6 +403,7 @@ MapRoute.defaultProps = {
   showNavigationButton: true,
   isNavigation: false,
   initialFocus: 'gps',
+  trackNavigationEvent: false,
 };
 
 export default MapRoute;
