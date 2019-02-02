@@ -4,6 +4,7 @@ import { GiftedChat } from 'react-native-gifted-chat';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import * as moment from 'moment';
+import { Notifications } from 'expo';
 import api from '../helpers/api';
 
 const USER_DETAILS = 'user/user_details';
@@ -89,6 +90,17 @@ export default class ChatStore {
   onReceivedMessage = messages => {
     const messageObject = JSON.parse(messages.body);
     if (messageObject.user._id !== this.userDetails.id) {
+      const localNotification = {
+        title: messageObject.sender,
+        body: messageObject.text,
+        android: {
+          sound: true,
+        },
+        ios: {
+          sound: true,
+        },
+      };
+      Notifications.presentLocalNotificationAsync(localNotification);
       this.messages = GiftedChat.append(this.messages, messageObject);
     }
   };

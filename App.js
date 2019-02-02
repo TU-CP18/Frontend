@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Alert as ReactAlert,
   Platform,
   StatusBar,
   StyleSheet,
@@ -12,6 +13,8 @@ import {
   Asset,
   Font,
   Icon,
+  Notifications,
+  Permissions,
 } from 'expo';
 import { observable } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
@@ -43,6 +46,15 @@ if (UIManager.setLayoutAnimationEnabledExperimental) {
 }
 
 chatStore.load();
+
+async function getiOSNotificationPermission() {
+  const { status } = await Permissions.getAsync(
+    Permissions.NOTIFICATIONS,
+  );
+  if (status !== 'granted') {
+    await Permissions.askAsync(Permissions.NOTIFICATIONS);
+  }
+}
 
 @observer
 class App extends React.Component {
@@ -77,6 +89,19 @@ class App extends React.Component {
     this.isLoadingComplete = true;
     this.initialRoute = userStore.authenticated ? 'Main' : 'Auth';
   };
+
+  listenForNotifications = () => {
+    Notifications.addListener(notification => {
+      if (notification.origin === 'received' && Platform.OS === 'ios') {
+        ReactAlert.alert(notification.title, notification.body);
+      }
+    });
+  };
+
+  componentWillMount() {
+    getiOSNotificationPermission();
+    this.listenForNotifications();
+  }
 
   render() {
     const { skipLoadingScreen } = this.props;
