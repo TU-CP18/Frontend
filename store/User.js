@@ -26,7 +26,6 @@ export default class User {
       await asyncSleep(1000);
       const userDetails = JSON.parse(await AsyncStorage.getItem(USER_DETAILS));
       if (userDetails.id_token) {
-        this.id = userDetails.id;
         this.authenticated = true;
         this.authToken = userDetails.id_token;
         this.id = userDetails.id;
