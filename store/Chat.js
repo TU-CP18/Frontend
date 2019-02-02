@@ -1,5 +1,5 @@
-import { observable, action } from "mobx";
-import api from "../helpers/api";
+import { observable, action } from 'mobx';
+import api from '../helpers/api';
 import { GiftedChat } from 'react-native-gifted-chat';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
@@ -24,11 +24,7 @@ export default class ChatStore {
     /*
     this.loading = true;
     try {
-      const response = await api.get('/_search/chat-messages', {
-        query: 'recipient.id:' + this.userDetails.id + ' OR sender.id:' + this.userDetails.id,
-        sort: 'id,asc',
-        page: '1',
-      });
+      const response = await api.get(`/chat-messages/history/${this.userDetails.id}`);
       // append history to gifted chat
       for (const key in response.data) {
         const message = response.data[key];
