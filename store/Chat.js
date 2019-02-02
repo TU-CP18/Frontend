@@ -21,28 +21,22 @@ export default class ChatStore {
     this.topic = `/topic/public/${this.userDetails.id}`;
 
     // load history
-    /*
     this.loading = true;
     try {
       const response = await api.get(`/chat-messages/history/${this.userDetails.id}`);
       // append history to gifted chat
       for (const key in response.data) {
         const message = response.data[key];
-        console.log(message);
         // first we assume the message was sent (by the app user)
         const giftedMessage = {
           _id: message.createdAt,
-          user: {},
+          user: {
+            _id: message.sender.id,
+            avatar: message.sender.imageUrl,
+          },
           text: message.text,
           createdAt: message.createdAt,
         };
-        // if message was received, add data about the sender
-        if (message.sender.id !== this.userDetails.id) {
-          giftedMessage.user = {
-            _id: message.sender.id,
-            avatar: message.sender.imageUrl,
-          };
-        }
         this.messages = GiftedChat.append(this.messages, giftedMessage);
       }
     } catch (e) {
@@ -51,7 +45,6 @@ export default class ChatStore {
     } finally {
       this.loading = false;
     }
-    */
   }
 
   onConnected = () => {
