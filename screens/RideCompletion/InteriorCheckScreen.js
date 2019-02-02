@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { observer, inject, disposeOnUnmount } from 'mobx-react';
 import { reaction } from 'mobx';
+import { StackActions, NavigationActions } from 'react-navigation';
 import { Entypo } from '@expo/vector-icons';
 import Rating from '../../components/Rating';
 import Button from '../../components/Button';
@@ -49,7 +50,11 @@ class InteriorCheckScreen extends React.Component {
   }
 
   componentDidMount() {
-    const { issues } = this.props;
+    const {
+      issues,
+      currentShift,
+      navigation,
+    } = this.props;
 
     // react so insertLoading change in the issues store
     const insertReaction = reaction(
@@ -69,13 +74,35 @@ class InteriorCheckScreen extends React.Component {
       },
     );
 
+    // react so insertLoading change in the issues store
+    const carClosedReaction = reaction(
+      // react so insertLoading change in the issues store
+      () => currentShift.closeCarSucceeded,
+      // reaction callback
+      succeeded => {
+        if (!succeeded) return;
+
+        // Reset the stack so that the user cannot return from the
+        // interior inspection to the exterior inspection screen.
+        // Another approach could be to create another sub-navigation-stack
+        // see /navigation/RidePreparationNavigator.js
+        const resetAction = StackActions.reset({
+          index: 0,
+          actions: [NavigationActions.navigate({ routeName: 'ExteriorCheckStart' })],
+        });
+        navigation.dispatch(resetAction);
+      },
+    );
+
     // dispose reaction when unmounting this component
-    disposeOnUnmount(this, insertReaction);
+    disposeOnUnmount(this, [insertReaction, carClosedReaction]);
   }
 
-  onPressStartRide = () => {
+  /**
+   * Show confirmation request, close car and transit to the exterior check.
+   */
+  onPressCloseCar = () => {
     const {
-      navigation,
       alert,
       currentShift,
     } = this.props;
@@ -93,22 +120,22 @@ class InteriorCheckScreen extends React.Component {
 
     Alert.alert(
       'Confirmation Request',
-      'Confirm that you checked the operional readiness of the car '
-      + 'accordingly and that you are prepared to drive manually if required.',
+      'Confirm that you checked the interior accordingly, forgot nothing in the car and left the'
+      + ' vehicle.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
-          onPress: async () => {
-            await currentShift.finishRidePreparation(rating);
-            navigation.navigate('Ride');
-          },
+          onPress: async () => currentShift.closeCar(rating),
         },
       ],
       { cancelable: true },
     );
   }
 
+  /**
+   * Shows the issue form.
+   */
   showIssueForm = () => {
     LayoutAnimation.easeInEaseOut();
     this.setState({
@@ -116,6 +143,9 @@ class InteriorCheckScreen extends React.Component {
     });
   }
 
+  /**
+   * Hies the issue form.
+   */
   hideIssueForm = () => {
     LayoutAnimation.easeInEaseOut();
     this.setState({
@@ -123,6 +153,9 @@ class InteriorCheckScreen extends React.Component {
     });
   }
 
+  /**
+   * Creates a new issue for the interior. Only the description is required for the interior.
+   */
   createIssue = () => {
     const {
       issues,
@@ -164,8 +197,7 @@ class InteriorCheckScreen extends React.Component {
         <View style={[s.main, { marginLeft: issueFormVisible ? '-100%' : 0 }]}>
           <View style={s.content}>
             <Text style={[s.guideText, { marginTop: 10 }]}>
-              Before you can start the ride, please track new issues of the interior and
-              confirm that the car is operational.
+              Please track new issues of the interior before closing the car.
             </Text>
 
             <Text style={s.titleText}>
@@ -234,10 +266,12 @@ class InteriorCheckScreen extends React.Component {
               textStyle={s.addIssueText}
             />
             <Button
-              onPress={this.onPressStartRide}
-              title="Start Ride"
+              onPress={this.onPressCloseCar}
+              title="Close the Car"
               wrapperStyle={s.confirmButtonWrapper}
               containerStyle={s.confirmButtonContainer}
+              iconLeft="FontAwesome/unlock"
+              iconStyle={{ position: 'absolute', top: 12, left: 12 }}
             />
           </View>
         </View>

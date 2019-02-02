@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { observer, inject, disposeOnUnmount } from 'mobx-react';
 import { reaction } from 'mobx';
-import { StackActions, NavigationActions } from 'react-navigation';
 import { Entypo } from '@expo/vector-icons';
 import Rating from '../../../components/Rating';
 import Button from '../../../components/Button';
@@ -53,29 +52,18 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
       // react so insertLoading change in the issues store
       () => currentShift.openCarSucceeded,
       // reaction callback
-      succeeded => {
-        if (!succeeded) return;
-
-        // Reset the stack so that the user cannot return from the
-        // interior inspection to the exterior inspection screen.
-        // Another approach could be to create another sub-navigation-stack
-        // see /navigation/RidePreparationNavigator.js
-        const resetAction = StackActions.reset({
-          index: 0,
-          actions: [NavigationActions.navigate({ routeName: 'InteriorCheck' })],
-        });
-        navigation.dispatch(resetAction);
-      },
+      succeeded => succeeded && navigation.navigate('Main'),
     );
 
     // dispose reaction when unmounting this component
     disposeOnUnmount(this, openCarReaction);
   }
 
-  onPressOpenCar = () => {
+  onPressFinishShift = () => {
     const {
       alert,
       currentShift,
+      navigation,
     } = this.props;
     const {
       rating,
@@ -96,7 +84,10 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
-          onPress: () => currentShift.openCar(rating),
+          onPress: () => {
+            currentShift.finishShift(rating);
+            navigation.navigate('Main');
+          },
         },
       ],
       { cancelable: true },
@@ -112,7 +103,7 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
       <View style={s.container}>
         <View style={{ flex: 1 }}>
           <Text style={s.guideText}>
-            Please rate the cleanliness of the car before opening th car.
+            Please rate the cleanliness of the car before ending the shift.
           </Text>
           <Text style={s.guideText}>
             If the car is quite dirty and needs a wash, provide a low rating.
@@ -129,11 +120,9 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
         </View>
 
         <Button
-          title="Open Car"
+          title="Finish Shift"
           containerStyle={{ marginBottom: 20, padding: 16 }}
-          iconStyle={{ position: 'absolute', top: 14, left: 12 }}
-          onPress={this.onPressOpenCar}
-          iconLeft="FontAwesome/unlock-alt"
+          onPress={this.onPressFinishShift}
         />
       </View>
     );
