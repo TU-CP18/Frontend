@@ -116,16 +116,12 @@ export default class CurrentShiftStore {
     this.closeCarLoading = true;
     this.closeCarError = false;
 
-    console.log("closing car")
-
     // persist rating of the cleanlines
     await this.persistCleanliness({
       part: 'interior',
       event: 'postRide',
       rating: rating,
     });
-
-    console.log("cleanliness persisted")
 
     // authorize the closeing of the car
     try {

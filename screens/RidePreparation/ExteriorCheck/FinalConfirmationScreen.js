@@ -6,7 +6,7 @@ import {
   Text,
   Alert,
 } from 'react-native';
-import { observer, inject } from 'mobx-react';
+import { observer, inject, disposeOnUnmount } from 'mobx-react';
 import { reaction } from 'mobx';
 import { StackActions, NavigationActions } from 'react-navigation';
 import { Entypo } from '@expo/vector-icons';
@@ -43,11 +43,15 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
     this.state = {
       rating: -1,
     };
+  }
+
+  componentDidMount() {
+    const { currentShift, navigation } = this.props;
 
     // react so insertLoading change in the issues store
-    reaction(
+    const openCarReaction = reaction(
       // react so insertLoading change in the issues store
-      () => props.currentShift.openCarSucceeded,
+      () => currentShift.openCarSucceeded,
       // reaction callback
       succeeded => {
         if (!succeeded) return;
@@ -60,9 +64,12 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
           index: 0,
           actions: [NavigationActions.navigate({ routeName: 'InteriorCheck' })],
         });
-        props.navigation.dispatch(resetAction);
+        navigation.dispatch(resetAction);
       },
     );
+
+    // dispose reaction when unmounting this component
+    disposeOnUnmount(this, openCarReaction);
   }
 
   onPressOpenCar = () => {

@@ -8,7 +8,7 @@ import {
   ScrollView,
   LayoutAnimation,
 } from 'react-native';
-import { observer, inject } from 'mobx-react';
+import { observer, inject, disposeOnUnmount } from 'mobx-react';
 import { reaction } from 'mobx';
 import { Entypo } from '@expo/vector-icons';
 import Rating from '../../components/Rating';
@@ -46,14 +46,18 @@ class InteriorCheckScreen extends React.Component {
       issueFormVisible: false,
       issueDesc: '',
     };
+  }
+
+  componentDidMount() {
+    const { issues } = this.props;
 
     // react so insertLoading change in the issues store
-    reaction(
+    const insertReaction = reaction(
       // react so insertLoading change in the issues store
-      () => props.issues.insertLoading,
+      () => issues.insertLoading,
       // reaction callback
       loading => {
-        if (!loading && !props.issues.insertError) {
+        if (!loading && !issues.insertError) {
           // when inserting is done and there has been no error
           // switch back to the issue list view
           LayoutAnimation.easeInEaseOut();
@@ -64,6 +68,9 @@ class InteriorCheckScreen extends React.Component {
         }
       },
     );
+
+    // dispose reaction when unmounting this component
+    disposeOnUnmount(this, insertReaction);
   }
 
   onPressStartRide = () => {

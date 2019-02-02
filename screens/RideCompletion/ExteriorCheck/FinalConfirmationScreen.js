@@ -6,7 +6,7 @@ import {
   Text,
   Alert,
 } from 'react-native';
-import { observer, inject } from 'mobx-react';
+import { observer, inject, disposeOnUnmount } from 'mobx-react';
 import { reaction } from 'mobx';
 import { Entypo } from '@expo/vector-icons';
 import Rating from '../../../components/Rating';
@@ -42,17 +42,24 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
     this.state = {
       rating: -1,
     };
+  }
+
+  componentDidMount() {
+    const { currentShift, navigation } = this.props;
 
     // react so insertLoading change in the issues store
-    reaction(
+    const openCarReaction = reaction(
       // react so insertLoading change in the issues store
-      () => props.currentShift.openCarSucceeded,
+      () => currentShift.openCarSucceeded,
       // reaction callback
       succeeded => succeeded && navigation.navigate('Main'),
     );
+
+    // dispose reaction when unmounting this component
+    disposeOnUnmount(this, openCarReaction);
   }
 
-  onPressOpenCar = () => {
+  onPressFinishShift = () => {
     const {
       alert,
       currentShift,
@@ -115,7 +122,7 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
         <Button
           title="Finish Shift"
           containerStyle={{ marginBottom: 20, padding: 16 }}
-          onPress={this.onPressOpenCar}
+          onPress={this.onPressFinishShift}
         />
       </View>
     );

@@ -13,7 +13,7 @@ import {
 import {
   Svg,
 } from 'expo';
-import { observer, inject } from 'mobx-react';
+import { observer, inject, disposeOnUnmount } from 'mobx-react';
 import { reaction } from 'mobx';
 import { Entypo } from '@expo/vector-icons';
 import Button from './Button';
@@ -59,14 +59,23 @@ class ExteriorCheck extends React.Component {
       scaleFactor: 1,
       imageheight: 300,
     };
+  }
+
+  componentDidMount() {
+    const { issues } = this.props;
+
+    this.setState({
+      scaleFactor: this.scaleFactor,
+      imageheight: this.imageheight,
+    });
 
     // react so insertLoading change in the issues store
-    reaction(
+    const insertReaction = reaction(
       // reaction change check
-      () => props.issues.insertLoading,
+      () => issues.insertLoading,
       // reaction callback
       loading => {
-        if (!loading && !props.issues.insertError) {
+        if (!loading && !issues.insertError) {
           // when inserting is done and there has been no error
           // switch back to the issue list view
           LayoutAnimation.easeInEaseOut();
@@ -78,13 +87,9 @@ class ExteriorCheck extends React.Component {
         }
       },
     );
-  }
 
-  componentDidMount() {
-    this.setState({
-      scaleFactor: this.scaleFactor,
-      imageheight: this.imageheight,
-    });
+    // dispose reaction when unmounting this component
+    disposeOnUnmount(this, insertReaction);
   }
 
   /**
