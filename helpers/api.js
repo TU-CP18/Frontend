@@ -37,8 +37,6 @@ const request = (method, url, bodyParams, queryParams, queryHeaders) => {
     options.headers.Authorization = `Bearer ${global.userStore.authToken}`;
   }
 
-  console.log('options', options);
-
   return axios(options);
 };
 
