@@ -100,11 +100,7 @@ class InteriorCheckScreen extends React.Component {
         {
           text: 'Confirm',
           onPress: async () => {
-            await currentShift.finishRidePreparation({
-              part: 'interior',
-              event: 'preRide',
-              rating: rating,
-            });
+            await currentShift.finishRidePreparation(rating);
             navigation.navigate('Ride');
           },
         },

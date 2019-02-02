@@ -76,7 +76,11 @@ export default class CurrentShiftStore {
     this.openCarError = false;
 
     // persist rating of the cleanlines
-    await this.persistCleanliness(rating);
+    await this.persistCleanliness({
+      part: 'exterior',
+      event: 'preRide',
+      rating: rating,
+    });
 
     // authorize the opening of the car
     try {
@@ -106,7 +110,11 @@ export default class CurrentShiftStore {
   @action.bound
   async finishRidePreparation(rating) {
     // persist rating of the cleanlines
-    await this.persistCleanliness(rating);
+    await this.persistCleanliness({
+      part: 'interior',
+      event: 'preRide',
+      rating: rating,
+    });
   }
 
   @action.bound

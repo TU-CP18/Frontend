@@ -96,11 +96,7 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
-          onPress: () => currentShift.openCar({
-            part: 'exterior',
-            event: 'preRide',
-            score: rating,
-          }),
+          onPress: () => currentShift.openCar(rating),
         },
       ],
       { cancelable: true },
