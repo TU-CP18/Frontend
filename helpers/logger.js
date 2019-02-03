@@ -25,7 +25,7 @@ const RIDE_AWARENESS_IGNORED = 'RIDE_AWARENESS_IGNORED'; // The driver ignored t
  *
  * @param {*} type
  */
-const log = type => {
+const log = (type, additionalParams = {}) => {
   const options = {
     method: 'POST',
     url: api.loggerHost,
@@ -46,6 +46,7 @@ const log = type => {
     driverId: global.userStore.id,
     shiftId: global.currentShift.shiftId,
     license: global.nextShift.shift.car.id,
+    ...additionalParams,
   };
 
   return axios(options);
@@ -54,13 +55,13 @@ const log = type => {
 /**
  * Soft log catches all errors. The caller does not care for success or failure.
  */
-const slog = async type => {
+const slog = async (type, params) => {
   try {
-    await log(type);
+    await log(type, params);
   } catch (error) {
     console.log(`error while logging event ${type}:`, error);
   }
-}
+};
 
 // export all constans and the log method
 // in that way it can be called via logger.log(logger.NAV_ESTOP);
