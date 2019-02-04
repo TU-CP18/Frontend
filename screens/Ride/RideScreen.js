@@ -4,9 +4,9 @@ import {
   View,
   Text,
   Vibration,
-  Platform,
+  Platform, Alert,
 } from 'react-native';
-import { Audio } from 'expo';
+import { Audio, Notifications } from 'expo';
 import { observer, inject } from 'mobx-react';
 import { FontAwesome } from '@expo/vector-icons';
 import Button from '../../components/Button';
@@ -200,7 +200,22 @@ class RideScreen extends React.Component {
         <Button
           title="Report"
           subtitle="Incident"
-          onPress={() => {}}
+          onPress={() => {
+            // Works on both iOS and Android
+            Alert.alert(
+              'Notfall',
+              'Wollen Sie wirklich einen Notfall melden?',
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+                { text: 'OK', onPress: () => navigation.navigate('Incident') },
+              ],
+              { cancelable: false },
+            );
+          }}
           iconLeft="MaterialIcons/report"
           wrapperStyle={styles.buttonWrapper}
           containerStyle={styles.buttonContainer}
