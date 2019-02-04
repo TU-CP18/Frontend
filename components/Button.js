@@ -41,6 +41,7 @@ const Button = ({
   onPress,
   disabled,
   iconLeft,
+  rightIcon,
   iconStyle,
   transparent,
 }) => {
@@ -78,6 +79,9 @@ const Button = ({
             </Text>
           )
         )) || children}
+        {rightIcon && (
+          renderIcon(rightIcon, iconStyle)
+        )}
       </View>
     </TouchableOpacity>
   );

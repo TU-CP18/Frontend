@@ -10,13 +10,16 @@ import {
  * The Component /components/Alert makes use of it.
  */
 export default class Alert {
-  @observable messages = [
-    // { title: 'Marker missing', subtitle: 'Please select an area in the image' },
-    // { title: 'Description missing', subtitle: 'Please provide a description for the issue' },
-  ];
+  @observable messages = [];
 
+  /**
+   *
+   * @param {*} title
+   * @param {*} subtitle
+   * @param {*} type [warning, success]
+   */
   @action
-  show(title, subtitle) {
+  show(title, subtitle, type = 'warning', header = true) {
     const id = Date.now();
 
     LayoutAnimation.easeInEaseOut();
@@ -25,6 +28,8 @@ export default class Alert {
       id,
       title,
       subtitle,
+      type,
+      header,
     });
 
     setTimeout(() => {

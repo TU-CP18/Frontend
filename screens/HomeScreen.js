@@ -2,17 +2,16 @@ import React from 'react';
 import {
   StyleSheet,
   View,
-  KeyboardAvoidingView,
   Text,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import { Icon } from 'react-native-elements';
 import { observer, inject } from 'mobx-react';
-import { when } from 'mobx';
-import * as Animatable from 'react-native-animatable';
-
-import { BackgroundImage } from '../components/BackgroundImage';
+import moment from 'moment';
+import Icons from '@expo/vector-icons';
 import MapMarker from '../components/MapMarker';
+import Header from '../components/Header';
+import Button from '../components/Button';
 
 @inject('user', 'nextShift')
 @observer
@@ -21,225 +20,232 @@ class HomeScreen extends React.Component {
     header: null,
   };
 
-  constructor(props) {
-    super(props);
-
-    when(
-      () => !props.user.authenticated,
-      () => props.navigation.navigate('Auth'),
-    );
+  componentDidMount() {
+    this.loadNextShift();
   }
 
-  async componentDidMount() {
+  componentWillUnmount() {
     const { nextShift } = this.props;
-    await nextShift.load();
+    nextShift.polling = false;
   }
 
-  handleCallOperator = () => {
-    const { navigation } = this.props;
-    navigation.navigate('Contact');
-  };
+  loadNextShift = () => {
+    const { nextShift } = this.props;
+    nextShift.polling = true;
+    nextShift.load();
+  }
 
-  handleLogout = () => {
-    this.props.user.logout();
-  };
-
-  handleShiftSchedule = () => {
+  onPressShiftSchedule = () => {
     const { navigation } = this.props;
     navigation.navigate('Schedule');
   };
 
-  renderIdleState() {
-    const { user, navigation } = this.props;
+  onPressSettings = () => {
+    const { navigation } = this.props;
+    navigation.navigate('Settings');
+  };
 
-    const { loading, shift } = this.props.nextShift;
+  onPressContact = () => {
+    const { navigation } = this.props;
+    navigation.navigate('Contact');
+  };
 
-    if (!loading && !shift) {
-      return (
+  onPressNextShift = () => {
+    const { navigation } = this.props;
+    navigation.navigate('NextShiftMap');
+  }
+
+  Item = ({ icon, iconStyle, label, separator = true }) => {
+    const Icon = Icons[icon.split('/')[0]];
+    const iconName = icon.split('/')[1];
+
+    return (
+      <View style={[s.item, separator ? s.itemSeparator : {}]}>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.messageText, { marginTop: 50 }]}>Hi {user.name},</Text>
-          <Text style={[styles.messageText, { marginTop: 70 }]}>No shift scheduled</Text>
-          <Text style={[styles.messageText, { marginTop: 10 }]}>in the next 30 mins</Text>
+          <Icon
+            name={iconName}
+            style={[s.itemIcon, iconStyle]}
+          />
+        </View>
+        <Text style={s.itemLabel}>
+          {label}
+        </Text>
+      </View>
+    );
+  }
+
+  MenuItem = ({ onPress, ...rest }) => (
+    <TouchableOpacity
+      style={s.menuItemTouchable}
+      onPress={onPress}
+    >
+      <this.Item {...rest} />
+    </TouchableOpacity>
+  );
+
+  renderIdleState() {
+    const {
+      nextShift,
+    } = this.props;
+
+    const { loading, shift } = nextShift;
+
+    if (loading) {
+      return (
+        <View style={[s.nextShiftBlock, { flex: 1, alignItems: 'center', justifyContent: 'center' }]}>
+          <ActivityIndicator
+            size="large"
+            color="#ffffff"
+          />
         </View>
       );
     }
 
-    const mapButton = loading ? (
-      <TouchableOpacity
-        disabled
-        style={{ alignItems: 'center', justifyContent: 'center' }}
-        onPress={() => null}
-      >
-        <View style={styles.mapContainer} pointerEvents="none">
-          <Animatable.View
-            animation="rotate"
-            easing="linear"
-            iterationCount="infinite"
-          >
-            <Icon name="spinner-3" type="evilicon" />
-          </Animatable.View>
+    if (!shift) {
+      return (
+        <View style={[s.nextShiftBlock, { flex: 1, alignItems: 'center', justifyContent: 'center' }]}>
+          <Text style={{ color: '#ffffff', marginBottom: 20, fontSize: 24 }}>
+            ¯\_(ツ)_/¯
+          </Text>
+          <Text style={{ color: '#ffffff', marginBottom: 20, fontSize: 24 }}>
+            No upcoming Shifts
+          </Text>
+          <Button
+            title="Reload"
+            onPress={this.loadNextShift}
+            containerStyle={{ backgroundColor: 'transparent', width: 200 }}
+          />
         </View>
-      </TouchableOpacity>
-    ) : (
-      <TouchableOpacity
-        style={{ alignItems: 'center', justifyContent: 'center' }}
-        onPress={() => navigation.navigate('NextShiftMap')}
-      >
-        <View style={styles.mapContainer} pointerEvents="none">
-          <MapMarker coordinate={{ latitude: shift.latStart, longitude: shift.longStart }} />
-        </View>
-      </TouchableOpacity>
-    );
+      );
+    }
+
+    const startdate = moment(shift.start);
+    const startDateFormatted = startdate.format('HH:MM');
 
     return (
-      <View style={{ flex: 1 }}>
-        <Text style={[styles.messageText, { marginTop: 50 }]}>
-          {`Hi ${user.name},`}
-        </Text>
-        {mapButton}
-        {!loading
-        && (
-          <Text style={[styles.messageText]}>
-            {`Head to ${shift.address.name}, ${shift.address.postalCode} ${shift.address.city}`}
-          </Text>
-        )}
-        {!loading && (
-          <Text style={styles.messageText}>
-          by
-            {` ${new Date(shift.start).toString()}`}
-          </Text>
-        )}
+      <View>
+        <TouchableOpacity onPress={this.onPressNextShift}>
+          <MapMarker
+            style={s.map}
+            coordinate={{
+              latitude: shift.latStart,
+              longitude: shift.longStart,
+            }}
+          />
+        </TouchableOpacity>
+
+        <View style={s.nextShiftBlock}>
+          <Header label="Your next Shift" />
+          <this.Item
+            label={`${shift.address.name}, ${shift.address.postalCode} ${shift.address.city}`}
+            icon="FontAwesome/map-marker"
+            iconStyle={{ marginLeft: 3 }}
+            separator={false}
+          />
+          <this.Item
+            label={`${startDateFormatted} o'clock`}
+            icon="Ionicons/md-time"
+            separator={false}
+          />
+          <View style={[s.item, { marginTop: -15, paddingBottom: 5 }]}>
+            <View style={{ flex: 1 }} />
+            <Text style={[s.itemLabel, { fontSize: 14 }]}>
+              Remember to confirm your arrival at the interchange point to start the shift!
+            </Text>
+          </View>
+          <Button
+            title="Show Start Position"
+            onPress={this.onPressNextShift}
+            containerStyle={{ backgroundColor: 'transparent', padding: 8, borderWidth: 0, justifyContent: 'flex-end'}}
+            textStyle={{ fontSize: 16, paddingRight: 6 }}
+            rightIcon="Feather/arrow-right"
+          />
+        </View>
       </View>
     );
   }
 
   render() {
-    const inner = (() => {
-      // TODO: Add assignment store from which we derive the current assignment
-      return this.renderIdleState();
-    })();
+    const { MenuItem } = this;
 
     return (
-      <KeyboardAvoidingView
-        style={[styles.container, this.keyboardOpen ? styles.containerKeyboardOpen : {}]}
-        behavior="padding"
-        enabled
-      >
-        <BackgroundImage />
-        {inner}
-        <View style={styles.bottomButtons}>
-          <TouchableOpacity
-            style={{ alignItems: 'center', justifyContent: 'center' }}
-            onPress={this.handleShiftSchedule}
-          >
-            <View pointerEvents="none">
-              <Icon
-                name="calendar"
-                color="#343434"
-                type="font-awesome"
-                containerStyle={styles.scheduleButton}
-                iconStyle={styles.scheduleButtonIconStyle}
-              />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-            onPress={this.handleLogout}
-          >
-            <View pointerEvents="none">
-              <Icon
-                name="gears"
-                type="font-awesome"
-                color="#343434"
-                containerStyle={styles.settingsButton}
-                iconStyle={styles.settingsButtonIconStyle}
-              />
-            </View>
-          </TouchableOpacity>
+      <View style={s.container}>
+        {this.renderIdleState()}
 
-          <TouchableOpacity
-            style={{ alignItems: 'center', justifyContent: 'center' }}
-            onPress={this.handleCallOperator}
-          >
-            <View pointerEvents="none">
-              <Icon
-                name="call"
-                color="#343434"
-                containerStyle={styles.callButton}
-                iconStyle={styles.callButtonIconStyle}
-              />
-            </View>
-          </TouchableOpacity>
+        <View style={s.menu}>
+          <MenuItem
+            label="See shift schedule"
+            icon="FontAwesome/calendar"
+            onPress={this.onPressShiftSchedule}
+          />
+
+          <MenuItem
+            label="Settings"
+            icon="FontAwesome/gears"
+            onPress={this.onPressSettings}
+          />
+
+          <MenuItem
+            label="Contact Fleet Manager"
+            icon="Entypo/chat"
+            onPress={this.onPressContact}
+            separator={false}
+          />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     );
   }
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#343434',
+    backgroundColor: '#212121',
   },
-  messageText: {
-    fontFamily: 'nemode',
-    fontSize: 32,
-    fontWeight: '600',
-    color: '#fefefe',
-    textAlign: 'center',
+
+  map: {
+    width: '100%',
+    height: 300,
+    flex: 0,
   },
-  mapContainer: {
-    marginTop: 25,
-    marginBottom: 25,
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    overflow: 'hidden',
+  nextShiftBlock: {
+    paddingHorizontal: 20,
+    backgroundColor: '#36558F',
+    paddingBottom: 10,
+    paddingTop: 5,
   },
-  bottomButtons: {
-    position: 'absolute',
-    bottom: 60,
-    left: 20,
-    right: 20,
-    height: 75,
-    justifyContent: 'center',
-    alignItems: 'center',
+
+  item: {
     flexDirection: 'row',
+    justifyContent: 'center',
+    paddingBottom: 20,
   },
-  callButton: {
-    width: 75,
-    height: 75,
-    borderRadius: 75,
-    backgroundColor: '#fefefe',
-    opacity: 0.75,
+  itemSeparator: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#C2C2C2',
+    paddingBottom: 15,
+    marginBottom: 15,
   },
-  callButtonIconStyle: {
-    marginTop: 16,
-    fontSize: 42,
+  itemIcon: {
+    marginRight: 14,
+    color: '#ffffff',
+    fontSize: 26,
   },
-  scheduleButton: {
-    width: 75,
-    height: 75,
-    borderRadius: 75,
-    backgroundColor: '#fefefe',
-    opacity: 0.75,
+  itemLabel: {
+    flex: 7,
+    alignSelf: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
   },
-  scheduleButtonIconStyle: {
-    marginTop: 16,
-    fontSize: 42,
+
+  menu: {
+    marginBottom: 20,
+    marginHorizontal: 20,
+    marginTop: 30,
   },
-  settingsButton: {
-    width: 75,
-    height: 75,
-    borderRadius: 50,
-    backgroundColor: '#fefefe',
-    opacity: 0.75,
-  },
-  settingsButtonIconStyle: {
-    marginTop: 16,
-    fontSize: 42,
+  menuItemTouchable: {
+    alignItems: 'center',
   },
 });
 

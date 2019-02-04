@@ -3,25 +3,14 @@ import {
   StyleSheet,
   View,
   Text,
-  NativeModules,
   TouchableOpacity,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { observer, inject } from 'mobx-react';
 
-const { UIManager } = NativeModules;
-
-if (UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
 @inject('alert')
 @observer
 class Alert extends React.Component {
-  // componentWillUpdate() {
-  //   LayoutAnimation.easeInEaseOut();
-  // }
-
   onItemPress = id => {
     const { alert } = this.props;
     alert.hide(id);
@@ -29,17 +18,19 @@ class Alert extends React.Component {
 
   render() {
     const { alert } = this.props;
+    const messages = alert.messages.slice();
+    const addClass = messages[0] && !messages[0].header ? s.containerNoHeader : {};
 
     return (
-      <View style={s.container}>
-        {alert.messages && alert.messages.slice().map(msg => {
+      <View style={[s.container, addClass]}>
+        {messages.map(msg => {
           return (
             <TouchableOpacity
               key={msg.id}
               style={s.itemWrapper}
               onPress={() => this.onItemPress(msg.id)}
             >
-              <View style={s.item}>
+              <View style={[s.item, s[msg.type], addClass]}>
                 <View style={s.content}>
                   <Text style={s.title}>
                     {msg.title}
@@ -70,6 +61,9 @@ const s = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 26,
   },
+  containerNoHeader: {
+    top: 30,
+  },
   itemWrapper: {
     marginBottom: 14,
   },
@@ -77,10 +71,16 @@ const s = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderRadius: 4,
-    // backgroundColor: 'rgba(0, 0, 0, 0.92)',
-    backgroundColor: 'rgba(96, 7, 7, 0.97)',
-    // 231, 85, 85
     flexDirection: 'row',
+  },
+  warning: {
+    backgroundColor: 'rgba(96, 7, 7, 0.97)',
+  },
+  info: {
+    backgroundColor: 'rgba(29, 125, 184, 1)',
+  },
+  success: {
+    backgroundColor: 'rgba(96, 235, 77, 1)',
   },
   content: {
     flex: 1,
