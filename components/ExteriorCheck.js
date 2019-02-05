@@ -27,7 +27,7 @@ const screenWidth = Dimensions.get('window').width;
 @inject('issues', 'alert')
 @observer
 class ExteriorCheck extends React.Component {
-  static getNavigationOptions = (title, navigation) => {
+  static getNavigationOptions = (title, { navigation }) => {
     return {
       title: title,
       headerStyle: {
