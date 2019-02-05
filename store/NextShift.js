@@ -23,8 +23,8 @@ export default class NextShiftStore {
     if (!ignoreCalled && this.called) return;
     this.called = true;
 
-    // sleep 1000, this is nice for the demo
-    // aditionally we don't is pauses the polling for new shifts
+    // sleep 1500, this is nice for the demo
+    // aditionally we don't need to pause the recursive call
     await sleep(1500);
 
     try {

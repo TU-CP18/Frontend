@@ -55,7 +55,12 @@ class HomeScreen extends React.Component {
     navigation.navigate('NextShiftMap');
   }
 
-  Item = ({ icon, iconStyle, label, separator = true }) => {
+  Item = ({
+    icon,
+    iconStyle,
+    label,
+    separator = true,
+  }) => {
     const Icon = Icons[icon.split('/')[0]];
     const iconName = icon.split('/')[1];
 
@@ -120,7 +125,20 @@ class HomeScreen extends React.Component {
     }
 
     const startdate = moment(shift.start);
-    const startDateFormatted = startdate.format('HH:MM');
+    const minutesLeft = Math.round(
+      moment.duration(startdate.diff(moment())).asMinutes()
+    );
+    let startDateFormatted = startdate.calendar(null, {
+      sameDay: '[Today] hh:mm a',
+      nextDay: '[Tomorrow] hh:mm a',
+      nextWeek: 'dddd hh:mm a',
+      lastDay: '[Yesterday] hh:mm a',
+      lastWeek: '[Last] dddd hh:mm a',
+      sameElse: 'DD/MM/YYYY hh:mm a',
+    });
+    if (minutesLeft < 60) {
+      startDateFormatted += ` (in ${minutesLeft} minutes)`;
+    }
 
     return (
       <View>
@@ -143,7 +161,7 @@ class HomeScreen extends React.Component {
             separator={false}
           />
           <this.Item
-            label={`${startDateFormatted} o'clock`}
+            label={startDateFormatted}
             icon="Ionicons/md-time"
             separator={false}
           />
