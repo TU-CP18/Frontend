@@ -5,6 +5,7 @@ import ScheduleScreen from '../screens/ScheduleScreen';
 import ContactScreen from '../screens/ContactScreen';
 import MapScreen from '../screens/MapScreen';
 import NextShiftMapScreen from '../screens/NextShiftMapScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const MainStack = createStackNavigator(
   {
@@ -13,6 +14,7 @@ const MainStack = createStackNavigator(
     Contact: ContactScreen,
     Map: MapScreen,
     NextShiftMap: NextShiftMapScreen,
+    Settings: SettingsScreen,
   },
   {
     initialRouteName: 'Home',
