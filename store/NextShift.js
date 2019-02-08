@@ -32,10 +32,17 @@ export default class NextShiftStore {
 
       const { locationServicesEnabled } = await Location.getProviderStatusAsync();
       if (locationServicesEnabled) {
-        const geocode = await Location.reverseGeocodeAsync({
-          latitude: response.data.latStart,
-          longitude: response.data.longStart,
-        });
+        // reverseGeocodeAsync leads to an app creash since the last update, hard code
+        // the address for now
+        // const geocode = await Location.reverseGeocodeAsync({
+        //   latitude: response.data.latStart,
+        //   longitude: response.data.longStart,
+        // });
+        const geocode = [{
+          name: 'Schönhauser Allee 38',
+          postalCode: '10439',
+          city: 'Berlin',
+        }];
         const [address] = geocode;
 
         LayoutAnimation.easeInEaseOut();

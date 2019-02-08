@@ -4,9 +4,9 @@ import fakeApi from './fakeApi';
 
 const BASE_URL = Api.host;
 
-const request = (method, url, bodyParams, queryParams) => {
+const request = (method, url, bodyParams, urlParams, headers = {}) => {
   if (global.devSettings.settings.get('fakeApi')) {
-    const response = fakeApi(method, url, bodyParams, queryParams);
+    const response = fakeApi(method, url, bodyParams, urlParams);
     if (response) return response;
   }
 
@@ -17,18 +17,18 @@ const request = (method, url, bodyParams, queryParams) => {
     baseURL: BASE_URL,
     url: url,
     responseType: 'json',
-    headers: {},
+    headers: headers,
   };
 
   if (bodyParams && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(verb)) {
     options.data = bodyParams;
   }
 
-  if (queryParams) {
-    options.params = queryParams;
+  if (urlParams) {
+    options.params = urlParams;
   }
 
-  if (global.userStore.authenticated) {
+  if (global.userStore.authToken) {
     // all api endpoints expect the authToken to be transferred in the authorization header
     options.headers.Authorization = `Bearer ${global.userStore.authToken}`;
   }
@@ -36,10 +36,10 @@ const request = (method, url, bodyParams, queryParams) => {
   return axios(options);
 };
 
-const get = (url, queryParams) => request('get', url, null, queryParams);
-const post = (url, bodyParams, queryParams) => request('post', url, bodyParams, queryParams);
-const put = (url, bodyParams, queryParams) => request('put', url, bodyParams, queryParams);
-const patch = (url, bodyParams, queryParams) => request('patch', url, bodyParams, queryParams);
+const get = (url, urlParams) => request('get', url, null, urlParams);
+const post = (url, bodyParams, urlParams, headers) => request('post', url, bodyParams, urlParams, headers);
+const put = (url, bodyParams, urlParams) => request('put', url, bodyParams, urlParams);
+const patch = (url, bodyParams, urlParams) => request('patch', url, bodyParams, urlParams);
 
 export default {
   get, post, put, patch,

@@ -12,11 +12,13 @@ import {
   Asset,
   Font,
   Icon,
+  Permissions,
 } from 'expo';
-import { observable } from 'mobx';
+import { observable, reaction } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
 import AppNavigator from './navigation/AppNavigator';
 import Alert from './components/Alert';
+import lib from './helpers/lib';
 
 import UserStore from './store/User';
 import DevSettingsStore from './store/DevSettings';
@@ -42,14 +44,33 @@ if (UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-chatStore.load();
-
 @observer
 class App extends React.Component {
   @observable isLoadingComplete = false;
 
   @observable initialRoute = 'Auth';
 
+  constructor() {
+    super();
+
+    // react to user authentication status changes
+    reaction(
+      () => userStore.authenticated,
+      authenticated => authenticated && this.onUserLoggedIn(),
+    );
+  }
+
+  componentDidMount() {
+    // initially ask for permissions to use the notifiactions and location service
+    // if they not have been granted already
+    lib.isPermissionGranted(Permissions.NOTIFICATIONS);
+    lib.isPermissionGranted(Permissions.LOCATION);
+  }
+
+  /**
+   * Called on app start. Loads required assets and sets up
+   * certain stores like the UserStore to initialize the user model.
+   */
   loadResourcesAsync = async () => Promise.all([
     Asset.loadAsync([
       require('./assets/images/robot-dev.png'),
@@ -77,6 +98,15 @@ class App extends React.Component {
     this.isLoadingComplete = true;
     this.initialRoute = userStore.authenticated ? 'Main' : 'Auth';
   };
+
+  /**
+   * Callback is called after the user has been authenticated.
+   * This happens either on app start when the user model is loaded and
+   * has been considered as authenticated or when the user loggs in successfully.
+   */
+  onUserLoggedIn = () => {
+    chatStore.load();
+  }
 
   render() {
     const { skipLoadingScreen } = this.props;
@@ -131,8 +161,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     bottom: 0,
-    // height: '100%',
-    // resizeMode: 'cover',
   },
 });
 
