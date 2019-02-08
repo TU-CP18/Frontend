@@ -132,12 +132,10 @@ class HomeScreen extends React.Component {
             icon="Ionicons/md-time"
             separator={false}
           />
-          <View style={[s.item, { marginTop: -15, paddingBottom: 5 }]}>
-            <View style={{ flex: 1 }} />
-            <Text style={[s.itemLabel, { fontSize: 14 }]}>
-              Remember to confirm your arrival at the interchange point to start the shift!
-            </Text>
-          </View>
+          <MenuItem
+            label="Remember to confirm your arrival at the interchange point to start the shift!"
+            separator={false}
+          />
           <Button
             title="Show Start Position"
             onPress={this.onPressNextShift}

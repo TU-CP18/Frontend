@@ -28,16 +28,23 @@ const Item = ({
   label,
   separator = true,
 }) => {
-  const Icon = Icons[icon.split('/')[0]];
-  const iconName = icon.split('/')[1];
+  let Icon = null;
+  let iconName = null;
+
+  if (icon) {
+    Icon = Icons[icon.split('/')[0]];
+    iconName = icon.split('/')[1];
+  }
 
   return (
     <View style={[s.item, separator ? s.itemSeparator : {}]}>
       <View style={{ flex: 1 }}>
-        <Icon
-          name={iconName}
-          style={[s.itemIcon, iconStyle]}
-        />
+        {icon && (
+          <Icon
+            name={iconName}
+            style={[s.itemIcon, iconStyle]}
+          />
+        )}
       </View>
       <Text style={s.itemLabel}>
         {label}
