@@ -45,7 +45,7 @@ export default class ChatStore {
       }
     } catch (e) {
       this.error = 'Error';
-      console.error(e);
+      console.log(e);
     } finally {
       this.loading = false;
     }

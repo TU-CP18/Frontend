@@ -28,7 +28,7 @@ const request = (method, url, bodyParams, urlParams, headers = {}) => {
     options.params = urlParams;
   }
 
-  if (global.userStore.authenticated) {
+  if (global.userStore.authToken) {
     // all api endpoints expect the authToken to be transferred in the authorization header
     options.headers.Authorization = `Bearer ${global.userStore.authToken}`;
   }
