@@ -3,14 +3,18 @@ import {
   StyleSheet,
   Text,
   View,
+  Linking,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
-import MenuItem from '../components/MenuItem';
+import { Constants } from 'expo';
+import { Entypo, FontAwesome } from '@expo/vector-icons';
 
 class IncidentScreen extends React.Component {
   static navigationOptions = {
-    title: 'Incident',
+    title: '',
     headerStyle: {
-      backgroundColor: '#000000',
+      backgroundColor: '#f00',
       elevation: 0,
       borderBottomWidth: 0,
     },
@@ -23,34 +27,53 @@ class IncidentScreen extends React.Component {
   };
 
   onPressCall = () => {
-    console.log('call fleet manager');
+    if (Constants.isDevice) {
+      Linking.openURL('tel:+123456789');
+      return;
+    }
+
+    Alert.alert(
+      'Call Fleet Manager',
+      'Link:"tel:+1234567" call intents do not work on Simulators',
+    );
   };
+
+  Button = ({ onPress, IconComponent, iconName }) => (
+    <TouchableOpacity onPress={onPress}>
+      <View style={s.iconWrapper}>
+        <IconComponent
+          name={iconName}
+          style={s.icon}
+        />
+      </View>
+    </TouchableOpacity>
+  );
 
   render() {
     return (
       <View style={s.container}>
         <View style={s.innerContainer}>
           <Text style={[s.messageText, { marginTop: 90 }]}>
-            Emergency!
+            EMERGENCY
           </Text>
-          <Text style={[s.messageText, { marginTop: 10 }]}>
+          <Text style={[s.messageText, { marginTop: 20 }]}>
             The car will stop.
           </Text>
           <Text style={[s.messageText, { marginTop: 10 }]}>
             Please contact your fleet manager via chat or phone call.
           </Text>
         </View>
+
         <View style={s.menu}>
-          <MenuItem
-            label="Contact Fleet Manager"
-            icon="Entypo/chat"
+          <this.Button
+            IconComponent={Entypo}
+            iconName="chat"
             onPress={this.onPressContact}
-            />
-          <MenuItem
-            label="Call Fleet Manager"
-            icon="FontAwesome/phone"
+          />
+          <this.Button
+            IconComponent={FontAwesome}
+            iconName="phone"
             onPress={this.onPressCall}
-            separator={false}
           />
         </View>
       </View>
@@ -76,9 +99,24 @@ const s = StyleSheet.create({
     textAlign: 'center',
   },
   menu: {
-    marginBottom: 40,
+    marginBottom: 70,
     marginHorizontal: 20,
     marginTop: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 60,
+  },
+  iconWrapper: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  icon: {
+    fontSize: 50,
+    color: '#f00',
   },
 });
 
