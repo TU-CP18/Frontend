@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import geolib from 'geolib';
 import MapboxClient from 'mapbox';
 import lib from '../helpers/lib';
-import Button from './Button';
+import asyncSleep from '../helpers/asyncSleep';
 import logger from '../helpers/logger';
 
 const { width, height } = Dimensions.get('window');
@@ -31,6 +31,7 @@ class MapRoute extends React.Component {
     this.state = {
       coordinates: [],
       steps: [],
+      currentCoordinate: {},
       focusedLocation: {
         latitude: props.latitude,
         longitude: props.longitude,
@@ -112,6 +113,17 @@ class MapRoute extends React.Component {
     }
   }
 
+  fakeDemo = async () => {
+    const { coordinates } = this.state;
+    for (let coord of coordinates) {
+      this.setState({ currentCoordinate: coord });
+      this.checkUserLocation({
+        coords: coord,
+      });
+      await asyncSleep(2000);
+    }
+  };
+
   focusOnCoords = coords => {
     const { focusedLocation } = this.state;
     const region = {
@@ -160,6 +172,8 @@ class MapRoute extends React.Component {
       coordinates: coordinates,
       steps: steps,
     });
+    console.log(coordinates);
+    console.log(steps);
     return coordinates;
   };
 
@@ -195,8 +209,8 @@ class MapRoute extends React.Component {
       if (distance <= 5) {
         // user is 5 meters close to intersection point
         this.map.animateToBearing(step.bearing);
-        steps[index].done = true;
-        manoeuvred = true;
+        //steps[index].done = true;
+        //manoeuvred = true;
         this.setState({ steps: steps });
       }
     });
@@ -230,6 +244,7 @@ class MapRoute extends React.Component {
       // log event
       logger.slog(logger.SHIFT_INTERCEPTING);
     }
+    this.fakeDemo();
   };
 
   renderConfirmalButton() {
@@ -314,6 +329,19 @@ class MapRoute extends React.Component {
     );
   }
 
+  renderLocationMarker() {
+    const { isMapReady, isNavigation, currentCoordinate } = this.state;
+    if (!isMapReady || !isNavigation || currentCoordinate.latitude === undefined) {
+      return null;
+    }
+    return (
+      <MapView.Marker
+        image={require('../assets/images/custom_marker.png')}
+        coordinate={currentCoordinate}
+      />
+    );
+  }
+
   onMapReady = () => {
     this.setState({ isMapReady: true });
   };
@@ -332,6 +360,7 @@ class MapRoute extends React.Component {
           onMapReady={this.onMapReady}
         >
           {this.renderRoute()}
+          {this.renderLocationMarker()}
           {this.renderMarker()}
         </MapView>
         {this.renderConfirmalButton()}
