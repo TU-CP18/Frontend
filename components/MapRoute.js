@@ -199,19 +199,11 @@ class MapRoute extends React.Component {
 
   animateNavigation = async coords => {
     const { steps } = this.state;
-    let manoeuvred = false;
-    steps.forEach((step, index) => {
-      if (step.done || manoeuvred) {
-        // maneuver has already been done
-        return;
-      }
+    steps.forEach(step => {
       const distance = geolib.getDistance(coords, step);
       if (distance <= 5) {
         // user is 5 meters close to intersection point
         this.map.animateToBearing(step.bearing);
-        //steps[index].done = true;
-        //manoeuvred = true;
-        this.setState({ steps: steps });
       }
     });
   };
