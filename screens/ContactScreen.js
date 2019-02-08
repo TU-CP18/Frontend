@@ -1,5 +1,4 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { inject, observer } from 'mobx-react';
 
@@ -16,6 +15,16 @@ class ContactScreen extends React.Component {
     headerTintColor: '#ffffff',
   };
 
+  componentDidMount() {
+    const { chat } = this.props;
+    chat.chatScreenOpen = true;
+  }
+
+  componentWillUnmount() {
+    const { chat } = this.props;
+    chat.chatScreenOpen = false;
+  }
+
   render() {
     const { chat, user } = this.props;
 
@@ -30,12 +39,5 @@ class ContactScreen extends React.Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});
 
 export default ContactScreen;

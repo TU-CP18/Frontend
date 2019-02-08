@@ -4,9 +4,9 @@ import fakeApi from './fakeApi';
 
 const BASE_URL = Api.host;
 
-const request = (method, url, bodyParams, queryParams, queryHeaders) => {
+const request = (method, url, bodyParams, urlParams, headers = {}) => {
   if (global.devSettings.settings.get('fakeApi')) {
-    const response = fakeApi(method, url, bodyParams, queryParams);
+    const response = fakeApi(method, url, bodyParams, urlParams);
     if (response) return response;
   }
 
@@ -17,19 +17,15 @@ const request = (method, url, bodyParams, queryParams, queryHeaders) => {
     baseURL: BASE_URL,
     url: url,
     responseType: 'json',
-    headers: {},
+    headers: headers,
   };
 
   if (bodyParams && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(verb)) {
     options.data = bodyParams;
   }
 
-  if (queryParams) {
-    options.params = queryParams;
-  }
-
-  if (queryHeaders) {
-    options.headers = queryHeaders;
+  if (urlParams) {
+    options.params = urlParams;
   }
 
   if (global.userStore.authenticated) {
@@ -40,10 +36,10 @@ const request = (method, url, bodyParams, queryParams, queryHeaders) => {
   return axios(options);
 };
 
-const get = (url, queryParams) => request('get', url, null, queryParams, {});
-const post = (url, bodyParams, queryParams, queryHeaders) => request('post', url, bodyParams, queryParams, queryHeaders);
-const put = (url, bodyParams, queryParams) => request('put', url, bodyParams, queryParams, {});
-const patch = (url, bodyParams, queryParams) => request('patch', url, bodyParams, queryParams, {});
+const get = (url, urlParams) => request('get', url, null, urlParams);
+const post = (url, bodyParams, urlParams, headers) => request('post', url, bodyParams, urlParams, headers);
+const put = (url, bodyParams, urlParams) => request('put', url, bodyParams, urlParams);
+const patch = (url, bodyParams, urlParams) => request('patch', url, bodyParams, urlParams);
 
 export default {
   get, post, put, patch,

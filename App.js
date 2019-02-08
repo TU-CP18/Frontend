@@ -20,6 +20,7 @@ import { observable } from 'mobx';
 import { observer, Provider } from 'mobx-react/native';
 import AppNavigator from './navigation/AppNavigator';
 import Alert from './components/Alert';
+import lib from './helpers/lib';
 
 import UserStore from './store/User';
 import DevSettingsStore from './store/DevSettings';
@@ -46,15 +47,6 @@ if (UIManager.setLayoutAnimationEnabledExperimental) {
 }
 
 chatStore.load();
-
-async function getiOSNotificationPermission() {
-  const { status } = await Permissions.getAsync(
-    Permissions.NOTIFICATIONS,
-  );
-  if (status !== 'granted') {
-    await Permissions.askAsync(Permissions.NOTIFICATIONS);
-  }
-}
 
 @observer
 class App extends React.Component {
@@ -90,17 +82,8 @@ class App extends React.Component {
     this.initialRoute = userStore.authenticated ? 'Main' : 'Auth';
   };
 
-  listenForNotifications = () => {
-    Notifications.addListener(notification => {
-      if (notification.origin === 'received' && Platform.OS === 'ios') {
-        ReactAlert.alert(notification.title, notification.body);
-      }
-    });
-  };
-
-  componentWillMount() {
-    getiOSNotificationPermission();
-    this.listenForNotifications();
+  componentDidMount() {
+    lib.isPermissionGranted(Permissions.NOTIFICATIONS);
   }
 
   render() {
@@ -156,8 +139,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     bottom: 0,
-    // height: '100%',
-    // resizeMode: 'cover',
   },
 });
 

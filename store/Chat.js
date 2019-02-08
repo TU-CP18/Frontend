@@ -4,8 +4,8 @@ import { GiftedChat } from 'react-native-gifted-chat';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import * as moment from 'moment';
-import { Notifications } from 'expo';
 import api from '../helpers/api';
+import showNotification from '../helpers/notification';
 
 const USER_DETAILS = 'user/user_details';
 
@@ -13,8 +13,9 @@ export default class ChatStore {
   @observable messages = [];
   @observable loading = true;
   @observable error = '';
+  @observable chatScreenOpen = false;
 
-  @action
+  @action.bound
   async load() {
     const socket = new SockJS('http://localhost:8080/websocket/chat/');
     this.stompClient = Stomp.over(socket);
@@ -58,7 +59,7 @@ export default class ChatStore {
     console.log('Could not connect to WebSocket server. Please refresh this page to try again!', error);
   };
 
-  @action
+  @action.bound
   sendMessage(messages = []) {
     this.messages = GiftedChat.append(this.messages, messages);
 
@@ -70,6 +71,7 @@ export default class ChatStore {
       type: 'CHAT',
     };
     this.stompClient.send(this.topic, {}, JSON.stringify(chatMessage));
+
     // send message to database
     const chatMessageDb = {
       createdAt: moment.format,
@@ -81,26 +83,24 @@ export default class ChatStore {
       },
       text: messages[0].text,
     };
-    api.post('/chat-messages/', JSON.stringify(chatMessageDb), null, { 'Content-Type': 'application/json' });
+    api.post(
+      '/chat-messages/',
+      JSON.stringify(chatMessageDb),
+      null,
+      { 'Content-Type': 'application/json' },
+    );
   }
 
   /**
    * When the server sends a message to this.
    */
+  @action.bound
   onReceivedMessage = messages => {
     const messageObject = JSON.parse(messages.body);
     if (messageObject.user._id !== this.userDetails.id) {
-      const localNotification = {
-        title: messageObject.sender,
-        body: messageObject.text,
-        android: {
-          sound: true,
-        },
-        ios: {
-          sound: true,
-        },
-      };
-      Notifications.presentLocalNotificationAsync(localNotification);
+      if (!this.chatScreenOpen) {
+        showNotification(messageObject.sender, messageObject.text);
+      }
       this.messages = GiftedChat.append(this.messages, messageObject);
     }
   };
