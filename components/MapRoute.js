@@ -165,7 +165,6 @@ class MapRoute extends React.Component {
         latitude: step.maneuver.location[1],
         longitude: step.maneuver.location[0],
         bearing: step.maneuver.bearing_after,
-        done: false,
       };
     });
     this.setState({
@@ -199,13 +198,17 @@ class MapRoute extends React.Component {
 
   animateNavigation = async coords => {
     const { steps } = this.state;
-    steps.forEach(step => {
-      const distance = geolib.getDistance(coords, step);
-      if (distance <= 5) {
+    for (let i = 0; i < steps.length; i++) {
+      const distance = geolib.getDistance(coords, steps[i]);
+      if (distance < 10) {
+        console.log(steps[i].bearing);
         // user is 5 meters close to intersection point
-        this.map.animateToBearing(step.bearing);
+        this.map.animateToBearing(steps[i].bearing);
+        steps.splice(i, 1);
+        this.setState({ steps: steps });
+        break;
       }
-    });
+    }
   };
 
   /**
