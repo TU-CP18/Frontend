@@ -113,7 +113,7 @@ class MapRoute extends React.Component {
     }
   }
 
-  fakeDemo = async () => {
+  simulateNavigation = async () => {
     const { coordinates } = this.state;
     for (let coord of coordinates) {
       this.setState({ currentCoordinate: coord });
@@ -236,7 +236,9 @@ class MapRoute extends React.Component {
       // log event
       logger.slog(logger.SHIFT_INTERCEPTING);
     }
-    this.fakeDemo();
+    if (global.devSettings.settings.get('fakeNavigation')) {
+      this.simulateNavigation();
+    }
   };
 
   renderConfirmalButton() {
