@@ -171,8 +171,6 @@ class MapRoute extends React.Component {
       coordinates: coordinates,
       steps: steps,
     });
-    console.log(coordinates);
-    console.log(steps);
     return coordinates;
   };
 
@@ -201,7 +199,6 @@ class MapRoute extends React.Component {
     for (let i = 0; i < steps.length; i++) {
       const distance = geolib.getDistance(coords, steps[i]);
       if (distance < 10) {
-        console.log(steps[i].bearing);
         // user is 5 meters close to intersection point
         this.map.animateToBearing(steps[i].bearing);
         steps.splice(i, 1);
