@@ -10,8 +10,8 @@ const request = (method, url, bodyParams, urlParams, headers = {}) => {
 
   const verb = method.toUpperCase();
   const baseUrl = Api.devMode && !global.devSettings.settings.get('productionApi')
-    ? Api.devHost
-    : Api.prodHost;
+    ? Api.apiDev
+    : Api.apiProd;
 
   const options = {
     method: verb,

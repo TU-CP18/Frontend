@@ -4,6 +4,7 @@ import { GiftedChat } from 'react-native-gifted-chat';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import * as moment from 'moment';
+import Api from '../constants/Api';
 import api from '../helpers/api';
 import showNotification from '../helpers/notification';
 
@@ -17,7 +18,11 @@ export default class ChatStore {
 
   @action.bound
   async load() {
-    const socket = new SockJS('http://localhost:8080/websocket/chat/');
+    const url = Api.devMode && !global.devSettings.settings.get('productionApi')
+      ? Api.websocketDev
+      : Api.websocketProd;
+
+    const socket = new SockJS(`${url}/chat`);
     this.stompClient = Stomp.over(socket);
     this.stompClient.connect({}, this.onConnected, this.onError);
     this.userDetails = JSON.parse(await AsyncStorage.getItem(USER_DETAILS));
