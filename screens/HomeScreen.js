@@ -22,16 +22,17 @@ class HomeScreen extends React.Component {
 
   componentDidMount() {
     this.loadNextShift();
+    const { nextShift } = this.props;
+    nextShift.startPolling();
   }
 
   componentWillUnmount() {
     const { nextShift } = this.props;
-    nextShift.polling = false;
+    nextShift.stopPolling();
   }
 
   loadNextShift = () => {
     const { nextShift } = this.props;
-    nextShift.polling = true;
     nextShift.load();
   }
 

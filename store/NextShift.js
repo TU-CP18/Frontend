@@ -11,24 +11,43 @@ export default class NextShiftStore {
 
   @observable error = '';
 
-  @observable polling = false;
+  @observable requestConter = 0;
 
   @action.bound
-  async load(explicit = true, ignoreCalled = false) {
-    this.loading = explicit;
-
+  async startPolling() {
     // counter known bug
     // somehow HomeScreen is mounted twice which results in two calls of this
-    // action at the same time. Return when loading is already true
-    if (!ignoreCalled && this.called) return;
-    this.called = true;
+    // action at the same time. Return when requestConter reaches 2
+    this.requestConter += 1;
+    if (this.requestConter > 1) return;
 
-    // sleep 1500, this is nice for the demo
-    // aditionally we don't need to pause the recursive call
-    await sleep(1500);
+    this.pollingInterval = setInterval(() => {
+      this.load(false);
+    }, 5000);
+
+    await sleep(1000);
+    await this.load(true);
+  }
+
+  async stopPolling() {
+    this.requestConter -= 1;
+    if (this.pollingInterval && this.requestConter === 0) {
+      clearInterval(this.pollingInterval);
+      this.requestConter = 0;
+    }
+  }
+
+  @action.bound
+  async load(explicit = true) {
+    this.loading = explicit;
 
     try {
       const response = await api.get('/shifts/user/next');
+
+      if (this.shift
+        && response.data.id === this.shift.id
+        && response.data.start === this.shift.start
+      ) return;
 
       const { locationServicesEnabled } = await Location.getProviderStatusAsync();
       if (locationServicesEnabled) {
@@ -63,9 +82,6 @@ export default class NextShiftStore {
     } catch (e) {
       this.error = 'Error';
       console.log(e);
-      if (this.polling) {
-        this.load(false, true);
-      }
     } finally {
       this.loading = false;
     }
