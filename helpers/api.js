@@ -2,8 +2,6 @@ import axios from 'axios';
 import Api from '../constants/Api';
 import fakeApi from './fakeApi';
 
-const BASE_URL = Api.host;
-
 const request = (method, url, bodyParams, urlParams, headers = {}) => {
   if (global.devSettings.settings.get('fakeApi')) {
     const response = fakeApi(method, url, bodyParams, urlParams);
@@ -11,10 +9,13 @@ const request = (method, url, bodyParams, urlParams, headers = {}) => {
   }
 
   const verb = method.toUpperCase();
+  const baseUrl = Api.devMode && !global.devSettings.settings.get('productionApi')
+    ? Api.devHost
+    : Api.prodHost;
 
   const options = {
     method: verb,
-    baseURL: BASE_URL,
+    baseURL: baseUrl,
     url: url,
     responseType: 'json',
     headers: headers,

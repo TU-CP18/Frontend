@@ -1,13 +1,12 @@
 import Expo from 'expo';
 
 const { manifest } = Expo.Constants;
-
-// manifest.packagerOpts is available in dev mode
-const host = manifest.packagerOpts
-  ? manifest.debuggerHost.split(':').shift()
-  : '13.80.251.160';
+const devIp = manifest.debuggerHost && manifest.debuggerHost.split(':').shift();
 
 export default {
-  host: `http://${host}:8080/api`,
+  devHost: `http://${devIp}:8080/api`,
+  prodHost: 'http://webapp.isecp.de/api',
+  // manifest.packagerOpts is available in dev mode
+  devMode: !!manifest.packagerOpts,
   loggerHost: 'http://log-collector.isecp.de/api/log',
 };
