@@ -45,7 +45,7 @@ const log = (type, additionalParams = {}) => {
     hostname: `sd-mobile-device-${global.userStore.id}`,
     driverId: global.userStore.id,
     shiftId: global.currentShift.shiftId,
-    license: global.nextShift.shift.car.id,
+    vehicleId: global.nextShift.shift.car.id,
     ...additionalParams,
   };
 
