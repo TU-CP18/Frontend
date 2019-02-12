@@ -30,7 +30,7 @@ class RideScreen extends React.Component {
       nextStopShift: false,
       nextStopShiftReached: false,
       pauseNavigation: false,
-      countdown: 30,
+      countdown: (global.devSettings.settings.get('demoAwarenessCheck')) ? 15 : 30,
     };
   }
 
@@ -103,7 +103,12 @@ class RideScreen extends React.Component {
     const { countdown } = this.state;
     if (countdown === 0) {
       clearInterval(this.countdown);
-      this.startVibration();
+      if (global.devSettings.settings.get('demoAwarenessCheck')) {
+        // in the demo we skip vibration and immediately play the audio sound
+        this.startAudio();
+      } else {
+        this.startVibration();
+      }
     } else {
       this.setState(prevState => (
         { countdown: prevState.countdown - 1 }
@@ -124,7 +129,9 @@ class RideScreen extends React.Component {
     if (this.soundObject) {
       this.soundObject.stopAsync();
     }
-    this.setState({ countdown: 30 });
+    this.setState({
+      countdown: (global.devSettings.settings.get('demoAwarenessCheck')) ? 15 : 30,
+    });
     this.startCountdown();
   };
 
@@ -252,7 +259,7 @@ class RideScreen extends React.Component {
         <Button
           title="Report"
           subtitle="Incident"
-          onPress={() => {}}
+          onPress={this.onPressReportIncident}
           iconLeft="MaterialIcons/report"
           wrapperStyle={styles.buttonWrapper}
           containerStyle={styles.buttonContainer}
