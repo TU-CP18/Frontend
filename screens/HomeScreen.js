@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
 import moment from 'moment';
-import Icons from '@expo/vector-icons';
 import MapMarker from '../components/MapMarker';
 import Header from '../components/Header';
 import Button from '../components/Button';
+import MenuItem from '../components/MenuItem';
 
 @inject('user', 'nextShift')
 @observer
@@ -54,39 +54,6 @@ class HomeScreen extends React.Component {
     const { navigation } = this.props;
     navigation.navigate('NextShiftMap');
   }
-
-  Item = ({
-    icon,
-    iconStyle,
-    label,
-    separator = true,
-  }) => {
-    const Icon = Icons[icon.split('/')[0]];
-    const iconName = icon.split('/')[1];
-
-    return (
-      <View style={[s.item, separator ? s.itemSeparator : {}]}>
-        <View style={{ flex: 1 }}>
-          <Icon
-            name={iconName}
-            style={[s.itemIcon, iconStyle]}
-          />
-        </View>
-        <Text style={s.itemLabel}>
-          {label}
-        </Text>
-      </View>
-    );
-  }
-
-  MenuItem = ({ onPress, ...rest }) => (
-    <TouchableOpacity
-      style={s.menuItemTouchable}
-      onPress={onPress}
-    >
-      <this.Item {...rest} />
-    </TouchableOpacity>
-  );
 
   renderIdleState() {
     const {
@@ -154,23 +121,21 @@ class HomeScreen extends React.Component {
 
         <View style={s.nextShiftBlock}>
           <Header label="Your next Shift" />
-          <this.Item
+          <MenuItem
             label={`${shift.address.name}, ${shift.address.postalCode} ${shift.address.city}`}
             icon="FontAwesome/map-marker"
             iconStyle={{ marginLeft: 3 }}
             separator={false}
           />
-          <this.Item
+          <MenuItem
             label={startDateFormatted}
             icon="Ionicons/md-time"
             separator={false}
           />
-          <View style={[s.item, { marginTop: -15, paddingBottom: 5 }]}>
-            <View style={{ flex: 1 }} />
-            <Text style={[s.itemLabel, { fontSize: 14 }]}>
-              Remember to confirm your arrival at the interchange point to start the shift!
-            </Text>
-          </View>
+          <MenuItem
+            label="Remember to confirm your arrival at the interchange point to start the shift!"
+            separator={false}
+          />
           <Button
             title="Show Start Position"
             onPress={this.onPressNextShift}
@@ -184,8 +149,6 @@ class HomeScreen extends React.Component {
   }
 
   render() {
-    const { MenuItem } = this;
-
     return (
       <View style={s.container}>
         {this.renderIdleState()}
@@ -233,37 +196,10 @@ const s = StyleSheet.create({
     paddingTop: 5,
   },
 
-  item: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: 20,
-  },
-  itemSeparator: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#C2C2C2',
-    paddingBottom: 15,
-    marginBottom: 15,
-  },
-  itemIcon: {
-    marginRight: 14,
-    color: '#ffffff',
-    fontSize: 26,
-  },
-  itemLabel: {
-    flex: 7,
-    alignSelf: 'center',
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-
   menu: {
     marginBottom: 20,
     marginHorizontal: 20,
     marginTop: 30,
-  },
-  menuItemTouchable: {
-    alignItems: 'center',
   },
 });
 
