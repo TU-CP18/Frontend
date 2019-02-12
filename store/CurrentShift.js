@@ -58,7 +58,9 @@ export default class CurrentShiftStore {
 
     // authorize the opening of the car
     try {
-      const res = await api.post(`/shifts/${this.shiftId}/authorize`, { currentLocation });
+      const res = await api.post(`/shifts/${this.shiftId}/authorize`, {
+        position: currentLocation,
+      });
       if (res.status === 200) {
         this.openCarSucceeded = true;
       } else {
@@ -174,7 +176,7 @@ export default class CurrentShiftStore {
         rating: rating.score,
       });
     } catch (e) {
-      // do noghinb, when the cleanliness could not be saved this is
+      // do nothing, when the cleanliness could not be saved this is
       // unfortunate but negligible
       // TODO: log event for the FM or throw an error
       console.log(e);

@@ -27,12 +27,18 @@ export default class ShiftSchedule {
         const end = moment(shift.end);
         const diff = moment.utc(end.diff(start)).format('HH:mm');
         let address = null;
-        if (locationServicesEnabled && shift.latStart && shift.longStart) {
-          [address] = await Location.reverseGeocodeAsync({
-            latitude: shift.latStart,
-            longitude: shift.longStart,
-          });
-        }
+        // if (locationServicesEnabled && shift.latStart && shift.longStart) {
+        //   [address] = await Location.reverseGeocodeAsync({
+        //     latitude: shift.latStart,
+        //     longitude: shift.longStart,
+        //   });
+        // }
+        const geocode = [{
+          name: 'Schönhauser Allee 38',
+          postalCode: '10439',
+          city: 'Berlin',
+        }];
+        [address] = geocode;
 
         return {
           ...shift,
