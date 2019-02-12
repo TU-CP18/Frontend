@@ -7,12 +7,18 @@ import {
   TextInput,
   ScrollView,
   LayoutAnimation,
+  Image,
+  Dimensions,
 } from 'react-native';
 import { observer, inject, disposeOnUnmount } from 'mobx-react';
 import { reaction } from 'mobx';
 import { Entypo } from '@expo/vector-icons';
 import Rating from '../../components/Rating';
 import Button from '../../components/Button';
+
+const unlockGif = require('../../assets/images/unlock.gif');
+
+const screenHeight = Dimensions.get('window').height;
 
 @inject('issues', 'alert', 'currentShift')
 @observer
@@ -45,6 +51,8 @@ class InteriorCheckScreen extends React.Component {
       rating: -1,
       issueFormVisible: false,
       issueDesc: '',
+      showCarUnlocked: true,
+      showCarUnlockedMessage: false,
     };
   }
 
@@ -71,6 +79,15 @@ class InteriorCheckScreen extends React.Component {
 
     // dispose reaction when unmounting this component
     disposeOnUnmount(this, insertReaction);
+
+    setTimeout(() => {
+      LayoutAnimation.easeInEaseOut();
+      this.setState({ showCarUnlockedMessage: true });
+    }, 1500);
+    setTimeout(() => {
+      LayoutAnimation.easeInEaseOut();
+      this.setState({ showCarUnlocked: false });
+    }, 4500);
   }
 
   onPressStartRide = () => {
@@ -94,7 +111,7 @@ class InteriorCheckScreen extends React.Component {
     Alert.alert(
       'Confirmation Request',
       'Confirm that you checked the operional readiness of the car '
-      + 'accordingly and that you are prepared to drive manually if required.',
+      + 'accordingly and that you ready for the ride.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -153,6 +170,8 @@ class InteriorCheckScreen extends React.Component {
       rating,
       issueFormVisible,
       issueDesc,
+      showCarUnlocked,
+      showCarUnlockedMessage,
     } = this.state;
 
     const issueList = issues.issues.slice().filter(issue => {
@@ -160,124 +179,143 @@ class InteriorCheckScreen extends React.Component {
     });
 
     return (
-      <View style={s.caroussel}>
-        <View style={[s.main, { marginLeft: issueFormVisible ? '-100%' : 0 }]}>
-          <View style={s.content}>
-            <Text style={[s.guideText, { marginTop: 10 }]}>
-              Before you can start the ride, please track new issues of the interior and
-              confirm that the car is operational.
-            </Text>
-
-            <Text style={s.titleText}>
-              Existing Issues
-            </Text>
-
-            {issueList.length === 0 && (
-              <Text style={[s.guideText, { marginBottom: 40 }]}>
-                There are currently no issue tracked
+      <View style={{ flex: 1, }}>
+        <View style={s.caroussel}>
+          <View style={[s.main, { marginLeft: issueFormVisible ? '-100%' : 0 }]}>
+            <View style={s.content}>
+              <Text style={[s.guideText, { marginTop: 10 }]}>
+                Before you can start the ride, please track new issues of the interior and
+                confirm that the car is operational.
               </Text>
-            ) || (
-              <ScrollView>
-                {issueList.map((issue, index) => {
-                  return (
-                    <View key={issue.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14}}>
-                      <View
-                        style={{
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 36,
-                          height: 36,
-                          borderRadius: 18,
-                          backgroundColor: '#ffffff',
-                        }}
-                      >
-                        <Text textAlign="center">
-                          {index + 1}
+
+              <Text style={s.titleText}>
+                Existing Issues
+              </Text>
+
+              {issueList.length === 0 && (
+                <Text style={[s.guideText, { marginBottom: 40 }]}>
+                  There are currently no issue tracked
+                </Text>
+              ) || (
+                <ScrollView>
+                  {issueList.map((issue, index) => {
+                    return (
+                      <View key={issue.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14}}>
+                        <View
+                          style={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 36,
+                            height: 36,
+                            borderRadius: 18,
+                            backgroundColor: '#ffffff',
+                          }}
+                        >
+                          <Text textAlign="center">
+                            {index + 1}
+                          </Text>
+                        </View>
+                        <Text
+                          style={{
+                            color: '#ffffff',
+                            marginLeft: 20,
+                            fontSize: 16,
+                            marginRight: 20,
+                          }}
+                          numberOfLines={3}
+                        >
+                          {issue.description}
                         </Text>
                       </View>
-                      <Text
-                        style={{
-                          color: '#ffffff',
-                          marginLeft: 20,
-                          fontSize: 16,
-                          marginRight: 20,
-                        }}
-                        numberOfLines={3}
-                      >
-                        {issue.description}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            )}
+                    );
+                  })}
+                </ScrollView>
+              )}
 
-            <Text style={s.titleText}>
-              Interior Cleanliness
-            </Text>
-            <Text style={[s.guideText, s.guideTextCleanliness]}>
-              Please also rate cleanliness of the interior.
-            </Text>
-            <Rating
-              rating={rating}
-              onRate={userRating => this.setState({ rating: userRating })}
-              style={s.rating}
-            />
+              <Text style={s.titleText}>
+                Interior Cleanliness
+              </Text>
+              <Text style={[s.guideText, s.guideTextCleanliness]}>
+                Please also rate cleanliness of the interior.
+              </Text>
+              <Rating
+                rating={rating}
+                onRate={userRating => this.setState({ rating: userRating })}
+                style={s.rating}
+              />
+            </View>
+
+            <View style={s.buttonGroup}>
+              <Button
+                onPress={this.showIssueForm}
+                title="Add Issue"
+                iconLeft="Entypo/plus"
+                containerStyle={s.addIssueButtonContainer}
+                textStyle={s.addIssueText}
+              />
+              <Button
+                onPress={this.onPressStartRide}
+                title="Start Ride"
+                wrapperStyle={s.confirmButtonWrapper}
+                containerStyle={s.confirmButtonContainer}
+              />
+            </View>
           </View>
 
-          <View style={s.buttonGroup}>
-            <Button
-              onPress={this.showIssueForm}
-              title="Add Issue"
-              iconLeft="Entypo/plus"
-              containerStyle={s.addIssueButtonContainer}
-              textStyle={s.addIssueText}
-            />
-            <Button
-              onPress={this.onPressStartRide}
-              title="Start Ride"
-              wrapperStyle={s.confirmButtonWrapper}
-              containerStyle={s.confirmButtonContainer}
-            />
+          <View style={[s.form, { marginRight: issueFormVisible ? 0 : '-100%' }]}>
+            <View style={s.formContent}>
+              <Text style={[s.titleText, { alignSelf: 'center', marginBottom: 20 }]}>
+                Add new Issue
+              </Text>
+              <Text style={s.guideText}>
+                Provide a short description of the discovered issue. Examples may be
+                broken parts of the interior, signs of vandalism etc.
+              </Text>
+              <Text style={[s.guideText, { marginBottom: 20 }]}>
+                In case you think the car should not transport passengers, please contact the
+                Fleet Manager.
+              </Text>
+              <TextInput
+                style={s.descInput}
+                underlineColorAndroid="transparent"
+                placeholder="Type short description here ..."
+                value={issueDesc}
+                onChangeText={text => this.setState({ issueDesc: text })}
+                placeholderTextColor="#ffffff"
+              />
+            </View>
+            <View style={s.buttonGroup}>
+              <Button
+                onPress={this.hideIssueForm}
+                title="Cancel"
+                containerStyle={s.addIssueButtonContainer}
+                textStyle={s.addIssueText}
+              />
+              <Button
+                onPress={this.createIssue}
+                title="Add Issue"
+                wrapperStyle={s.confirmButtonWrapper}
+                containerStyle={s.confirmButtonContainer}
+              />
+            </View>
           </View>
         </View>
 
-        <View style={[s.form, { marginRight: issueFormVisible ? 0 : '-100%' }]}>
-          <View style={s.formContent}>
-            <Text style={[s.titleText, { alignSelf: 'center', marginBottom: 20 }]}>
-              Add new Issue
-            </Text>
-            <Text style={s.guideText}>
-              Provide a short description of the discovered issue. Examples may be
-              broken parts of the interior, signs of vandalism etc.
-            </Text>
-            <Text style={[s.guideText, { marginBottom: 20 }]}>
-              In case you think the car should not transport passengers, please contact the
-              Fleet Manager.
-            </Text>
-            <TextInput
-              style={s.descInput}
-              underlineColorAndroid="transparent"
-              placeholder="Type short description here ..."
-              value={issueDesc}
-              onChangeText={text => this.setState({ issueDesc: text })}
-              placeholderTextColor="#ffffff"
-            />
-          </View>
-          <View style={s.buttonGroup}>
-            <Button
-              onPress={this.hideIssueForm}
-              title="Cancel"
-              containerStyle={s.addIssueButtonContainer}
-              textStyle={s.addIssueText}
-            />
-            <Button
-              onPress={this.createIssue}
-              title="Add Issue"
-              wrapperStyle={s.confirmButtonWrapper}
-              containerStyle={s.confirmButtonContainer}
-            />
-          </View>
+        <View
+          style={[
+            s.unlockedCover,
+            { marginTop: showCarUnlocked ? 0 : -screenHeight },
+          ]}
+        >
+          <Image
+            source={unlockGif}
+          />
+          {showCarUnlockedMessage && (
+            <View style={{ marginTop: -160 }}>
+              <Text style={s.unlockTitle}>Doors Unlocked</Text>
+              <Text style={s.unlockSubtitle}>Please enter the car</Text>
+            </View>
+          )}
         </View>
       </View>
     );
@@ -354,6 +392,27 @@ const s = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 12,
     marginBottom: 20,
+  },
+
+  unlockedCover: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    backgroundColor: 'black',
+    height: '100%',
+    width: '100%',
+    alignItems: 'center',
+  },
+  unlockTitle: {
+    color: '#ffffff',
+    fontSize: 32,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  unlockSubtitle: {
+    color: '#ffffff',
+    fontSize: 24,
+    textAlign: 'center',
   },
 });
 
