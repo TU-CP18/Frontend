@@ -331,6 +331,10 @@ class MapRoute extends React.Component {
   }
 
   renderLocationMarker() {
+    if (!global.devSettings.settings.get('fakeNavigation')) {
+      // only used for simulating navigation
+      return;
+    }
     const {
       isMapReady,
       isNavigation,

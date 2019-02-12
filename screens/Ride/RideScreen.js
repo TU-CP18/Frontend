@@ -51,6 +51,10 @@ class RideScreen extends React.Component {
   };
 
   onPhaseTextPressed = () => {
+    if (!global.devSettings.settings.get('fakeNavigation')) {
+      // only used for simulating navigation
+      return;
+    }
     const { pauseNavigation } = this.state;
     this.setState({ pauseNavigation: !pauseNavigation });
   };
