@@ -5,8 +5,6 @@ import {
   View,
   Dimensions,
   Alert,
-  TouchableOpacity,
-  Text,
 } from 'react-native';
 import {
   MapView,
@@ -15,14 +13,15 @@ import {
   IntentLauncherAndroid,
   Constants,
 } from 'expo';
-import { Ionicons } from '@expo/vector-icons';
 import geolib from 'geolib';
 import MapboxClient from 'mapbox';
 import lib from '../helpers/lib';
 import asyncSleep from '../helpers/asyncSleep';
 import logger from '../helpers/logger';
+import Button from './Button';
 
 const { width, height } = Dimensions.get('window');
+const customMarkerImg = require('../assets/images/custom_marker.png');
 
 class MapRoute extends React.Component {
   constructor(props) {
@@ -248,6 +247,24 @@ class MapRoute extends React.Component {
     }
   };
 
+  /**
+   * Renders the button for the startNavigation and confirmal button.
+   */
+  renderButton = (title, onPress) => (
+    <Button
+      title={title}
+      onPress={onPress}
+      iconLeft="Ionicons/ios-checkmark-circle-outline"
+      wrapperStyle={s.confirmButtonWrapper}
+      containerStyle={s.confirmButtonContainer}
+      iconStyle={s.confirmButtonIcon}
+      titleStyle={s.confirmButtonTitle}
+    />
+  );
+
+  /**
+   * Render button to confirm arrival when the user arrived at the interchange point.
+   */
   renderConfirmalButton() {
     const { onArrivalConfirmed, showConfirmationButton } = this.props;
     const { destinationReached } = this.state;
@@ -256,26 +273,12 @@ class MapRoute extends React.Component {
       return null;
     }
 
-    return (
-      <View style={styles.confirmContainer}>
-        <TouchableOpacity
-          style={styles.confirmButton}
-          onPress={onArrivalConfirmed}
-        >
-          <View style={styles.drawerItem}>
-            <Ionicons
-              name="ios-checkmark-circle-outline"
-              size={30}
-              color="#ffffff"
-              style={styles.drawerItemIcon}
-            />
-            <Text style={styles.buttonText}>Confirm Arrival</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
+    return this.renderButton('Confirm Arrival', onArrivalConfirmed);
   }
 
+  /**
+   * Render button to start the navigation if it have not already been started.
+   */
   renderNavigationButton() {
     const { showNavigationButton } = this.props;
     const { destinationReached, isNavigation } = this.state;
@@ -284,24 +287,7 @@ class MapRoute extends React.Component {
       return null;
     }
 
-    return (
-      <View style={styles.confirmContainer}>
-        <TouchableOpacity
-          style={styles.confirmButton}
-          onPress={this.startNavigation}
-        >
-          <View style={styles.drawerItem}>
-            <Ionicons
-              name="ios-checkmark-circle-outline"
-              size={30}
-              color="#ffffff"
-              style={styles.drawerItemIcon}
-            />
-            <Text style={styles.buttonText}>Start Navigation</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
+    return this.renderButton('Start Navigation', this.startNavigation);
   }
 
   renderRoute() {
@@ -333,7 +319,7 @@ class MapRoute extends React.Component {
   renderLocationMarker() {
     if (!global.devSettings.settings.get('fakeNavigation')) {
       // only used for simulating navigation
-      return;
+      return null;
     }
     const {
       isMapReady,
@@ -346,7 +332,7 @@ class MapRoute extends React.Component {
     }
     return (
       <MapView.Marker
-        image={require('../assets/images/custom_marker.png')}
+        image={customMarkerImg}
         coordinate={coordinates[currentCoordinateIndex]}
       />
     );
@@ -359,10 +345,10 @@ class MapRoute extends React.Component {
   render() {
     const { style } = this.props;
     return (
-      <View style={styles.container}>
+      <View style={s.container}>
         <MapView
           provider="google"
-          style={[styles.map, style]}
+          style={[s.map, style]}
           showsUserLocation
           loadingEnabled
           customMapStyle={mapStyle}
@@ -382,7 +368,7 @@ class MapRoute extends React.Component {
 
 const mapStyle = require('../assets/styles/mapStyle');
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -391,32 +377,22 @@ const styles = StyleSheet.create({
     width: width,
     height: height,
   },
-  confirmContainer: {
+
+  /* Button */
+  confirmButtonWrapper: { // touchable wrapper
     position: 'absolute',
-    left: 0,
-    bottom: 0,
-    height: 150,
-    width: '100%',
-    justifyContent: 'center',
+    left: 40,
+    right: 40,
+    bottom: 60,
   },
-  confirmButton: {
-    paddingHorizontal: 30,
+  confirmButtonContainer: {
+    padding: 16,
   },
-  drawerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    backgroundColor: '#000000',
-    borderColor: '#ffffff',
-    borderWidth: 1,
-    borderRadius: 15,
-  },
-  drawerItemIcon: {
+  confirmButtonIcon: {
     marginRight: 10,
+    marginTop: 2,
   },
-  buttonText: {
-    color: '#ffffff',
+  confirmButtonTitle: {
     fontSize: 22,
   },
 });

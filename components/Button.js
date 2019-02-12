@@ -36,7 +36,7 @@ const Button = ({
   children,
   wrapperStyle,
   containerStyle,
-  textStyle,
+  titleStyle,
   subtitleStyle,
   onPress,
   disabled,
@@ -66,7 +66,7 @@ const Button = ({
         {(title && (
           (subtitle && (
             <View>
-              <Text style={[s.title, textStyle]}>
+              <Text style={[s.title, titleStyle]}>
                 {title}
               </Text>
               <Text style={[s.subtitle, subtitleStyle]}>
@@ -74,7 +74,7 @@ const Button = ({
               </Text>
             </View>
           )) || (
-            <Text style={[s.title, textStyle]}>
+            <Text style={[s.title, titleStyle]}>
               {title}
             </Text>
           )

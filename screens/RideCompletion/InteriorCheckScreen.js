@@ -263,7 +263,7 @@ class InteriorCheckScreen extends React.Component {
               title="Add Issue"
               iconLeft="Entypo/plus"
               containerStyle={s.addIssueButtonContainer}
-              textStyle={s.addIssueText}
+              titleStyle={s.addIssueText}
             />
             <Button
               onPress={this.onPressCloseCar}
@@ -303,7 +303,7 @@ class InteriorCheckScreen extends React.Component {
               onPress={this.hideIssueForm}
               title="Cancel"
               containerStyle={s.addIssueButtonContainer}
-              textStyle={s.addIssueText}
+              titleStyle={s.addIssueText}
             />
             <Button
               onPress={this.createIssue}

@@ -20,7 +20,7 @@ const CarCheckItem = ({
         <CheckBox
           title={title}
           checked={checked}
-          textStyle={styles.checkBoxText}
+          titleStyle={styles.checkBoxText}
           containerStyle={styles.checkboxContainer}
           onPress={onPressCheck}
         />

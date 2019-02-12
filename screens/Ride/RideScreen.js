@@ -252,7 +252,7 @@ class RideScreen extends React.Component {
           wrapperStyle={styles.buttonWrapper}
           containerStyle={styles.buttonContainer}
           iconStyle={styles.buttonIcon}
-          textStyle={styles.buttonText}
+          titleStyle={styles.buttonText}
           subtitleStyle={styles.buttonSubtitle}
         />
 
@@ -264,7 +264,7 @@ class RideScreen extends React.Component {
           wrapperStyle={styles.buttonWrapper}
           containerStyle={styles.buttonContainer}
           iconStyle={styles.buttonIcon}
-          textStyle={styles.buttonText}
+          titleStyle={styles.buttonText}
           subtitleStyle={styles.buttonSubtitle}
         />
 
@@ -276,7 +276,7 @@ class RideScreen extends React.Component {
           wrapperStyle={styles.buttonWrapper}
           containerStyle={styles.buttonContainer}
           iconStyle={styles.buttonIcon}
-          textStyle={styles.buttonText}
+          titleStyle={styles.buttonText}
           subtitleStyle={styles.buttonSubtitle}
         />
       </View>
