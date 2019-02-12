@@ -91,6 +91,11 @@ class RideScreen extends React.Component {
   };
 
   startVibration = () => {
+    const { nextStopShiftReached } = this.state;
+    if (nextStopShiftReached) {
+      // safety driver is at destination, so awareness does not need to be checked anymore
+      return;
+    }
     if (Platform.OS === 'android') {
       // vibrate for 30 seconds
       Vibration.vibrate(30000);
@@ -112,9 +117,10 @@ class RideScreen extends React.Component {
   };
 
   startAudio = async () => {
-    const { countdown } = this.state;
-    if (countdown > 0) {
+    const { countdown, nextStopShiftReached } = this.state;
+    if (countdown > 0 || nextStopShiftReached) {
       // user has swiped the button during vibration
+      // safety driver is at destination, so awareness does not need to be checked anymore
       return;
     }
     this.soundObject = new Audio.Sound();
@@ -135,12 +141,13 @@ class RideScreen extends React.Component {
 
   sendNotificationToFleetManager = () => {
     const { chat, user } = this.props;
-    const { countdown } = this.state;
-    logger.slog(logger.RIDE_AWARENESS_IGNORED);
-    if (countdown > 0) {
+    const { countdown, nextStopShiftReached } = this.state;
+    if (countdown > 0 || nextStopShiftReached) {
       // user has swiped the button during audio
+      // safety driver is at destination, so awareness does not need to be checked anymore
       return;
     }
+    logger.slog(logger.RIDE_AWARENESS_IGNORED);
     // send message to fleet manager
     chat.sendMessage([{
       _id: Math.round(Math.random() * 1000000),
