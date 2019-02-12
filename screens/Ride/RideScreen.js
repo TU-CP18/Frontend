@@ -5,6 +5,7 @@ import {
   Text,
   Vibration,
   Platform,
+  Alert,
   TouchableOpacity,
 } from 'react-native';
 import { Audio } from 'expo';
@@ -42,6 +43,39 @@ class RideScreen extends React.Component {
     currentShift.startRide();
     this.setState({ nextStopShift: true });
     this.startCountdown();
+  };
+
+  /**
+   * When pressing the incident button, show a confirmation dialog
+   * to clearly make sure that an emergency exists.
+   */
+  onPressReportIncident = () => {
+    Alert.alert(
+      'Emergency Confirmation',
+      'Do you want to report an emergency? The car will stop the current ride if you confirm.',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Stop Car',
+          onPress: this.onConfirmReportIncident,
+        },
+      ],
+      { cancelable: false },
+    );
+  };
+
+  /**
+   * When confirming an incident, track the event
+   * and open the incident screen.
+   */
+  onConfirmReportIncident = () => {
+    const { navigation } = this.props;
+    navigation.navigate('Incident');
+    logger.slog(logger.NAV_ESTOP);
   };
 
   onDestinationReached = () => {
