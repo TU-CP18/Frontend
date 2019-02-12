@@ -169,16 +169,20 @@ export default class CurrentShiftStore {
    */
   static async persistCleanliness(rating) {
     try {
-      const carId = global.currentShift.car.id;
-      await api.post(`/cars/${carId}/cleanliness`, {
+      await api.post('/car-cleanlinesses', {
+        car: {
+          id: this.car.id,
+        },
+        shift: {
+          id: this.shiftId,
+        },
         part: rating.part,
         event: rating.event,
         rating: rating.score,
       });
     } catch (e) {
-      // do nothing, when the cleanliness could not be saved this is
-      // unfortunate but negligible
-      // TODO: log event for the FM or throw an error
+      // do nothing, when the cleanliness could not be saved
+      // this is unfortunate but negligible
       console.log(e);
     }
   }
