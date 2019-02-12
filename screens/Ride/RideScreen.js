@@ -5,6 +5,7 @@ import {
   Text,
   Vibration,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
 import { Audio } from 'expo';
 import { observer, inject } from 'mobx-react';
@@ -27,6 +28,7 @@ class RideScreen extends React.Component {
     this.state = {
       nextStopShift: false,
       nextStopShiftReached: false,
+      pauseNavigation: false,
       countdown: 30,
     };
   }
@@ -42,11 +44,16 @@ class RideScreen extends React.Component {
     this.startCountdown();
   };
 
-  onDestinationReachted = () => {
+  onDestinationReached = () => {
     const { currentShift } = this.props;
     currentShift.finishRide();
     this.setState({ nextStopShiftReached: true });
-  }
+  };
+
+  onPhaseTextPressed = () => {
+    const { pauseNavigation } = this.state;
+    this.setState({ pauseNavigation: !pauseNavigation });
+  };
 
   startCountdown = () => {
     this.countdown = setInterval(() => {
@@ -236,7 +243,7 @@ class RideScreen extends React.Component {
   };
 
   render() {
-    const { nextStopShift } = this.state;
+    const { nextStopShift, pauseNavigation } = this.state;
 
     return (
       <View style={styles.container}>
@@ -244,19 +251,22 @@ class RideScreen extends React.Component {
           showNavigationButton={false}
           showConfirmationButton={false}
           isNavigation={nextStopShift}
-          onDestinationReached={this.onDestinationReachted}
+          pauseNavigation={pauseNavigation}
+          onDestinationReached={this.onDestinationReached}
           latitude={52.523}
           longitude={13.413492}
           style={styles.mapPreview}
         />
 
-        <View style={styles.warningContainer}>
-          <Text style={styles.warningText}>Next Stop</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <FontAwesome name="caret-right" size={30} style={styles.warningIcon} />
-            <Text style={styles.warningTitle}>{this.renderPhaseText()}</Text>
+        <TouchableOpacity style={styles.warningContainer} onPress={this.onPhaseTextPressed}>
+          <View>
+            <Text style={styles.warningText}>Next Stop</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome name="caret-right" size={30} style={styles.warningIcon} />
+              <Text style={styles.warningTitle}>{this.renderPhaseText()}</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.content}>
           {this.renderDriveModeButton()}

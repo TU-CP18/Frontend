@@ -31,7 +31,7 @@ class MapRoute extends React.Component {
     this.state = {
       coordinates: [],
       steps: [],
-      currentCoordinate: {},
+      currentCoordinateIndex: 0,
       focusedLocation: {
         latitude: props.latitude,
         longitude: props.longitude,
@@ -101,9 +101,12 @@ class MapRoute extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { isNavigation } = this.props;
+    const { isNavigation, pauseNavigation } = this.props;
     if (isNavigation && isNavigation !== prevProps.isNavigation) {
       this.startNavigation();
+    }
+    if (!pauseNavigation && pauseNavigation !== prevProps.pauseNavigation) {
+      this.simulateNavigation();
     }
   }
 
@@ -114,13 +117,17 @@ class MapRoute extends React.Component {
   }
 
   simulateNavigation = async () => {
-    const { coordinates } = this.state;
-    for (let coord of coordinates) {
-      this.setState({ currentCoordinate: coord });
+    const { pauseNavigation } = this.props;
+    const { coordinates, currentCoordinateIndex } = this.state;
+    if (!pauseNavigation && currentCoordinateIndex < coordinates.length) {
       this.checkUserLocation({
-        coords: coord,
+        coords: coordinates[currentCoordinateIndex],
       });
-      await asyncSleep(2000);
+      await asyncSleep(1500);
+      this.setState(prevState => (
+        { currentCoordinateIndex: prevState.currentCoordinateIndex + 1 }
+      ));
+      this.simulateNavigation();
     }
   };
 
@@ -324,14 +331,19 @@ class MapRoute extends React.Component {
   }
 
   renderLocationMarker() {
-    const { isMapReady, isNavigation, currentCoordinate } = this.state;
-    if (!isMapReady || !isNavigation || currentCoordinate.latitude === undefined) {
+    const {
+      isMapReady,
+      isNavigation,
+      currentCoordinateIndex,
+      coordinates,
+    } = this.state;
+    if (!isMapReady || !isNavigation || coordinates[currentCoordinateIndex] === undefined) {
       return null;
     }
     return (
       <MapView.Marker
         image={require('../assets/images/custom_marker.png')}
-        coordinate={currentCoordinate}
+        coordinate={coordinates[currentCoordinateIndex]}
       />
     );
   }
@@ -412,6 +424,7 @@ MapRoute.propTypes = {
   showConfirmationButton: PropTypes.bool,
   showNavigationButton: PropTypes.bool,
   isNavigation: PropTypes.bool,
+  pauseNavigation: PropTypes.bool,
   latitude: PropTypes.number.isRequired,
   longitude: PropTypes.number.isRequired,
   initialFocus: PropTypes.string,
@@ -425,6 +438,7 @@ MapRoute.defaultProps = {
   showConfirmationButton: true,
   showNavigationButton: true,
   isNavigation: false,
+  pauseNavigation: false,
   initialFocus: 'gps',
   trackNavigationEvent: false,
 };

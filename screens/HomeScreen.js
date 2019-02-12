@@ -47,7 +47,7 @@ class HomeScreen extends React.Component {
 
   onPressContact = () => {
     const { navigation } = this.props;
-    navigation.navigate('Contact');
+    navigation.navigate('Ride');
   };
 
   onPressNextShift = () => {
