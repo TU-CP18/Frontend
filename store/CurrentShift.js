@@ -150,6 +150,14 @@ export default class CurrentShiftStore {
       rating: rating,
     });
 
+    // for demo purpose:
+    // tell nextShift store to ignore the fetched shift if it
+    // has the same is as this.shift.id
+    global.nextShift.ignoreShiftId = this.shiftId;
+    global.nextShift.shift = null;
+    this.shiftId = null;
+    this.car = null;
+
     logger.slog(logger.SHIFT_FINISH);
   }
 

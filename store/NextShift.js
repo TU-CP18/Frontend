@@ -13,6 +13,8 @@ export default class NextShiftStore {
 
   @observable requestConter = 0;
 
+  ignoreShiftId = -1;
+
   @action.bound
   async startPolling() {
     // counter known bug
@@ -48,6 +50,11 @@ export default class NextShiftStore {
         && response.data.id === this.shift.id
         && response.data.start === this.shift.start
       ) return;
+
+      console.log("this.ignoreShiftId", this.ignoreShiftId);
+      if (response.data.id === this.ignoreShiftId) {
+        return;
+      }
 
       const { locationServicesEnabled } = await Location.getProviderStatusAsync();
       if (locationServicesEnabled) {
