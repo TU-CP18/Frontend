@@ -67,6 +67,30 @@ class DevSettingsScreen extends React.Component {
           this.props.devSettings.set('fakeApi', !this.props.devSettings.settings.get('fakeApi'));
         },
       },
+      {
+        type: 'checkbox',
+        label: 'Simulate Navigation',
+        subtitle: 'Simulate Location in Turn-by-turn navigation"',
+        leftIcon: 'aircraft',
+        leftIconType: 'entypo',
+        rightIcon: this.props.devSettings.settings.get('fakeNavigation') ? 'check-square' : 'square',
+        rightIconType: 'feather',
+        onPress: () => {
+          this.props.devSettings.set('fakeNavigation', !this.props.devSettings.settings.get('fakeNavigation'));
+        },
+      },
+      {
+        type: 'checkbox',
+        label: 'Demo Awareness Check',
+        subtitle: 'Shortens the awareness check countdown to 15 seconds"',
+        leftIcon: 'aircraft',
+        leftIconType: 'entypo',
+        rightIcon: this.props.devSettings.settings.get('demoAwarenessCheck') ? 'check-square' : 'square',
+        rightIconType: 'feather',
+        onPress: () => {
+          this.props.devSettings.set('demoAwarenessCheck', !this.props.devSettings.settings.get('demoAwarenessCheck'));
+        },
+      },
     ];
 
     return (

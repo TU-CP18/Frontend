@@ -10,6 +10,8 @@ const DEV_SETTINGS = 'dev_settings';
 export default class DevSettings {
   @observable settings = observable.map({
     fakeApi: false,
+    fakeNavigation: false,
+    demoAwarenessCheck: false,
   });
 
   @action.bound

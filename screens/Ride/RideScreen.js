@@ -4,7 +4,9 @@ import {
   View,
   Text,
   Vibration,
-  Platform, Alert,
+  Platform,
+  Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { Audio } from 'expo';
 import { observer, inject } from 'mobx-react';
@@ -27,7 +29,8 @@ class RideScreen extends React.Component {
     this.state = {
       nextStopShift: false,
       nextStopShiftReached: false,
-      countdown: 30,
+      pauseNavigation: false,
+      countdown: (global.devSettings.settings.get('demoAwarenessCheck')) ? 15 : 30,
     };
   }
 
@@ -63,7 +66,7 @@ class RideScreen extends React.Component {
       ],
       { cancelable: false },
     );
-  }
+  };
 
   /**
    * When confirming an incident, track the event
@@ -73,13 +76,22 @@ class RideScreen extends React.Component {
     const { navigation } = this.props;
     navigation.navigate('Incident');
     logger.slog(logger.NAV_ESTOP);
-  }
+  };
 
-  onDestinationReachted = () => {
+  onDestinationReached = () => {
     const { currentShift } = this.props;
     currentShift.finishRide();
     this.setState({ nextStopShiftReached: true });
-  }
+  };
+
+  onPhaseTextPressed = () => {
+    if (!global.devSettings.settings.get('fakeNavigation')) {
+      // only used for simulating navigation
+      return;
+    }
+    const { pauseNavigation } = this.state;
+    this.setState({ pauseNavigation: !pauseNavigation });
+  };
 
   startCountdown = () => {
     this.countdown = setInterval(() => {
@@ -91,7 +103,12 @@ class RideScreen extends React.Component {
     const { countdown } = this.state;
     if (countdown === 0) {
       clearInterval(this.countdown);
-      this.startVibration();
+      if (global.devSettings.settings.get('demoAwarenessCheck')) {
+        // in the demo we skip vibration and immediately play the audio sound
+        this.startAudio();
+      } else {
+        this.startVibration();
+      }
     } else {
       this.setState(prevState => (
         { countdown: prevState.countdown - 1 }
@@ -112,11 +129,18 @@ class RideScreen extends React.Component {
     if (this.soundObject) {
       this.soundObject.stopAsync();
     }
-    this.setState({ countdown: 30 });
+    this.setState({
+      countdown: (global.devSettings.settings.get('demoAwarenessCheck')) ? 15 : 30,
+    });
     this.startCountdown();
   };
 
   startVibration = () => {
+    const { nextStopShiftReached } = this.state;
+    if (nextStopShiftReached) {
+      // safety driver is at destination, so awareness does not need to be checked anymore
+      return;
+    }
     if (Platform.OS === 'android') {
       // vibrate for 30 seconds
       Vibration.vibrate(30000);
@@ -138,9 +162,10 @@ class RideScreen extends React.Component {
   };
 
   startAudio = async () => {
-    const { countdown } = this.state;
-    if (countdown > 0) {
+    const { countdown, nextStopShiftReached } = this.state;
+    if (countdown > 0 || nextStopShiftReached) {
       // user has swiped the button during vibration
+      // safety driver is at destination, so awareness does not need to be checked anymore
       return;
     }
     this.soundObject = new Audio.Sound();
@@ -161,12 +186,13 @@ class RideScreen extends React.Component {
 
   sendNotificationToFleetManager = () => {
     const { chat, user } = this.props;
-    const { countdown } = this.state;
-    logger.slog(logger.RIDE_AWARENESS_IGNORED);
-    if (countdown > 0) {
+    const { countdown, nextStopShiftReached } = this.state;
+    if (countdown > 0 || nextStopShiftReached) {
       // user has swiped the button during audio
+      // safety driver is at destination, so awareness does not need to be checked anymore
       return;
     }
+    logger.slog(logger.RIDE_AWARENESS_IGNORED);
     // send message to fleet manager
     chat.sendMessage([{
       _id: Math.round(Math.random() * 1000000),
@@ -269,7 +295,7 @@ class RideScreen extends React.Component {
   };
 
   render() {
-    const { nextStopShift } = this.state;
+    const { nextStopShift, pauseNavigation } = this.state;
 
     return (
       <View style={styles.container}>
@@ -277,19 +303,22 @@ class RideScreen extends React.Component {
           showNavigationButton={false}
           showConfirmationButton={false}
           isNavigation={nextStopShift}
-          onDestinationReached={this.onDestinationReachted}
+          pauseNavigation={pauseNavigation}
+          onDestinationReached={this.onDestinationReached}
           latitude={52.523}
           longitude={13.413492}
           style={styles.mapPreview}
         />
 
-        <View style={styles.warningContainer}>
-          <Text style={styles.warningText}>Next Stop</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <FontAwesome name="caret-right" size={30} style={styles.warningIcon} />
-            <Text style={styles.warningTitle}>{this.renderPhaseText()}</Text>
+        <TouchableOpacity style={styles.warningContainer} onPress={this.onPhaseTextPressed}>
+          <View>
+            <Text style={styles.warningText}>Next Stop</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome name="caret-right" size={30} style={styles.warningIcon} />
+              <Text style={styles.warningTitle}>{this.renderPhaseText()}</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.content}>
           {this.renderDriveModeButton()}

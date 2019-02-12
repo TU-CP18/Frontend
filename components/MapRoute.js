@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import geolib from 'geolib';
 import MapboxClient from 'mapbox';
 import lib from '../helpers/lib';
-import Button from './Button';
+import asyncSleep from '../helpers/asyncSleep';
 import logger from '../helpers/logger';
 
 const { width, height } = Dimensions.get('window');
@@ -31,6 +31,7 @@ class MapRoute extends React.Component {
     this.state = {
       coordinates: [],
       steps: [],
+      currentCoordinateIndex: 0,
       focusedLocation: {
         latitude: props.latitude,
         longitude: props.longitude,
@@ -100,9 +101,12 @@ class MapRoute extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { isNavigation } = this.props;
+    const { isNavigation, pauseNavigation } = this.props;
     if (isNavigation && isNavigation !== prevProps.isNavigation) {
       this.startNavigation();
+    }
+    if (!pauseNavigation && pauseNavigation !== prevProps.pauseNavigation) {
+      this.simulateNavigation();
     }
   }
 
@@ -111,6 +115,21 @@ class MapRoute extends React.Component {
       this.watchid.remove();
     }
   }
+
+  simulateNavigation = async () => {
+    const { pauseNavigation } = this.props;
+    const { coordinates, currentCoordinateIndex } = this.state;
+    if (!pauseNavigation && currentCoordinateIndex < coordinates.length) {
+      this.checkUserLocation({
+        coords: coordinates[currentCoordinateIndex],
+      });
+      await asyncSleep(1500);
+      this.setState(prevState => (
+        { currentCoordinateIndex: prevState.currentCoordinateIndex + 1 }
+      ));
+      this.simulateNavigation();
+    }
+  };
 
   focusOnCoords = coords => {
     const { focusedLocation } = this.state;
@@ -153,7 +172,6 @@ class MapRoute extends React.Component {
         latitude: step.maneuver.location[1],
         longitude: step.maneuver.location[0],
         bearing: step.maneuver.bearing_after,
-        done: false,
       };
     });
     this.setState({
@@ -185,21 +203,16 @@ class MapRoute extends React.Component {
 
   animateNavigation = async coords => {
     const { steps } = this.state;
-    let manoeuvred = false;
-    steps.forEach((step, index) => {
-      if (step.done || manoeuvred) {
-        // maneuver has already been done
-        return;
-      }
-      const distance = geolib.getDistance(coords, step);
-      if (distance <= 5) {
+    for (let i = 0; i < steps.length; i++) {
+      const distance = geolib.getDistance(coords, steps[i]);
+      if (distance < 10) {
         // user is 5 meters close to intersection point
-        this.map.animateToBearing(step.bearing);
-        steps[index].done = true;
-        manoeuvred = true;
+        this.map.animateToBearing(steps[i].bearing);
+        steps.splice(i, 1);
         this.setState({ steps: steps });
+        break;
       }
-    });
+    }
   };
 
   /**
@@ -229,6 +242,9 @@ class MapRoute extends React.Component {
     if (trackNavigationEvent) {
       // log event
       logger.slog(logger.SHIFT_INTERCEPTING);
+    }
+    if (global.devSettings.settings.get('fakeNavigation')) {
+      this.simulateNavigation();
     }
   };
 
@@ -314,6 +330,28 @@ class MapRoute extends React.Component {
     );
   }
 
+  renderLocationMarker() {
+    if (!global.devSettings.settings.get('fakeNavigation')) {
+      // only used for simulating navigation
+      return;
+    }
+    const {
+      isMapReady,
+      isNavigation,
+      currentCoordinateIndex,
+      coordinates,
+    } = this.state;
+    if (!isMapReady || !isNavigation || coordinates[currentCoordinateIndex] === undefined) {
+      return null;
+    }
+    return (
+      <MapView.Marker
+        image={require('../assets/images/custom_marker.png')}
+        coordinate={coordinates[currentCoordinateIndex]}
+      />
+    );
+  }
+
   onMapReady = () => {
     this.setState({ isMapReady: true });
   };
@@ -332,6 +370,7 @@ class MapRoute extends React.Component {
           onMapReady={this.onMapReady}
         >
           {this.renderRoute()}
+          {this.renderLocationMarker()}
           {this.renderMarker()}
         </MapView>
         {this.renderConfirmalButton()}
@@ -389,6 +428,7 @@ MapRoute.propTypes = {
   showConfirmationButton: PropTypes.bool,
   showNavigationButton: PropTypes.bool,
   isNavigation: PropTypes.bool,
+  pauseNavigation: PropTypes.bool,
   latitude: PropTypes.number.isRequired,
   longitude: PropTypes.number.isRequired,
   initialFocus: PropTypes.string,
@@ -402,6 +442,7 @@ MapRoute.defaultProps = {
   showConfirmationButton: true,
   showNavigationButton: true,
   isNavigation: false,
+  pauseNavigation: false,
   initialFocus: 'gps',
   trackNavigationEvent: false,
 };
