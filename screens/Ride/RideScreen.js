@@ -240,44 +240,43 @@ class RideScreen extends React.Component {
     );
   };
 
+  MenuButton = ({ title, subtitle, onPress, icon }) => (
+    <Button
+      title={title}
+      subtitle={subtitle}
+      onPress={onPress}
+      iconLeft={icon}
+      wrapperStyle={styles.buttonWrapper}
+      containerStyle={styles.buttonContainer}
+      iconStyle={styles.buttonIcon}
+      titleStyle={styles.buttonText}
+      subtitleStyle={styles.buttonSubtitle}
+      textContainerStyle={styles.buttonTextContainer}
+    />
+  );
+
   renderControlButtons = () => {
     const { navigation } = this.props;
+
     return (
       <View style={styles.buttonGroup}>
-        <Button
+        <this.MenuButton
           title="Car"
           subtitle="Control"
           onPress={() => navigation.navigate('Control')}
-          iconLeft="Ionicons/md-settings"
-          wrapperStyle={styles.buttonWrapper}
-          containerStyle={styles.buttonContainer}
-          iconStyle={styles.buttonIcon}
-          titleStyle={styles.buttonText}
-          subtitleStyle={styles.buttonSubtitle}
+          icon="Ionicons/md-settings"
         />
-
-        <Button
+        <this.MenuButton
           title="Report"
           subtitle="Incident"
           onPress={this.onPressReportIncident}
-          iconLeft="MaterialIcons/report"
-          wrapperStyle={styles.buttonWrapper}
-          containerStyle={styles.buttonContainer}
-          iconStyle={styles.buttonIcon}
-          titleStyle={styles.buttonText}
-          subtitleStyle={styles.buttonSubtitle}
+          icon="MaterialIcons/report"
         />
-
-        <Button
+        <this.MenuButton
           title="Contact"
           subtitle="Manager"
           onPress={() => navigation.navigate('Contact')}
-          iconLeft="FontAwesome/phone"
-          wrapperStyle={styles.buttonWrapper}
-          containerStyle={styles.buttonContainer}
-          iconStyle={styles.buttonIcon}
-          titleStyle={styles.buttonText}
-          subtitleStyle={styles.buttonSubtitle}
+          icon="FontAwesome/phone"
         />
       </View>
     );
@@ -345,13 +344,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     justifyContent: 'space-between',
+    marginBottom: 20,
   },
   buttonWrapper: {
     width: '31.5%',
     height: 50,
   },
   buttonContainer: {
-    alignItems: 'center',
     borderRadius: 25,
     borderColor: '#ffffff',
     borderWidth: 1,
@@ -360,14 +359,20 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   buttonIcon: {
-    marginRight: 5,
+    marginRight: 6,
     color: '#ffffff',
+  },
+  buttonTextContainer: {
+    marginTop: -2,
   },
   buttonText: {
     color: '#ffffff',
+    alignSelf: 'flex-start',
   },
   buttonSubtitle: {
     color: '#ffffff',
+    alignSelf: 'flex-start',
+    paddingTop: 2,
   },
   warningContainer: {
     position: 'absolute',

@@ -20,14 +20,14 @@ const renderIcon = (iconLeft, iconStyle) => {
         size={24}
       />
     );
-  } else {
-    return (
-      <Image
-        source={iconLeft}
-        style={iconStyle}
-      />
-    );
   }
+
+  return (
+    <Image
+      source={iconLeft}
+      style={iconStyle}
+    />
+  );
 };
 
 const Button = ({
@@ -44,48 +44,46 @@ const Button = ({
   rightIcon,
   iconStyle,
   transparent,
-}) => {
-
-  return (
-    <TouchableOpacity
-      style={[s.touchableWrapper, wrapperStyle]}
-      onPress={onPress}
-      disabled={disabled}
+  textContainerStyle,
+}) => (
+  <TouchableOpacity
+    style={[s.touchableWrapper, wrapperStyle]}
+    onPress={onPress}
+    disabled={disabled}
+  >
+    <View
+      style={[
+        s.container,
+        disabled ? s.disabledContainer : undefined,
+        transparent ? s.transparentContainer : undefined,
+        containerStyle,
+      ]}
     >
-      <View
-        style={[
-          s.container,
-          disabled ? s.disabledContainer : undefined,
-          transparent ? s.transparentContainer : undefined,
-          containerStyle,
-        ]}
-      >
-        {iconLeft && (
-          renderIcon(iconLeft, iconStyle)
-        )}
-        {(title && (
-          (subtitle && (
-            <View>
-              <Text style={[s.title, titleStyle]}>
-                {title}
-              </Text>
-              <Text style={[s.subtitle, subtitleStyle]}>
-                {subtitle}
-              </Text>
-            </View>
-          )) || (
+      {iconLeft && (
+        renderIcon(iconLeft, iconStyle)
+      )}
+      {(title && (
+        (subtitle && (
+          <View style={textContainerStyle}>
             <Text style={[s.title, titleStyle]}>
               {title}
             </Text>
-          )
-        )) || children}
-        {rightIcon && (
-          renderIcon(rightIcon, iconStyle)
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-};
+            <Text style={[s.subtitle, subtitleStyle]}>
+              {subtitle}
+            </Text>
+          </View>
+        )) || (
+          <Text style={[s.title, titleStyle]}>
+            {title}
+          </Text>
+        )
+      )) || children}
+      {rightIcon && (
+        renderIcon(rightIcon, iconStyle)
+      )}
+    </View>
+  </TouchableOpacity>
+);
 
 const s = StyleSheet.create({
   touchableWrapper: {
