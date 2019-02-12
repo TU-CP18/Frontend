@@ -51,17 +51,17 @@ export default class NextShiftStore {
 
       const { locationServicesEnabled } = await Location.getProviderStatusAsync();
       if (locationServicesEnabled) {
-        // reverseGeocodeAsync leads to an app creash since the last update, hard code
-        // the address for now
-        // const geocode = await Location.reverseGeocodeAsync({
-        //   latitude: response.data.latStart,
-        //   longitude: response.data.longStart,
-        // });
-        const geocode = [{
-          name: 'Schönhauser Allee 38',
-          postalCode: '10439',
-          city: 'Berlin',
-        }];
+        // reverseGeocodeAsync leads to an app crash when the lat long values are not
+        // correct, watch out to use correct values or hardcode an example:
+        // const geocode = [{
+        //   name: 'Schönhauser Allee 38',
+        //   postalCode: '10439',
+        //   city: 'Berlin',
+        // }];
+        const geocode = await Location.reverseGeocodeAsync({
+          latitude: response.data.latStart,
+          longitude: response.data.longStart,
+        });
         const [address] = geocode;
 
         LayoutAnimation.easeInEaseOut();

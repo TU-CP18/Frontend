@@ -27,24 +27,27 @@ export default class ShiftSchedule {
         const end = moment(shift.end);
         const diff = moment.utc(end.diff(start)).format('HH:mm');
         let address = null;
-        // if (locationServicesEnabled && shift.latStart && shift.longStart) {
-        //   [address] = await Location.reverseGeocodeAsync({
-        //     latitude: shift.latStart,
-        //     longitude: shift.longStart,
-        //   });
-        // }
-        const geocode = [{
-          name: 'Schönhauser Allee 38',
-          postalCode: '10439',
-          city: 'Berlin',
-        }];
-        [address] = geocode;
+
+        // reverseGeocodeAsync leads to an app crash when the lat long values are not
+        // correct, watch out to use correct values or hardcode an example:
+        // const geocode = [{
+        //   name: 'Schönhauser Allee 38',
+        //   postalCode: '10439',
+        //   city: 'Berlin',
+        // }];
+        // [address] = geocode;
+        if (locationServicesEnabled && shift.latStart && shift.longStart) {
+          [address] = await Location.reverseGeocodeAsync({
+            latitude: shift.latStart,
+            longitude: shift.longStart,
+          });
+        }
 
         return {
           ...shift,
           startDay: start.format('DD'),
           startMonth: start.format('MMM'),
-          fromTime: start.format('HH:mm'), // 'hh:mm a' for am/pm
+          fromTime: start.format('HH:mm'), // use 'hh:mm a' for am/pm
           toTime: end.format('HH:mm'),
           durationHours: diff,
           address: address,
