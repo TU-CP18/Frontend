@@ -77,9 +77,6 @@ export default class CurrentShiftStore {
       Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
     } finally {
       this.openCarLoading = false;
-
-      // TODO: temporary, remove when authorize endpoint is available
-      this.openCarSucceeded = true;
     }
 
     // track event
@@ -139,9 +136,6 @@ export default class CurrentShiftStore {
       Alert.alert('Authentication issue', 'You are not allowed to close the car. Contact your fleet manager.');
     } finally {
       this.closeCarLoading = false;
-
-      // TODO: temporary, remove when authorize endpoint is available
-      this.closeCarSucceeded = true;
     }
 
     logger.slog(logger.VEHICLE_CLOSE);
