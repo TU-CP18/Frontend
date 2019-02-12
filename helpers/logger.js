@@ -1,6 +1,7 @@
 
 
 import axios from 'axios';
+import moment from 'moment';
 import api from '../constants/Api';
 
 /* VEHICLE event types */
@@ -40,12 +41,16 @@ const log = (type, additionalParams = {}) => {
 
   options.data = {
     source: source,
-    timestamp: Date.now(),
+    timestamp: moment().format(),
     type: type,
-    hostname: `sd-mobile-device-${global.userStore.id}`,
-    driverId: global.userStore.id,
-    shiftId: global.currentShift.shiftId,
-    vehicleId: global.nextShift.shift.car.id,
+    driverId: global.userStore.id.toString(),
+    // nextShift.shift and currentShift.shift may be different at some point.
+    // As currentShift.shift is not set when tracking the event
+    // `SHIFT_INTERCEPTING` (prior starting the shift) use the nextShift.shift
+    shiftId: global.currentShift.shift
+      ? global.currentShift.shift.id.toString()
+      : global.nextShift.shift.id.toString(),
+    vehicleId: global.nextShift.shift.car.id.toString(),
     ...additionalParams,
   };
 
