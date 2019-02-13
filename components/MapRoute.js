@@ -24,6 +24,8 @@ const { width, height } = Dimensions.get('window');
 const customMarkerImg = require('../assets/images/custom_marker.png');
 
 class MapRoute extends React.Component {
+  cancelNavigation = false;
+
   constructor(props) {
     super(props);
 
@@ -110,6 +112,7 @@ class MapRoute extends React.Component {
   }
 
   componentWillUnmount() {
+    this.cancelNavigation = true;
     if (this.watchid) {
       this.watchid.remove();
     }
@@ -123,6 +126,11 @@ class MapRoute extends React.Component {
         coords: coordinates[currentCoordinateIndex],
       });
       await asyncSleep(1500);
+
+      // in case the component unmounts cancelNavigation is set to true
+      // otherwise setState can provide error
+      if (this.cancelNavigation) return;
+
       this.setState(prevState => (
         { currentCoordinateIndex: prevState.currentCoordinateIndex + 1 }
       ));
