@@ -304,8 +304,10 @@ class RideScreen extends React.Component {
           isNavigation={nextStopShift}
           pauseNavigation={pauseNavigation}
           onDestinationReached={this.onDestinationReached}
-          latitude={52.523}
-          longitude={13.413492}
+          latitude={52.5246175}
+          longitude={13.3701056}
+          userLatitude={52.5228096}
+          userLongitude={13.4087783}
           style={styles.mapPreview}
         />
 

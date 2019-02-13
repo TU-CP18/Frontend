@@ -69,7 +69,7 @@ class MapRoute extends React.Component {
     }
 
     // get the current location of the user
-    const currentLocation = await lib.getLocation();
+    const currentLocation = await this.getLocation();
     const destinationLocation = {
       latitude,
       longitude,
@@ -116,6 +116,17 @@ class MapRoute extends React.Component {
     if (this.watchid) {
       this.watchid.remove();
     }
+  }
+
+  getLocation = async () => {
+    const { userLatitude, userLongitude } = this.props;
+    if (userLatitude) {
+      return {
+        latitude: userLatitude,
+        longitude: userLongitude,
+      };
+    }
+    return lib.getLocation();
   }
 
   simulateNavigation = async () => {
@@ -243,7 +254,7 @@ class MapRoute extends React.Component {
     this.setState({ isNavigation: true });
     this.map.fitToCoordinates(coordinates.slice(0, 2));
     this.map.animateToViewingAngle(45);
-    const currentLocation = await lib.getLocation();
+    const currentLocation = await this.getLocation();
     this.animateNavigation(currentLocation);
 
     if (trackNavigationEvent) {
@@ -351,13 +362,15 @@ class MapRoute extends React.Component {
   };
 
   render() {
+    const { userLatitude } = this.props;
     const { style } = this.props;
+
     return (
       <View style={s.container}>
         <MapView
           provider="google"
           style={[s.map, style]}
-          showsUserLocation
+          showsUserLocation={!userLatitude}
           loadingEnabled
           customMapStyle={mapStyle}
           ref={map => { this.map = map; }}
@@ -415,6 +428,8 @@ MapRoute.propTypes = {
   pauseNavigation: PropTypes.bool,
   latitude: PropTypes.number.isRequired,
   longitude: PropTypes.number.isRequired,
+  userLatitude: PropTypes.number,
+  userLongitude: PropTypes.number,
   initialFocus: PropTypes.string,
   trackNavigationEvent: PropTypes.bool,
 };
@@ -429,6 +444,8 @@ MapRoute.defaultProps = {
   pauseNavigation: false,
   initialFocus: 'gps',
   trackNavigationEvent: false,
+  userLatitude: null,
+  userLongitude: null,
 };
 
 export default MapRoute;
