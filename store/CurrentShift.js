@@ -180,7 +180,7 @@ export default class CurrentShiftStore {
         },
         part: rating.part,
         event: rating.event,
-        rating: rating.score,
+        rating: rating.rating,
       });
     } catch (e) {
       // do nothing, when the cleanliness could not be saved
