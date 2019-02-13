@@ -35,7 +35,7 @@ class RideScreen extends React.Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.countdown);
+    this.stopCountdown();
   }
 
   onPressStartRide = () => {
@@ -81,6 +81,7 @@ class RideScreen extends React.Component {
   onDestinationReached = () => {
     const { currentShift } = this.props;
     currentShift.finishRide();
+    this.stopCountdown();
     this.setState({ nextStopShiftReached: true });
   };
 
@@ -98,6 +99,19 @@ class RideScreen extends React.Component {
       this.decrementCountdown();
     }, 1000);
   };
+
+  stopCountdown() {
+    if (this.countdown) clearInterval(this.countdown);
+
+    // stop vibration
+    Vibration.cancel();
+    if (this.vibration) clearInterval(this.vibration);
+
+    // stop potential audio
+    if (this.soundObject) {
+      this.soundObject.stopAsync();
+    }
+  }
 
   decrementCountdown = () => {
     const { countdown } = this.state;
@@ -117,18 +131,8 @@ class RideScreen extends React.Component {
   };
 
   restartCountdown = () => {
-    const { countdown } = this.state;
     logger.slog(logger.RIDE_AWARENESS_CHECKED);
-    if (countdown > 0) {
-      clearInterval(this.countdown);
-    }
-    // stop vibration
-    Vibration.cancel();
-    clearInterval(this.vibration);
-    // stop potential audio
-    if (this.soundObject) {
-      this.soundObject.stopAsync();
-    }
+    this.stopCountdown();
     this.setState({
       countdown: (global.devSettings.settings.get('demoAwarenessCheck')) ? 15 : 30,
     });
