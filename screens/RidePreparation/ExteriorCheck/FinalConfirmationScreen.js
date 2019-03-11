@@ -27,7 +27,7 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
       headerTintColor: '#ffffff',
       headerRight: (
         <Entypo
-          onPress={() => navigation.navigate('Contect')}
+          onPress={() => navigation.navigate('Contact')}
           name="chat"
           size={32}
           color="#ffffff"
@@ -112,7 +112,7 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
       <View style={s.container}>
         <View style={{ flex: 1 }}>
           <Text style={s.guideText}>
-            Please rate the cleanliness of the car before opening th car.
+            Please rate the cleanliness of the car before opening it.
           </Text>
           <Text style={s.guideText}>
             If the car is quite dirty and needs a wash, provide a low rating.

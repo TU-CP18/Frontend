@@ -22,7 +22,7 @@ class NextShiftMapScreen extends React.Component {
       currentShift,
     } = this.props;
 
-    // TODO: add buttonLoading prop to MapRoute
+    // consider adding a loading screen here, or better, loading prop to the button
     await currentShift.startShift(nextShift.shift);
 
     // we redirect the user no matter the response as the purpose is solely tracking

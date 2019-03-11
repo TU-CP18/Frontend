@@ -26,7 +26,7 @@ class ExteriorCheckFinalConfirmationScreen extends React.Component {
       headerTintColor: '#ffffff',
       headerRight: (
         <Entypo
-          onPress={() => navigation.navigate('Contect')}
+          onPress={() => navigation.navigate('Contact')}
           name="chat"
           size={32}
           color="#ffffff"

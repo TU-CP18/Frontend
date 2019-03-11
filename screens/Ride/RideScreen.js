@@ -35,7 +35,7 @@ class RideScreen extends React.Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.countdown);
+    this.stopCountdown();
   }
 
   onPressStartRide = () => {
@@ -81,6 +81,7 @@ class RideScreen extends React.Component {
   onDestinationReached = () => {
     const { currentShift } = this.props;
     currentShift.finishRide();
+    this.stopCountdown();
     this.setState({ nextStopShiftReached: true });
   };
 
@@ -98,6 +99,19 @@ class RideScreen extends React.Component {
       this.decrementCountdown();
     }, 1000);
   };
+
+  stopCountdown() {
+    if (this.countdown) clearInterval(this.countdown);
+
+    // stop vibration
+    Vibration.cancel();
+    if (this.vibration) clearInterval(this.vibration);
+
+    // stop potential audio
+    if (this.soundObject) {
+      this.soundObject.stopAsync();
+    }
+  }
 
   decrementCountdown = () => {
     const { countdown } = this.state;
@@ -117,18 +131,8 @@ class RideScreen extends React.Component {
   };
 
   restartCountdown = () => {
-    const { countdown } = this.state;
     logger.slog(logger.RIDE_AWARENESS_CHECKED);
-    if (countdown > 0) {
-      clearInterval(this.countdown);
-    }
-    // stop vibration
-    Vibration.cancel();
-    clearInterval(this.vibration);
-    // stop potential audio
-    if (this.soundObject) {
-      this.soundObject.stopAsync();
-    }
+    this.stopCountdown();
     this.setState({
       countdown: (global.devSettings.settings.get('demoAwarenessCheck')) ? 15 : 30,
     });
@@ -240,44 +244,43 @@ class RideScreen extends React.Component {
     );
   };
 
+  MenuButton = ({ title, subtitle, onPress, icon }) => (
+    <Button
+      title={title}
+      subtitle={subtitle}
+      onPress={onPress}
+      iconLeft={icon}
+      wrapperStyle={styles.buttonWrapper}
+      containerStyle={styles.buttonContainer}
+      iconStyle={styles.buttonIcon}
+      titleStyle={styles.buttonText}
+      subtitleStyle={styles.buttonSubtitle}
+      textContainerStyle={styles.buttonTextContainer}
+    />
+  );
+
   renderControlButtons = () => {
     const { navigation } = this.props;
+
     return (
       <View style={styles.buttonGroup}>
-        <Button
+        <this.MenuButton
           title="Car"
           subtitle="Control"
           onPress={() => navigation.navigate('Control')}
-          iconLeft="Ionicons/md-settings"
-          wrapperStyle={styles.buttonWrapper}
-          containerStyle={styles.buttonContainer}
-          iconStyle={styles.buttonIcon}
-          textStyle={styles.buttonText}
-          subtitleStyle={styles.buttonSubtitle}
+          icon="Ionicons/md-settings"
         />
-
-        <Button
+        <this.MenuButton
           title="Report"
           subtitle="Incident"
           onPress={this.onPressReportIncident}
-          iconLeft="MaterialIcons/report"
-          wrapperStyle={styles.buttonWrapper}
-          containerStyle={styles.buttonContainer}
-          iconStyle={styles.buttonIcon}
-          textStyle={styles.buttonText}
-          subtitleStyle={styles.buttonSubtitle}
+          icon="MaterialIcons/report"
         />
-
-        <Button
+        <this.MenuButton
           title="Contact"
           subtitle="Manager"
           onPress={() => navigation.navigate('Contact')}
-          iconLeft="FontAwesome/phone"
-          wrapperStyle={styles.buttonWrapper}
-          containerStyle={styles.buttonContainer}
-          iconStyle={styles.buttonIcon}
-          textStyle={styles.buttonText}
-          subtitleStyle={styles.buttonSubtitle}
+          icon="FontAwesome/phone"
         />
       </View>
     );
@@ -305,8 +308,10 @@ class RideScreen extends React.Component {
           isNavigation={nextStopShift}
           pauseNavigation={pauseNavigation}
           onDestinationReached={this.onDestinationReached}
-          latitude={52.523}
-          longitude={13.413492}
+          latitude={52.5246175}
+          longitude={13.3701056}
+          userLatitude={52.5228096}
+          userLongitude={13.4087783}
           style={styles.mapPreview}
         />
 
@@ -345,13 +350,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     justifyContent: 'space-between',
+    marginBottom: 20,
   },
   buttonWrapper: {
     width: '31.5%',
     height: 50,
   },
   buttonContainer: {
-    alignItems: 'center',
     borderRadius: 25,
     borderColor: '#ffffff',
     borderWidth: 1,
@@ -360,14 +365,20 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   buttonIcon: {
-    marginRight: 5,
+    marginRight: 6,
     color: '#ffffff',
+  },
+  buttonTextContainer: {
+    marginTop: -2,
   },
   buttonText: {
     color: '#ffffff',
+    alignSelf: 'flex-start',
   },
   buttonSubtitle: {
     color: '#ffffff',
+    alignSelf: 'flex-start',
+    paddingTop: 2,
   },
   warningContainer: {
     position: 'absolute',

@@ -5,8 +5,6 @@ import {
   View,
   Dimensions,
   Alert,
-  TouchableOpacity,
-  Text,
 } from 'react-native';
 import {
   MapView,
@@ -15,16 +13,19 @@ import {
   IntentLauncherAndroid,
   Constants,
 } from 'expo';
-import { Ionicons } from '@expo/vector-icons';
 import geolib from 'geolib';
 import MapboxClient from 'mapbox';
 import lib from '../helpers/lib';
 import asyncSleep from '../helpers/asyncSleep';
 import logger from '../helpers/logger';
+import Button from './Button';
 
 const { width, height } = Dimensions.get('window');
+const customMarkerImg = require('../assets/images/custom_marker.png');
 
 class MapRoute extends React.Component {
+  cancelNavigation = false;
+
   constructor(props) {
     super(props);
 
@@ -68,7 +69,7 @@ class MapRoute extends React.Component {
     }
 
     // get the current location of the user
-    const currentLocation = await lib.getLocation();
+    const currentLocation = await this.getLocation();
     const destinationLocation = {
       latitude,
       longitude,
@@ -111,9 +112,21 @@ class MapRoute extends React.Component {
   }
 
   componentWillUnmount() {
+    this.cancelNavigation = true;
     if (this.watchid) {
       this.watchid.remove();
     }
+  }
+
+  getLocation = async () => {
+    const { userLatitude, userLongitude } = this.props;
+    if (userLatitude) {
+      return {
+        latitude: userLatitude,
+        longitude: userLongitude,
+      };
+    }
+    return lib.getLocation();
   }
 
   simulateNavigation = async () => {
@@ -124,6 +137,11 @@ class MapRoute extends React.Component {
         coords: coordinates[currentCoordinateIndex],
       });
       await asyncSleep(1500);
+
+      // in case the component unmounts cancelNavigation is set to true
+      // otherwise setState can provide error
+      if (this.cancelNavigation) return;
+
       this.setState(prevState => (
         { currentCoordinateIndex: prevState.currentCoordinateIndex + 1 }
       ));
@@ -236,7 +254,7 @@ class MapRoute extends React.Component {
     this.setState({ isNavigation: true });
     this.map.fitToCoordinates(coordinates.slice(0, 2));
     this.map.animateToViewingAngle(45);
-    const currentLocation = await lib.getLocation();
+    const currentLocation = await this.getLocation();
     this.animateNavigation(currentLocation);
 
     if (trackNavigationEvent) {
@@ -248,6 +266,24 @@ class MapRoute extends React.Component {
     }
   };
 
+  /**
+   * Renders the button for the startNavigation and confirmal button.
+   */
+  renderButton = (title, onPress) => (
+    <Button
+      title={title}
+      onPress={onPress}
+      iconLeft="Ionicons/ios-checkmark-circle-outline"
+      wrapperStyle={s.confirmButtonWrapper}
+      containerStyle={s.confirmButtonContainer}
+      iconStyle={s.confirmButtonIcon}
+      titleStyle={s.confirmButtonTitle}
+    />
+  );
+
+  /**
+   * Render button to confirm arrival when the user arrived at the interchange point.
+   */
   renderConfirmalButton() {
     const { onArrivalConfirmed, showConfirmationButton } = this.props;
     const { destinationReached } = this.state;
@@ -256,26 +292,12 @@ class MapRoute extends React.Component {
       return null;
     }
 
-    return (
-      <View style={styles.confirmContainer}>
-        <TouchableOpacity
-          style={styles.confirmButton}
-          onPress={onArrivalConfirmed}
-        >
-          <View style={styles.drawerItem}>
-            <Ionicons
-              name="ios-checkmark-circle-outline"
-              size={30}
-              color="#ffffff"
-              style={styles.drawerItemIcon}
-            />
-            <Text style={styles.buttonText}>Confirm Arrival</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
+    return this.renderButton('Confirm Arrival', onArrivalConfirmed);
   }
 
+  /**
+   * Render button to start the navigation if it have not already been started.
+   */
   renderNavigationButton() {
     const { showNavigationButton } = this.props;
     const { destinationReached, isNavigation } = this.state;
@@ -284,24 +306,7 @@ class MapRoute extends React.Component {
       return null;
     }
 
-    return (
-      <View style={styles.confirmContainer}>
-        <TouchableOpacity
-          style={styles.confirmButton}
-          onPress={this.startNavigation}
-        >
-          <View style={styles.drawerItem}>
-            <Ionicons
-              name="ios-checkmark-circle-outline"
-              size={30}
-              color="#ffffff"
-              style={styles.drawerItemIcon}
-            />
-            <Text style={styles.buttonText}>Start Navigation</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
+    return this.renderButton('Start Navigation', this.startNavigation);
   }
 
   renderRoute() {
@@ -333,7 +338,7 @@ class MapRoute extends React.Component {
   renderLocationMarker() {
     if (!global.devSettings.settings.get('fakeNavigation')) {
       // only used for simulating navigation
-      return;
+      return null;
     }
     const {
       isMapReady,
@@ -346,7 +351,7 @@ class MapRoute extends React.Component {
     }
     return (
       <MapView.Marker
-        image={require('../assets/images/custom_marker.png')}
+        image={customMarkerImg}
         coordinate={coordinates[currentCoordinateIndex]}
       />
     );
@@ -357,13 +362,15 @@ class MapRoute extends React.Component {
   };
 
   render() {
+    const { userLatitude } = this.props;
     const { style } = this.props;
+
     return (
-      <View style={styles.container}>
+      <View style={s.container}>
         <MapView
           provider="google"
-          style={[styles.map, style]}
-          showsUserLocation
+          style={[s.map, style]}
+          showsUserLocation={!userLatitude}
           loadingEnabled
           customMapStyle={mapStyle}
           ref={map => { this.map = map; }}
@@ -382,7 +389,7 @@ class MapRoute extends React.Component {
 
 const mapStyle = require('../assets/styles/mapStyle');
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -391,32 +398,22 @@ const styles = StyleSheet.create({
     width: width,
     height: height,
   },
-  confirmContainer: {
+
+  /* Button */
+  confirmButtonWrapper: { // touchable wrapper
     position: 'absolute',
-    left: 0,
-    bottom: 0,
-    height: 150,
-    width: '100%',
-    justifyContent: 'center',
+    left: 40,
+    right: 40,
+    bottom: 60,
   },
-  confirmButton: {
-    paddingHorizontal: 30,
+  confirmButtonContainer: {
+    padding: 16,
   },
-  drawerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    backgroundColor: '#000000',
-    borderColor: '#ffffff',
-    borderWidth: 1,
-    borderRadius: 15,
-  },
-  drawerItemIcon: {
+  confirmButtonIcon: {
     marginRight: 10,
+    marginTop: 2,
   },
-  buttonText: {
-    color: '#ffffff',
+  confirmButtonTitle: {
     fontSize: 22,
   },
 });
@@ -431,6 +428,8 @@ MapRoute.propTypes = {
   pauseNavigation: PropTypes.bool,
   latitude: PropTypes.number.isRequired,
   longitude: PropTypes.number.isRequired,
+  userLatitude: PropTypes.number,
+  userLongitude: PropTypes.number,
   initialFocus: PropTypes.string,
   trackNavigationEvent: PropTypes.bool,
 };
@@ -445,6 +444,8 @@ MapRoute.defaultProps = {
   pauseNavigation: false,
   initialFocus: 'gps',
   trackNavigationEvent: false,
+  userLatitude: null,
+  userLongitude: null,
 };
 
 export default MapRoute;

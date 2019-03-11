@@ -22,16 +22,17 @@ class HomeScreen extends React.Component {
 
   componentDidMount() {
     this.loadNextShift();
+    const { nextShift } = this.props;
+    nextShift.startPolling();
   }
 
   componentWillUnmount() {
     const { nextShift } = this.props;
-    nextShift.polling = false;
+    nextShift.stopPolling();
   }
 
   loadNextShift = () => {
     const { nextShift } = this.props;
-    nextShift.polling = true;
     nextShift.load();
   }
 
@@ -140,7 +141,7 @@ class HomeScreen extends React.Component {
             title="Show Start Position"
             onPress={this.onPressNextShift}
             containerStyle={{ backgroundColor: 'transparent', padding: 8, borderWidth: 0, justifyContent: 'flex-end'}}
-            textStyle={{ fontSize: 16, paddingRight: 6 }}
+            titleStyle={{ fontSize: 16, paddingRight: 6 }}
             rightIcon="Feather/arrow-right"
           />
         </View>

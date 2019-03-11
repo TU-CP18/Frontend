@@ -16,9 +16,9 @@ class DevSettingsScreen extends React.Component {
     title: 'Dev Settings',
   };
 
-  static keyExtractor = (item, index) => item.label;
+  static keyExtractor = item => item.label;
 
-  renderItem({ item }) {
+  renderItem = ({ item }) => {
     if (item.type === 'checkbox') {
       return (
         <ListItem
@@ -37,34 +37,35 @@ class DevSettingsScreen extends React.Component {
         />
       );
     }
-    if (item.type === 'textinput') {
 
-    }
+    return null;
   }
 
   render() {
+    const { devSettings } = this.props;
+
     const settingsList = [
-      // {
-      //   type: 'checkbox',
-      //   label: 'Development Mode',
-      //   leftIcon: 'code',
-      //   leftIconType: 'entypo',
-      //   rightIcon: settings.get('devMode') ? 'check-square' : 'square',
-      //   rightIconType: 'feather',
-      //   onPress: () => {
-      //     setSetting('devMode', !settings.get('devMode'));
-      //   },
-      // },
       {
         type: 'checkbox',
         label: 'Fake API',
         subtitle: 'Server call will ve faked, have a look at "helper/fakeApi.js"',
         leftIcon: 'aircraft',
         leftIconType: 'entypo',
-        rightIcon: this.props.devSettings.settings.get('fakeApi') ? 'check-square' : 'square',
+        rightIcon: devSettings.settings.get('fakeApi') ? 'check-square' : 'square',
         rightIconType: 'feather',
         onPress: () => {
-          this.props.devSettings.set('fakeApi', !this.props.devSettings.settings.get('fakeApi'));
+          devSettings.set('fakeApi', !devSettings.settings.get('fakeApi'));
+        },
+      },
+      {
+        type: 'checkbox',
+        label: 'Production API',
+        leftIcon: 'upload-to-cloud',
+        leftIconType: 'entypo',
+        rightIcon: devSettings.settings.get('productionApi') ? 'check-square' : 'square',
+        rightIconType: 'feather',
+        onPress: () => {
+          devSettings.set('productionApi', !devSettings.settings.get('productionApi'));
         },
       },
       {
@@ -73,10 +74,10 @@ class DevSettingsScreen extends React.Component {
         subtitle: 'Simulate Location in Turn-by-turn navigation"',
         leftIcon: 'aircraft',
         leftIconType: 'entypo',
-        rightIcon: this.props.devSettings.settings.get('fakeNavigation') ? 'check-square' : 'square',
+        rightIcon: devSettings.settings.get('fakeNavigation') ? 'check-square' : 'square',
         rightIconType: 'feather',
         onPress: () => {
-          this.props.devSettings.set('fakeNavigation', !this.props.devSettings.settings.get('fakeNavigation'));
+          devSettings.set('fakeNavigation', !devSettings.settings.get('fakeNavigation'));
         },
       },
       {
@@ -85,34 +86,40 @@ class DevSettingsScreen extends React.Component {
         subtitle: 'Shortens the awareness check countdown to 15 seconds"',
         leftIcon: 'aircraft',
         leftIconType: 'entypo',
-        rightIcon: this.props.devSettings.settings.get('demoAwarenessCheck') ? 'check-square' : 'square',
+        rightIcon: devSettings.settings.get('demoAwarenessCheck') ? 'check-square' : 'square',
         rightIconType: 'feather',
         onPress: () => {
-          this.props.devSettings.set('demoAwarenessCheck', !this.props.devSettings.settings.get('demoAwarenessCheck'));
+          devSettings.set('demoAwarenessCheck', !devSettings.settings.get('demoAwarenessCheck'));
         },
       },
     ];
 
     return (
-      <View style={styles.container}>
+      <View style={s.container}>
         <FlatList
           keyExtractor={DevSettingsScreen.keyExtractor}
           data={settingsList}
-          renderItem={this.renderItem.bind(this)}
-          style={styles.optionList}
+          renderItem={this.renderItem}
         />
-        <Text style={{ padding: 10, paddingLeft: 16, fontSize: 16 }}>Expo Config:</Text>
+        <Text style={s.expoConfigTitle}>
+          Expo Config:
+        </Text>
         <ExpoConfigView />
       </View>
     );
   }
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'stretch',
+  },
+  expoConfigTitle: {
+    padding: 10,
+    paddingLeft: 16,
+    fontSize: 16,
   },
 });
 

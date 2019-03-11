@@ -58,7 +58,9 @@ export default class CurrentShiftStore {
 
     // authorize the opening of the car
     try {
-      const res = await api.post(`/shifts/${this.shiftId}/authorize`, { currentLocation });
+      const res = await api.post(`/shifts/${this.shiftId}/authorize`, {
+        position: currentLocation,
+      });
       if (res.status === 200) {
         this.openCarSucceeded = true;
       } else {
@@ -75,9 +77,6 @@ export default class CurrentShiftStore {
       Alert.alert('Authentication issue', 'You are not allowed to open the car. Contact your fleet manager.');
     } finally {
       this.openCarLoading = false;
-
-      // TODO: temporary, remove when authorize endpoint is available
-      this.openCarSucceeded = true;
     }
 
     // track event
@@ -137,9 +136,6 @@ export default class CurrentShiftStore {
       Alert.alert('Authentication issue', 'You are not allowed to close the car. Contact your fleet manager.');
     } finally {
       this.closeCarLoading = false;
-
-      // TODO: temporary, remove when authorize endpoint is available
-      this.closeCarSucceeded = true;
     }
 
     logger.slog(logger.VEHICLE_CLOSE);
@@ -154,6 +150,14 @@ export default class CurrentShiftStore {
       rating: rating,
     });
 
+    // for demo purpose:
+    // tell nextShift store to ignore the fetched shift if it
+    // has the same is as this.shift.id
+    global.nextShift.ignoreShiftId = this.shiftId;
+    global.nextShift.shift = null;
+    this.shiftId = null;
+    this.car = null;
+
     logger.slog(logger.SHIFT_FINISH);
   }
 
@@ -167,16 +171,20 @@ export default class CurrentShiftStore {
    */
   static async persistCleanliness(rating) {
     try {
-      const carId = global.currentShift.car.id;
-      await api.post(`/cars/${carId}/cleanliness`, {
+      await api.post('/car-cleanlinesses', {
+        car: {
+          id: this.car.id,
+        },
+        shift: {
+          id: this.shiftId,
+        },
         part: rating.part,
         event: rating.event,
-        rating: rating.score,
+        rating: rating.rating,
       });
     } catch (e) {
-      // do noghinb, when the cleanliness could not be saved this is
-      // unfortunate but negligible
-      // TODO: log event for the FM or throw an error
+      // do nothing, when the cleanliness could not be saved
+      // this is unfortunate but negligible
       console.log(e);
     }
   }
