@@ -17,6 +17,11 @@ export default class NextShiftStore {
 
   @action.bound
   async startPolling() {
+    if (global.devSettings.settings.get('fakeApi')) {
+      this.load(true);
+      return;
+    }
+
     // counter known bug
     // somehow HomeScreen is mounted twice which results in two calls of this
     // action at the same time. Return when requestConter reaches 2
@@ -51,7 +56,6 @@ export default class NextShiftStore {
         && response.data.start === this.shift.start
       ) return;
 
-      console.log("this.ignoreShiftId", this.ignoreShiftId);
       if (response.data.id === this.ignoreShiftId) {
         return;
       }
