@@ -11,6 +11,7 @@ export default class DevSettings {
   @observable settings = observable.map({
     fakeApi: false,
     productionApi: false,
+    productionApiHost: '',
     fakeNavigation: false,
     demoAwarenessCheck: false,
   });

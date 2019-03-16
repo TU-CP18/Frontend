@@ -94,7 +94,7 @@ class HomeScreen extends React.Component {
 
     const startdate = moment(shift.start);
     const minutesLeft = Math.round(
-      moment.duration(startdate.diff(moment())).asMinutes()
+      moment.duration(startdate.diff(moment())).asMinutes(),
     );
     let startDateFormatted = startdate.calendar(null, {
       sameDay: '[Today] hh:mm a',

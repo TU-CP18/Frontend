@@ -18,9 +18,12 @@ export default class ChatStore {
 
   @action.bound
   async load() {
+    const prodApiSetting = global.devSettings.settings.get('productionApiHost');
+    const prodApi = prodApiSetting.length > 0 ? `${prodApiSetting}/websocket` : Api.websocketProd;
+
     const url = Api.devMode && !global.devSettings.settings.get('productionApi')
       ? Api.websocketDev
-      : Api.websocketProd;
+      : prodApi;
 
     const socket = new SockJS(`${url}/chat`);
     this.stompClient = Stomp.over(socket);
