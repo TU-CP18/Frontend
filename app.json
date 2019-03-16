@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "cpdaimler",
-    "description": "A very interesting project.",
-    "slug": "cpdaimler",
-    "privacy": "unlisted",
+    "name": "TUCP18",
+    "description": "An interesting student project",
+    "slug": "tucp18",
+    "privacy": "public",
     "sdkVersion": "30.0.0",
     "platforms": [
       "ios",
