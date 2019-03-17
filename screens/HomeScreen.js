@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
 import moment from 'moment';
@@ -12,6 +13,8 @@ import MapMarker from '../components/MapMarker';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import MenuItem from '../components/MenuItem';
+
+const screenHeight = Dimensions.get('window').height;
 
 @inject('user', 'nextShift')
 @observer
@@ -94,7 +97,7 @@ class HomeScreen extends React.Component {
 
     const startdate = moment(shift.start);
     const minutesLeft = Math.round(
-      moment.duration(startdate.diff(moment())).asMinutes()
+      moment.duration(startdate.diff(moment())).asMinutes(),
     );
     let startDateFormatted = startdate.calendar(null, {
       sameDay: '[Today] hh:mm a',
@@ -187,7 +190,7 @@ const s = StyleSheet.create({
 
   map: {
     width: '100%',
-    height: 300,
+    height: screenHeight * 0.3,
     flex: 0,
   },
   nextShiftBlock: {

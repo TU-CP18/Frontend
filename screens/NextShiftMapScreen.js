@@ -2,7 +2,7 @@ import React from 'react';
 import { observer, inject } from 'mobx-react';
 import MapRoute from '../components/MapRoute';
 
-@inject('nextShift', 'currentShift')
+@inject('nextShift', 'currentShift', 'devSettings')
 @observer
 class NextShiftMapScreen extends React.Component {
   static navigationOptions = {
@@ -30,7 +30,15 @@ class NextShiftMapScreen extends React.Component {
   };
 
   render() {
-    const { nextShift } = this.props;
+    const { nextShift, devSettings } = this.props;
+
+    let fakeUserGpsProps = {};
+    if (devSettings.settings.get('fakeApi')) {
+      fakeUserGpsProps = {
+        userLatitude: 52.526027,
+        userLongitude: 13.408033,
+      };
+    }
 
     return (
       <MapRoute
@@ -38,6 +46,7 @@ class NextShiftMapScreen extends React.Component {
         latitude={nextShift.shift.latStart}
         longitude={nextShift.shift.longStart}
         trackNavigationEvent
+        {...fakeUserGpsProps}
       />
     );
   }

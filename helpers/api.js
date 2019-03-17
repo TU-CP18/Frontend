@@ -8,10 +8,13 @@ const request = (method, url, bodyParams, urlParams, headers = {}) => {
     if (response) return response;
   }
 
+  const prodApiSetting = global.devSettings.settings.get('productionApiHost');
+  const prodApi = prodApiSetting.length > 0 ? `${prodApiSetting}/api` : Api.apiProd;
+
   const verb = method.toUpperCase();
   const baseUrl = Api.devMode && !global.devSettings.settings.get('productionApi')
     ? Api.apiDev
-    : Api.apiProd;
+    : prodApi;
 
   const options = {
     method: verb,
