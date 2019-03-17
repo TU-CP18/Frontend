@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TUCP18",
-    "description": "An interesting student project",
+    "description": "A very beautiful app developed by students of TU Berlin",
     "slug": "tucp18",
     "privacy": "public",
     "sdkVersion": "30.0.0",
@@ -43,6 +43,7 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ]
-    }
+    },
+    "githubUrl": "https://github.com/TU-CP18/cp18-app"
   }
 }

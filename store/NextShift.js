@@ -18,7 +18,7 @@ export default class NextShiftStore {
   @action.bound
   async startPolling() {
     if (global.devSettings.settings.get('fakeApi')) {
-      this.load(true);
+      this.load();
       return;
     }
 
@@ -57,6 +57,12 @@ export default class NextShiftStore {
       ) return;
 
       if (response.data.id === this.ignoreShiftId) {
+        return;
+      }
+
+      if (global.devSettings.settings.get('fakeApi')) {
+        LayoutAnimation.easeInEaseOut();
+        this.shift = response.data;
         return;
       }
 

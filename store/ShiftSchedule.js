@@ -8,7 +8,7 @@ export default class ShiftSchedule {
 
   @observable loading = true;
 
-  @observable error = '';
+  @observable error = false;
 
   async load() {
     this.loading = true;
@@ -36,7 +36,10 @@ export default class ShiftSchedule {
         //   city: 'Berlin',
         // }];
         // [address] = geocode;
-        if (locationServicesEnabled && shift.latStart && shift.longStart) {
+
+        if (global.devSettings.settings.get('fakeApi')) {
+          address = shift.address;
+        } else if (locationServicesEnabled && shift.latStart && shift.longStart) {
           [address] = await Location.reverseGeocodeAsync({
             latitude: shift.latStart,
             longitude: shift.longStart,
@@ -58,7 +61,7 @@ export default class ShiftSchedule {
         return moment(a.start).isBefore(moment(b.end)) ? -1 : 1;
       });
     } catch (e) {
-      this.error = 'Error';
+      this.error = true;
       console.log(e);
     } finally {
       this.loading = false;

@@ -2,6 +2,7 @@ import moment from 'moment';
 
 const carIssues = [
   {
+    id: 1,
     description: 'A small dent is visible',
     part: 'front/Bonnet',
     posX: 621.8804347826087,
@@ -34,14 +35,18 @@ export default (method, url, bodyParams, queryParams) => {
     return Promise.resolve({
       status: 200,
       data: {
-        id: 1,
+        id: 2,
         car: {
           id: 1,
         },
         latStart: 52.5228096,
         longStart: 13.4087783,
-        start: moment().add(45, 'm').toISOString(),
-        // address.name}, ${shift.address.postalCode} ${shift.address.city
+        start: moment().add(85, 'minutes').toISOString(),
+        address: {
+          name: 'Rosa-Luxemburg-Straße',
+          postalCode: 10178,
+          city: 'Berlin',
+        },
       },
     });
   }
@@ -51,28 +56,43 @@ export default (method, url, bodyParams, queryParams) => {
       status: 200,
       data: [
         {
-          id: 1,
+          id: 2,
           car: 1,
           latStart: 52.5228096,
           longStart: 13.4087783,
-          start: moment().add(45, 'm').toISOString(),
-          end: moment().add(45, 'm').add(4, 'h').toISOString(),
+          start: moment().add(85, 'm').toISOString(),
+          end: moment().add(85, 'm').add(4, 'h').toISOString(),
+          address: {
+            name: 'Rosa-Luxemburg-Straße',
+            postalCode: 10178,
+            city: 'Berlin',
+          },
         },
         {
-          id: 2,
+          id: 3,
           car: 2,
           latStart: 52.5228096,
           longStart: 13.4087783,
           start: moment().add(8, 'h').toISOString(),
           end: moment().add(8, 'h').add(4, 'h').toISOString(),
+          address: {
+            name: 'Rosa-Luxemburg-Straße',
+            postalCode: 10178,
+            city: 'Berlin',
+          },
         },
         {
-          id: 3,
+          id: 4,
           car: 4,
           latStart: 52.5228096,
           longStart: 13.4087783,
           start: moment().add(2, 'd').toISOString(),
           end: moment().add(2, 'd').add(3, 'h').add(30, 'm').toISOString(),
+          address: {
+            name: 'Rosa-Luxemburg-Straße',
+            postalCode: 10178,
+            city: 'Berlin',
+          },
         },
       ],
     });
@@ -87,6 +107,7 @@ export default (method, url, bodyParams, queryParams) => {
 
   if (url === '/cars/1/issues' && method === 'post') {
     carIssues.push({
+      id: Date.now(),
       posX: bodyParams.posX,
       posY: bodyParams.posY,
       part: bodyParams.part,
@@ -96,6 +117,7 @@ export default (method, url, bodyParams, queryParams) => {
     return Promise.resolve({
       status: 200,
       data: {
+        id: Date.now(),
         posX: bodyParams.posX,
         posY: bodyParams.posY,
         part: bodyParams.part,
@@ -104,7 +126,13 @@ export default (method, url, bodyParams, queryParams) => {
     });
   }
 
-  if (url === '/shifts/1/authorize' && method === 'post') {
+  if (url === '/shifts/2/authorize' && method === 'post') {
+    return Promise.resolve({
+      status: 200,
+    });
+  }
+
+  if (url === '/car-cleanlinesses' && method === 'post') {
     return Promise.resolve({
       status: 200,
     });

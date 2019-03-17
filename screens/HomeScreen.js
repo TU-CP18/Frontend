@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { observer, inject } from 'mobx-react';
 import moment from 'moment';
@@ -12,6 +13,8 @@ import MapMarker from '../components/MapMarker';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import MenuItem from '../components/MenuItem';
+
+const screenHeight = Dimensions.get('window').height;
 
 @inject('user', 'nextShift')
 @observer
@@ -187,7 +190,7 @@ const s = StyleSheet.create({
 
   map: {
     width: '100%',
-    height: 300,
+    height: screenHeight * 0.3,
     flex: 0,
   },
   nextShiftBlock: {
